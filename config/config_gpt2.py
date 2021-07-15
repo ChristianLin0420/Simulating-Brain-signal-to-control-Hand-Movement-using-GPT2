@@ -1,5 +1,5 @@
 
-from config_utils import PretrainedConfig
+from .config_utils import PretrainedConfig
 
 '''
 ----- GPT2Config -----

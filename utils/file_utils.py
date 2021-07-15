@@ -49,12 +49,12 @@ from tqdm.auto import tqdm
 import requests
 from filelock import FileLock
 from huggingface_hub import HfApi, HfFolder, Repository
-from versions import importlib_metadata
+from .versions import importlib_metadata
+from .logging import get_logger
 
-from . import __version__
+__version__ = "4.9.0.dev0"
 
-import logging
-logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
+logger = get_logger(__name__)  # pylint: disable=invalid-name
 
 ENV_VARS_TRUE_VALUES = {"1", "ON", "YES", "TRUE"}
 ENV_VARS_TRUE_AND_AUTO_VALUES = ENV_VARS_TRUE_VALUES.union({"AUTO"})

@@ -3,12 +3,12 @@ import json
 import os
 from typing import Any, Dict, Tuple, Union
 
-import logging
-from . import __version__
-from file_utils import CONFIG_NAME, PushToHubMixin, cached_path, hf_bucket_url, is_offline_mode, is_remote_url
+from utils.logging import get_logger
+from utils.file_utils import CONFIG_NAME, PushToHubMixin, cached_path, hf_bucket_url, is_offline_mode, is_remote_url
 
+__version__ = "4.9.0.dev0"
 
-logger = logging.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class PretrainedConfig(PushToHubMixin):

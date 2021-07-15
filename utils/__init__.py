@@ -1,6 +1,6 @@
 from packaging import version
 
-from .. import __version__
+__version__ = "4.9.0.dev0"
 
 
 def check_min_version(min_version):

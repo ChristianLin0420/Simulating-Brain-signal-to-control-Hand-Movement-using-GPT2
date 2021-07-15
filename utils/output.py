@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
-from file_utils import ModelOutput
+from .file_utils import ModelOutput
 
 
 @dataclass
@@ -37,6 +37,41 @@ class TFBaseModelOutputWithPast(ModelOutput):
     """
 
     last_hidden_state: tf.Tensor = None
+    past_key_values: Optional[List[tf.Tensor]] = None
+    hidden_states: Optional[Tuple[tf.Tensor]] = None
+    attentions: Optional[Tuple[tf.Tensor]] = None
+
+@dataclass
+class TFCausalLMOutputWithPast(ModelOutput):
+    """
+    Base class for causal language model (or autoregressive) outputs.
+
+    Args:
+        loss (:obj:`tf.Tensor` of shape :obj:`(n,)`, `optional`, where n is the number of non-masked labels, returned when :obj:`labels` is provided):
+            Language modeling loss (for next-token prediction).
+        logits (:obj:`tf.Tensor` of shape :obj:`(batch_size, sequence_length, config.vocab_size)`):
+            Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
+        past_key_values (:obj:`List[tf.Tensor]`, `optional`, returned when ``use_cache=True`` is passed or when ``config.use_cache=True``):
+            List of :obj:`tf.Tensor` of length :obj:`config.n_layers`, with each tensor of shape :obj:`(2, batch_size,
+            num_heads, sequence_length, embed_size_per_head)`).
+
+            Contains pre-computed hidden-states (key and values in the attention blocks) that can be used (see
+            :obj:`past_key_values` input) to speed up sequential decoding.
+        hidden_states (:obj:`tuple(tf.Tensor)`, `optional`, returned when ``output_hidden_states=True`` is passed or when ``config.output_hidden_states=True``):
+            Tuple of :obj:`tf.Tensor` (one for the output of the embeddings + one for the output of each layer) of
+            shape :obj:`(batch_size, sequence_length, hidden_size)`.
+
+            Hidden-states of the model at the output of each layer plus the initial embedding outputs.
+        attentions (:obj:`tuple(tf.Tensor)`, `optional`, returned when ``output_attentions=True`` is passed or when ``config.output_attentions=True``):
+            Tuple of :obj:`tf.Tensor` (one for each layer) of shape :obj:`(batch_size, num_heads, sequence_length,
+            sequence_length)`.
+
+            Attentions weights after the attention softmax, used to compute the weighted average in the self-attention
+            heads.
+    """
+
+    loss: Optional[tf.Tensor] = None
+    logits: tf.Tensor = None
     past_key_values: Optional[List[tf.Tensor]] = None
     hidden_states: Optional[Tuple[tf.Tensor]] = None
     attentions: Optional[Tuple[tf.Tensor]] = None

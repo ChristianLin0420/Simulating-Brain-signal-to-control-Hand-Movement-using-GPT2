@@ -54,8 +54,7 @@ from .file_utils import (
     torch_required,
 )
 
-import logging
-
+from .logging import get_logger
 
 if TYPE_CHECKING:
     if is_torch_available():
@@ -94,7 +93,7 @@ else:
         pass
 
 
-logger = logging.get_logger(__name__)
+logger = get_logger(__name__)
 
 VERY_LARGE_INTEGER = int(1e30)  # This is used to set the max input length for a model with infinite size input
 LARGE_INTEGER = int(1e20)  # This is used when we need something big but slightly smaller than VERY_LARGE_INTEGER
