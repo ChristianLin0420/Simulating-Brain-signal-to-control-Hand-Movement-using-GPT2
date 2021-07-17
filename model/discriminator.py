@@ -27,14 +27,14 @@ class Discriminator(tf.keras.layers.Layer):
     #     total_loss = real_loss + fake_loss
     #     return total_loss
 
-    def __call__(self, x):
+    def __call__(self, x, training=False):
         x = self.conv2D_a(x)
         x = self.relu_a(x)
-        x = self.dropout_a(x)
+        x = self.dropout_a(x, training = training)
 
         x = self.conv2D_b(x)
         x = self.relu_b(x)
-        x = self.dropout_b(x)
+        x = self.dropout_b(x, training = training)
 
         x = self.flatten(x)
         x = self.dense(x)

@@ -182,6 +182,28 @@ class TFBlock(tf.keras.layers.Layer):
         outputs = [x] + output_attn[1:]
         return outputs  # x, present, (attentions)
 
+class TFImageTransformer(tf.keras.layers.Layer):
+    def __init__(self, nx, initializer_range, **kwargs):
+        super().__init__(**kwargs)
+        self.nx = nx
+        self.initializer_range = initializer_range
+
+    def build(self, input_shape):
+        self.transformer = self.add_weight(
+            "transformer", shape = [self.nx, 1], initializer=get_initializer(self.initializer_range)
+        )
+
+    def call(self, inputs):
+        bz, sl = shape_list(inputs)[:2]
+
+        x = tf.reshape(inputs, [-1, self.nx])
+        x = tf.matmul(x, self.transformer)
+
+        size = int(sl ** 0.5)
+
+        return tf.reshape(x, [bz, size, size, 1])
+
+
 
 @keras_serializable
 class TFGPT2MainLayer(tf.keras.layers.Layer):
@@ -208,6 +230,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
         self.h = [TFBlock(config.n_ctx, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
+        self.transformer = TFImageTransformer(config.n_embd, config.initializer_range)
 
     def build(self, input_shape):
         with tf.name_scope("wpe"):
@@ -248,6 +271,19 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         training=False,
         **kwargs,
     ):
+
+        # print("input_ids = {}".format(input_ids))
+        # print("past = {}".format(past))
+        # print("attention_mask = {}".format(attention_mask))
+        # print("token_type_ids = {}".format(token_type_ids))
+        # print("position_ids = {}".format(position_ids))
+        # print("head_mask = {}".format(head_mask))
+        # print("inputs_embeds = {}".format(inputs_embeds))
+        # print("use_cache = {}".format(use_cache))
+        # print("output_attentions = {}".format(output_attentions))
+        # print("output_hidden_states = {}".format(output_hidden_states))
+        # print("return_dict = {}".format(return_dict))
+
         inputs = input_processing(
             func=self.call,
             config=self.config,
@@ -266,13 +302,12 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             kwargs_call=kwargs,
         )
 
-        print(inputs)
-
         if inputs["input_ids"] is not None and inputs["inputs_embeds"] is not None:
             raise ValueError("You cannot specify both input_ids and inputs_embeds at the same time")
         elif inputs["input_ids"] is not None:
             input_shape = shape_list(inputs["input_ids"])
-            inputs["input_ids"] = tf.reshape(inputs["input_ids"], [-1, input_shape[-1]])
+            inputs["input_ids"] = input_ids
+            # inputs["input_ids"] = tf.reshape(inputs["input_ids"], [-1, input_shape[-1]])
         elif inputs["inputs_embeds"] is not None:
             input_shape = shape_list(inputs["inputs_embeds"])[:-1]
         else:
@@ -285,7 +320,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             past_length = shape_list(inputs["past"][0][0])[-2]
 
         if inputs["position_ids"] is None:
-            inputs["position_ids"] = tf.expand_dims(tf.range(past_length, input_shape[-1] + past_length), axis=0)
+            inputs["position_ids"] = tf.expand_dims(tf.range(past_length, input_shape[-2] + past_length), axis=0)
 
         if inputs["attention_mask"] is not None:
             # We create a 3D attention mask from a 2D tensor mask.
@@ -320,11 +355,12 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             inputs["head_mask"] = [None] * self.num_hidden_layers
             # head_mask = tf.constant([0] * self.num_hidden_layers)
 
-        inputs["position_ids"] = tf.reshape(inputs["position_ids"], [-1, shape_list(inputs["position_ids"])[-1]])
+        inputs["position_ids"] = tf.reshape(inputs["position_ids"], [shape_list(inputs["position_ids"])[-1]])
 
         if inputs["inputs_embeds"] is None:
             inputs["inputs_embeds"] = self.wte(inputs["input_ids"], mode="embedding")
 
+        # print(inputs["position_ids"])
         position_embeds = tf.gather(self.wpe, inputs["position_ids"])
 
         if inputs["token_type_ids"] is not None:
@@ -335,12 +371,17 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         else:
             token_type_embeds = tf.constant(0.0)
 
+        # print("inputs_embeds")
+        # print(inputs["inputs_embeds"])
+        # print(position_embeds)
+
         position_embeds = tf.cast(position_embeds, dtype=inputs["inputs_embeds"].dtype)
         token_type_embeds = tf.cast(token_type_embeds, dtype=inputs["inputs_embeds"].dtype)
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
         hidden_states = self.drop(hidden_states, training=inputs["training"])
 
-        output_shape = input_shape + [shape_list(hidden_states)[-1]]
+        # output_shape = input_shape + [shape_list(hidden_states)[-1]]
+        output_shape = input_shape
 
         presents = () if inputs["use_cache"] else None
         all_attentions = () if inputs["output_attentions"] else None
@@ -389,14 +430,19 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             print('-' * 80)
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
+        hidden_states = self.transformer(hidden_states)
+        print("hidden_states after transformation: {}".format(hidden_states))
+
         print('-' * 80)
 
-        return TFBaseModelOutputWithPast(
-            last_hidden_state=hidden_states,
-            past_key_values=presents,
-            hidden_states=all_hidden_states,
-            attentions=all_attentions,
-        )
+        return hidden_states
+
+        # return TFBaseModelOutputWithPast(
+        #     last_hidden_state=hidden_states,
+        #     past_key_values=presents,
+        #     hidden_states=all_hidden_states,
+        #     attentions=all_attentions,
+        # )
 
 class TFGPT2PreTrainedModel(TFPreTrainedModel):
     """

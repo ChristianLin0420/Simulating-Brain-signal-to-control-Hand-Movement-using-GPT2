@@ -1152,6 +1152,11 @@ class TFSharedEmbeddings(tf.keras.layers.Layer):
         self.weight = self.add_weight(
             "weight", shape=[self.vocab_size, self.hidden_size], initializer=get_initializer(self.initializer_range)
         )
+
+        self.emb = self.add_weight(
+            "emb", shape = [self.hidden_size, self.hidden_size], initializer = get_initializer(self.initializer_range)
+        )
+
         super().build(input_shape)
 
     def get_config(self):
@@ -1196,9 +1201,18 @@ class TFSharedEmbeddings(tf.keras.layers.Layer):
         else:
             raise ValueError(f"mode {mode} is not valid.")
 
-    def _embedding(self, input_ids):
+    def _embedding(self, inputs):
         """Applies embedding based on inputs tensor."""
-        return tf.gather(self.weight, input_ids)
+
+        first_dims = shape_list(inputs)[:-1]
+        x = tf.reshape(inputs, [-1, self.hidden_size])
+        logits = tf.matmul(x, self.emb, transpose_b=True)
+
+        # print("first_dims: {}".format(first_dims))
+        print(first_dims + [self.hidden_size])
+
+        # return tf.gather(self.weight, input_ids)
+        return tf.reshape(logits, first_dims + [self.hidden_size])
 
     def _linear(self, inputs):
         """
@@ -1213,6 +1227,8 @@ class TFSharedEmbeddings(tf.keras.layers.Layer):
         first_dims = shape_list(inputs)[:-1]
         x = tf.reshape(inputs, [-1, self.hidden_size])
         logits = tf.matmul(x, self.weight, transpose_b=True)
+
+        # print("first_dims: {}".format(first_dims))
 
         return tf.reshape(logits, first_dims + [self.vocab_size])
 
