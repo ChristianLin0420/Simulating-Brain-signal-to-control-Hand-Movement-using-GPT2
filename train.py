@@ -8,15 +8,18 @@ import PIL
 import imageio
 import matplotlib.pyplot as plt
 
+from tqdm import tqdm
 from IPython import display
+from alive_progress import alive_bar
+
 
 from model.GPT2GAN import GPT2GAN
 from config.config_gpt2 import GPT2Config
 
 print(tf.config.list_physical_devices())
 
-gpus = tf.config.list_physical_devices(device_type='GPU')
-tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
+# gpus = tf.config.list_physical_devices(device_type='GPU')
+# tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
 
 
 BUFFER_SIZE = 60000
@@ -120,8 +123,10 @@ def train(dataset, epochs):
     for epoch in range(epochs):
         start = time.time()
 
-        for image_batch in dataset:
-            train_step(image_batch)
+        with alive_bar(len(dataset)) as bar:
+            for i in range(len(dataset)):
+                # train_step(image_batch)
+                bar()
 
         # Produce images for the GIF as you go
         # display.clear_output(wait=True)
@@ -141,7 +146,7 @@ def train(dataset, epochs):
 def display_image(epoch_no):
     return PIL.Image.open('image_at_epoch_{:04d}.png'.format(epoch_no))
 
-# train(train_dataset, EPOCHS)
+train(train_dataset, EPOCHS)
 
 # checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 
@@ -157,8 +162,8 @@ with imageio.get_writer(anim_file, mode='I') as writer:
         image = imageio.imread(filename)
         writer.append_data(image)
         
-    image = imageio.imread(filename)
-    writer.append_data(image)
+    # image = imageio.imread(filename)
+    # writer.append_data(image)
 
-import tensorflow_docs.vis.embed as embed
-embed.embed_file(anim_file)
+# import tensorflow_docs.vis.embed as embed
+# embed.embed_file(anim_file)
