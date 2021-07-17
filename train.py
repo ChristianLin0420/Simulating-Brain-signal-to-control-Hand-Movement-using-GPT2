@@ -147,18 +147,18 @@ def display_image(epoch_no):
 
 # display_image(EPOCHS)
 
-# anim_file = 'dcgan.gif'
+anim_file = 'dcgan.gif'
 
-# with imageio.get_writer(anim_file, mode='I') as writer:
-#     filenames = glob.glob('image*.png')
-#     filenames = sorted(filenames)
+with imageio.get_writer(anim_file, mode='I') as writer:
+    filenames = glob.glob('image*.png')
+    filenames = sorted(filenames)
 
-#     for filename in filenames:
-#         image = imageio.imread(filename)
-#         writer.append_data(image)
+    for filename in filenames:
+        image = imageio.imread(filename)
+        writer.append_data(image)
         
-#     image = imageio.imread(filename)
-#     writer.append_data(image)
+    image = imageio.imread(filename)
+    writer.append_data(image)
 
-# import tensorflow_docs.vis.embed as embed
+import tensorflow_docs.vis.embed as embed
 embed.embed_file(anim_file)
