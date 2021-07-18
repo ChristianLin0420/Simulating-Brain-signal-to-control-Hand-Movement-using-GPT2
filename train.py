@@ -16,15 +16,15 @@ from alive_progress import alive_bar
 from model.GPT2GAN import GPT2GAN
 from config.config_gpt2 import GPT2Config
 
-print(tf.config.list_physical_devices())
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
-# gpus = tf.config.list_physical_devices(device_type='GPU')
-# tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
+gpus = tf.config.list_physical_devices(device_type='GPU')
+tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
 
 
-BUFFER_SIZE = 60000
+BUFFER_SIZE = 10000
 BATCH_SIZE = 64
-EPOCHS = 50
+EPOCHS = 100
 noise_len = 784
 noise_dim = 768
 num_examples_to_generate = 16
@@ -41,20 +41,6 @@ config = GPT2Config(n_positions=noise_len)
 model = GPT2GAN(config = config)
 
 print(model.config)
-
-# defining our optimizer
-# optimizer = tf.keras.optimizers.Adam(learning_rate = 3e-5, epsilon = 1e-08, clipnorm = 1.0)
-
-# # definining our loss function
-# loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits = True)
-
-# # defining our metric which we want to observe
-# metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
-
-# # compiling the model
-# model.compile(  optimizer = optimizer, 
-#                 loss = [loss, * [None] * model.config.n_layer], 
-#                 metrics = [metric])
 
 # You will reuse this seed overtime (so it's easier)
 # to visualize progress in the animated GIF)
@@ -116,31 +102,33 @@ def generate_and_save_images(model, epoch, test_input):
         plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
         plt.axis('off')
 
-    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
+    plt.savefig('result/image_at_epoch_{:04d}.png'.format(epoch))
     plt.show()
 
 def train(dataset, epochs):
-    for epoch in range(epochs):
-        start = time.time()
+    with alive_bar(epochs) as bar:
+        for epoch in range(epochs):
+            start = time.time()
 
-        with alive_bar(len(dataset)) as bar:
-            for i in range(len(dataset)):
-                # train_step(image_batch)
-                bar()
+            for i, image_batch in enumerate(dataset):
+                print("data id: {}".format(i))
+                train_step(image_batch)
 
-        # Produce images for the GIF as you go
-        # display.clear_output(wait=True)
-        generate_and_save_images(model.generator, epoch + 1, seed)
+            # Produce images for the GIF as you go
+            # display.clear_output(wait=True)
+            generate_and_save_images(model.generator, epoch + 1, seed)
 
-        # Save the model every 15 epochs
-        if (epoch + 1) % 15 == 0:
-            checkpoint.save(file_prefix = checkpoint_prefix)
+            # Save the model every 15 epochs
+            if (epoch + 1) % 10 == 0:
+                checkpoint.save(file_prefix = checkpoint_prefix)
 
-        print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+            print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
 
-    # Generate after the final epoch
-    display.clear_output(wait=True)
-    generate_and_save_images(model.generator, epochs, seed)
+            bar()
+
+        # Generate after the final epoch
+        display.clear_output(wait=True)
+        generate_and_save_images(model.generator, epochs, seed)
 
 # Display a single image using the epoch number
 def display_image(epoch_no):
@@ -152,10 +140,10 @@ train(train_dataset, EPOCHS)
 
 # display_image(EPOCHS)
 
-anim_file = 'dcgan.gif'
+anim_file = 'result/dcgan.gif'
 
 with imageio.get_writer(anim_file, mode='I') as writer:
-    filenames = glob.glob('image*.png')
+    filenames = glob.glob('result/image*.png')
     filenames = sorted(filenames)
 
     for filename in filenames:
