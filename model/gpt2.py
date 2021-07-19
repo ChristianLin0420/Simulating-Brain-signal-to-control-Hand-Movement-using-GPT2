@@ -358,7 +358,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         inputs["position_ids"] = tf.reshape(inputs["position_ids"], [shape_list(inputs["position_ids"])[-1]])
 
         if inputs["inputs_embeds"] is None:
-            inputs["inputs_embeds"] = self.wte(inputs["input_ids"], mode="embedding")
+            inputs["input_ids"] = tf.constant(inputs["input_ids"])
+            # inputs["inputs_embeds"] = self.wte(inputs["input_ids"], mode="embedding")
 
         # print(inputs["position_ids"])
         position_embeds = tf.gather(self.wpe, inputs["position_ids"])

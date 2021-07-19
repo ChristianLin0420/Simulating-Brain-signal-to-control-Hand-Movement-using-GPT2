@@ -8,6 +8,7 @@ import PIL
 import imageio
 import matplotlib.pyplot as plt
 
+from datetime import datetime
 from tqdm import tqdm
 from IPython import display
 from alive_progress import alive_bar
@@ -16,11 +17,16 @@ from alive_progress import alive_bar
 from model.GPT2GAN import GPT2GAN
 from config.config_gpt2 import GPT2Config
 
+
+
 print(tf.config.list_physical_devices())
 
 gpus = tf.config.list_physical_devices(device_type='GPU')
-tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
 
+if gpus:
+    tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
+else:
+    print("[No GPR] there is no availible gpu to use!!!")
 
 BUFFER_SIZE = 1000
 BATCH_SIZE = 8
@@ -28,6 +34,10 @@ EPOCHS = 50
 noise_len = 784
 noise_dim = 32
 num_examples_to_generate = 16
+
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y/%H:%M:%S")
+print("date and time =", dt_string)
 
 
 (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
@@ -117,8 +127,7 @@ def train(dataset, epochs):
 
             start = time.time()
             
-            for k, image_batch in enumerate(dataset):
-#                 print("data id: {}".format(k))   
+            for image_batch in dataset:
                 train_step(image_batch)
 
             # Produce images for the GIF as you go
@@ -165,3 +174,5 @@ with imageio.get_writer(anim_file, mode='I') as writer:
 
 # import tensorflow_docs.vis.embed as embed
 # embed.embed_file(anim_file)
+
+
