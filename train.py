@@ -16,17 +16,17 @@ from alive_progress import alive_bar
 from model.GPT2GAN import GPT2GAN
 from config.config_gpt2 import GPT2Config
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+print(tf.config.list_physical_devices())
 
 gpus = tf.config.list_physical_devices(device_type='GPU')
 tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
 
 
-BUFFER_SIZE = 10000
-BATCH_SIZE = 64
-EPOCHS = 100
+BUFFER_SIZE = 1000
+BATCH_SIZE = 8
+EPOCHS = 50
 noise_len = 784
-noise_dim = 768
+noise_dim = 32
 num_examples_to_generate = 16
 
 
@@ -37,14 +37,19 @@ train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
 # Batch and shuffle the data
 train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 
-config = GPT2Config(n_positions=noise_len)
+config = GPT2Config(n_head = 4, n_embd = noise_dim, n_positions=noise_len)
+
+# Batch and shuffle the data
+train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+
+config = GPT2Config(n_head = 4, n_embd = noise_dim, n_positions=noise_len)
 model = GPT2GAN(config = config)
 
 print(model.config)
 
 # You will reuse this seed overtime (so it's easier)
 # to visualize progress in the animated GIF)
-seed = tf.random.normal([num_examples_to_generate, noise_dim])
+seed = tf.random.normal([num_examples_to_generate, noise_len, noise_dim])
 
 # This method returns a helper function to compute cross entropy loss
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -61,7 +66,7 @@ def generator_loss(fake_output):
 generator_optimizer = tf.keras.optimizers.Adam(1e-4)
 discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
-checkpoint_dir = './training_checkpoints'
+checkpoint_dir = './gpt2_training_checkpoints'
 checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
 checkpoint = tf.train.Checkpoint(generator_optimizer = generator_optimizer,
                                  discriminator_optimizer = discriminator_optimizer,
@@ -102,33 +107,38 @@ def generate_and_save_images(model, epoch, test_input):
         plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
         plt.axis('off')
 
-    plt.savefig('result/image_at_epoch_{:04d}.png'.format(epoch))
+    plt.savefig('gpt2_result/image_at_epoch_{:04d}.png'.format(epoch))
     plt.show()
 
 def train(dataset, epochs):
     with alive_bar(epochs) as bar:
-        for epoch in range(epochs):
-            start = time.time()
+        for i in range(epochs):
+            print("epoch: {}".format(i))
 
-            for i, image_batch in enumerate(dataset):
-                print("data id: {}".format(i))
+            start = time.time()
+            
+            for k, image_batch in enumerate(dataset):
+#                 print("data id: {}".format(k))   
                 train_step(image_batch)
 
             # Produce images for the GIF as you go
             # display.clear_output(wait=True)
-            generate_and_save_images(model.generator, epoch + 1, seed)
+            generate_and_save_images(model.generator, i + 1, seed)
 
             # Save the model every 15 epochs
-            if (epoch + 1) % 10 == 0:
+            if (i + 1) % 10 == 0:
                 checkpoint.save(file_prefix = checkpoint_prefix)
 
-            print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
-
+            print ('Time for epoch {} is {} sec'.format(i + 1, time.time() - start))
+        
             bar()
 
         # Generate after the final epoch
-        display.clear_output(wait=True)
+        # display.clear_output(wait=True)
+        print("epoch: {}".format(i))
         generate_and_save_images(model.generator, epochs, seed)
+        print("finished generating images")
+        print("-" * 80)
 
 # Display a single image using the epoch number
 def display_image(epoch_no):
@@ -140,10 +150,10 @@ train(train_dataset, EPOCHS)
 
 # display_image(EPOCHS)
 
-anim_file = 'result/dcgan.gif'
+anim_file = 'gpt2_result/gpt2_dcgan.gif'
 
 with imageio.get_writer(anim_file, mode='I') as writer:
-    filenames = glob.glob('result/image*.png')
+    filenames = glob.glob('gpt2_result/image*.png')
     filenames = sorted(filenames)
 
     for filename in filenames:
