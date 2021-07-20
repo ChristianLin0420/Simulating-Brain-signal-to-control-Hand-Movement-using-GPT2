@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 def generate_and_save_images(model, time, epoch, test_input, model_name):
 
-    diractory = 'results/gpt2_results/{}'.format(time)
+    diractory = 'results/gpt2_results/{}_{}'.format(time)
 
     if not os.path.exists(diractory):
         os.mkdir(diractory)
