@@ -24,7 +24,7 @@ def generate_and_save_images(model, time, epoch, test_input, model_name):
         plt.axis('off')
 
     plt.savefig('results/gpt2_results/{}_{}/image_at_epoch_{:04d}.png'.format(model_name, time, epoch))
-    plt.show()
+    plt.close()
 
 
 def save_result_as_gif(time, model_name):
@@ -61,8 +61,5 @@ def save_loss_record(lst_iter, g_loss, d_loss, time, model_name):
     plt.title(title)
 
     # save image
-    path = ""
     plt.savefig("results/gpt2_loss/{}_{}.png".format(model_name, time))  # should before show method
-
-    # show
-    plt.show()
+    plt.close()

@@ -158,7 +158,7 @@ class GPT2WGAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
                                                 noise_len = noise_len, 
                                                 noise_dim = noise_dim)
 
-                    if k % 750 == 0:
+                    if k % 1500 == 0:
                         gen_loss_record.append(g_l)
                         dis_loss_record.append(d_l)
 
