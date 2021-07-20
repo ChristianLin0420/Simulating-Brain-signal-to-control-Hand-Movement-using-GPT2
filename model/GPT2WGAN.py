@@ -14,15 +14,17 @@ from utils.model_monitor import generate_and_save_images, save_loss_record, save
 from utils.output import TFCausalLMOutputWithPast
 from utils.model_utils import input_processing, TFPreTrainedModel, TFCausalLanguageModelingLoss
 
-class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
+class GPT2WGAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
 
-    def __init__(self, config, *inputs, **kwargs):
+    def __init__(self, config, d_extra_steps, *inputs, **kwargs):
         super().__init__(config, *inputs, **kwargs)
         self.generator = TFGPT2MainLayer(config, name = "generator")
         self.discriminator = Discriminator(config, name = "discriminator")
 
+        self.d_extra_steps = d_extra_steps
+        self.gp_weight = 10.0
+
         # This method returns a helper function to compute cross entropy loss
-        self.cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits = True)
         self.generator_optimizer = tf.keras.optimizers.Adam(1e-4)
         self.discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
@@ -30,7 +32,7 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
         now = datetime.now()
         self.time = now.strftime("%d_%m_%Y_%H_%M_%S")
 
-        self.model_name = "gpt2gan"
+        self.model_name = "gpt2wgan"
 
     def get_output_embeddings(self):
         return self.get_input_embeddings()
@@ -39,13 +41,38 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
         self.set_input_embeddings(value)
 
     def discriminator_loss(self, real_output, fake_output):
-        real_loss = self.cross_entropy(tf.ones_like(real_output), real_output)
-        fake_loss = self.cross_entropy(tf.zeros_like(fake_output), fake_output)
-        total_loss = real_loss + fake_loss
-        return total_loss
+        real_loss = tf.reduce_mean(real_output)
+        fake_loss = tf.reduce_mean(fake_output)
+        return fake_loss - real_loss
 
     def generator_loss(self, fake_output):
-        return self.cross_entropy(tf.ones_like(fake_output), fake_output)
+        return -tf.reduce_mean(fake_output)
+
+    def gradient_penalty(self, 
+                         real_images, 
+                         fake_images, 
+                         batch_size: int = 8):
+        """ Calculates the gradient penalty.
+
+        This loss is calculated on an interpolated image
+        and added to the discriminator loss.
+        """
+        # Get the interpolated image
+        alpha = tf.random.normal([batch_size, 1, 1, 1], 0.0, 1.0)
+        diff = fake_images - real_images
+        interpolated = real_images + alpha * diff
+
+        with tf.GradientTape() as gp_tape:
+            gp_tape.watch(interpolated)
+            # 1. Get the discriminator output for this interpolated image.
+            pred = self.discriminator(interpolated, training = True)
+
+        # 2. Calculate the gradients w.r.t to this interpolated image.
+        grads = gp_tape.gradient(pred, [interpolated])[0]
+        # 3. Calculate the norm of the gradients.
+        norm = tf.sqrt(tf.reduce_sum(tf.square(grads), axis = [1, 2, 3]))
+        gp = tf.reduce_mean((norm - 1.0) ** 2)
+        return gp
 
     # Notice the use of `tf.function`
     # This annotation causes the function to be "compiled".
@@ -56,24 +83,43 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
                     noise_len: int = 784, 
                     noise_dim: int = 32):
 
+        for _ in range(self.d_extra_steps):
+            
+            noise = tf.random.normal([batch_size, noise_len, noise_dim])
+
+            with tf.GradientTape() as tape:
+                # Generate fake images from the random noise
+                generated_images = self.generator(noise, training = True)
+                
+                # Get the logits for the real images
+                real_output = self.discriminator(images, training = True)
+                # Get the logits for the fake images
+                fake_output = self.discriminator(generated_images, training = True)
+
+                # Calculate the discriminator loss using the fake and real image logits
+                d_cost = self.discriminator_loss(real_output, fake_output)
+                # Calculate the gradient penalty
+                gp = self.gradient_penalty(images, generated_images, batch_size)
+                # Add the gradient penalty to the original discriminator loss
+                d_loss = d_cost + gp * self.gp_weight
+
+            d_gradient = tape.gradient(d_loss, self.discriminator.trainable_variables)
+            self.discriminator_optimizer.apply_gradients(zip(d_gradient, self.discriminator.trainable_variables))
+
         noise = tf.random.normal([batch_size, noise_len, noise_dim])
-
-        with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+        
+        with tf.GradientTape() as tape:
+            # Generate fake images using the generator
             generated_images = self.generator(noise, training = True)
-
-            real_output = self.discriminator(images, training = True)
+            # Get the discriminator logits for fake images
             fake_output = self.discriminator(generated_images, training = True)
+            # Calculate the generator loss
+            g_loss = self.generator_loss(fake_output)
 
-            gen_loss = self.generator_loss(fake_output)
-            disc_loss = self.discriminator_loss(real_output, fake_output)
+        g_gradient = tape.gradient(g_loss, self.generator.trainable_variables)
+        self.generator_optimizer.apply_gradients(zip(g_gradient, self.generator.trainable_variables))
 
-        gradients_of_generator = gen_tape.gradient(gen_loss, self.generator.trainable_variables)
-        gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
-
-        self.generator_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))
-        self.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
-
-        return float(gen_loss), float(disc_loss)
+        return float(g_loss), float(d_loss)
 
     def train(  self, 
                 dataset, 
