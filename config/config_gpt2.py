@@ -89,7 +89,7 @@ class GPT2Config(PretrainedConfig):
         n_positions=1024,
         n_ctx=1024,
         n_embd=768,
-        n_layer=12,
+        n_layer=4,
         n_head=12,
         n_inner=None,
         activation_function="gelu_new",

@@ -2,11 +2,12 @@
 import os
 import time as tt
 import numpy as np
+import random
 import tensorflow as tf
 
 from datetime import datetime
-from typing import Any
 from alive_progress import alive_bar
+from tensorflow import keras
 
 from .gpt2 import TFGPT2MainLayer
 from .discriminator import Discriminator
@@ -18,6 +19,7 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
 
     def __init__(self, config, *inputs, **kwargs):
         super().__init__(config, *inputs, **kwargs)
+        
         self.generator = TFGPT2MainLayer(config, name = "generator")
         self.discriminator = Discriminator(config, name = "discriminator")
 
@@ -31,6 +33,7 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
         self.time = now.strftime("%d_%m_%Y_%H_%M_%S")
 
         self.model_name = "gpt2gan"
+        self.log_dir = "./logs/gpt2gan/{}".format(self.time)
 
     def get_output_embeddings(self):
         return self.get_input_embeddings()
@@ -46,6 +49,26 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
 
     def generator_loss(self, fake_output):
         return self.cross_entropy(tf.ones_like(fake_output), fake_output)
+
+    def Callback_EarlyStopping(self, LossList, min_delta = 0.1, patience = 20):
+        #No early stopping for 2 * patience epochs 
+        if len(LossList) // patience < 2 :
+            return False
+
+        # Mean loss for last patience epochs and second-last patience epochs
+        mean_previous = np.mean(LossList[::-1][patience:2*patience]) # second-last
+        mean_recent = np.mean(LossList[::-1][:patience]) #last
+
+        # you can use relative or absolute change
+        delta_abs = np.abs(mean_recent - mean_previous) #abs change
+        delta_abs = np.abs(delta_abs / mean_previous)  # relative change
+
+        if delta_abs < min_delta :
+            print("*CB_ES* Loss didn't change much from last %d epochs"%(patience))
+            print("*CB_ES* Percent change in loss value:", delta_abs*1e2)
+            return True
+        else:
+            return False
 
     # Notice the use of `tf.function`
     # This annotation causes the function to be "compiled".
@@ -81,21 +104,27 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
                 batch_size, 
                 num_examples_to_generate, 
                 noise_len, 
-                noise_dim):
+                noise_dim   ):
 
         seed = tf.random.normal([num_examples_to_generate, noise_len, noise_dim])
 
-        diractory = './checkpoints/gpt2_training_checkpoints/{}'.format(self.time)
+        diractory = './checkpoints/gpt2gan_training_checkpoints/{}'.format(self.time)
 
         if not os.path.exists(diractory):
             os.mkdir(diractory)
+        
+        if not os.path.exists(self.log_dir):
+            os.mkdir(self.log_dir)
 
-        checkpoint_dir = './checkpoints/gpt2_training_checkpoints/{}'.format(self.time)
+        checkpoint_dir = './checkpoints/gpt2gan_training_checkpoints/{}'.format(self.time)
         checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
         checkpoint = tf.train.Checkpoint(generator_optimizer = self.generator_optimizer,
                                          discriminator_optimizer = self.discriminator_optimizer,
                                          generator = self.generator,
                                          discriminator = self.discriminator)
+
+        tb_callback = tf.keras.callbacks.TensorBoard(self.log_dir)
+        tb_callback.set_model(self)
 
         gen_loss_record = []
         dis_loss_record = []
@@ -125,6 +154,13 @@ class GPT2GAN(TFPreTrainedModel, TFCausalLanguageModelingLoss):
                 print ('Time for epoch {} is {} sec'.format(i + 1, tt.time() - start))
             
                 bar()
+
+                stopEarly = self.Callback_EarlyStopping(gen_loss_record, min_delta = 0.1, patience = 20)
+
+                if stopEarly:
+                    print("Callback_EarlyStopping signal received at epoch = {}/{}".format(i, epochs))
+                    print("Terminating training ")
+                    break
 
             # Generate after the final epoch
             print("epoch: {}".format(i))
