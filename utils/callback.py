@@ -2,7 +2,7 @@
 import numpy as np
 import tensorflow as tf
 
-from model_monitor import generate_and_save_images
+from .model_monitor import generate_and_save_images
 
 class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
     """Stop training when the loss is at its min, i.e. the loss stops decreasing.
