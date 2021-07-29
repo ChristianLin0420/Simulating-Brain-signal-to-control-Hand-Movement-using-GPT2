@@ -135,7 +135,8 @@ if __name__ == '__main__':
             d_loss_collection.append(d_loss)
             
             # save model
-            model.save("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
+            tf.saved_model.save(model, "./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
+            # model.save("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
 
         elif args.mode == "gpt2wgan":
 
@@ -176,8 +177,7 @@ if __name__ == '__main__':
             break
         
         # create git to observe the training performance
-        tf.saved_model.save(model, "./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
-        # save_result_as_gif(time, args.mode, current_round)
+        save_result_as_gif(time, args.mode, current_round)
         
         current_round += 1
 
