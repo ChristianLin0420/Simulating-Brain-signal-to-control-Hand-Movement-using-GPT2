@@ -129,6 +129,9 @@ if __name__ == '__main__':
 
             g_loss_collection.append(g_loss)
             d_loss_collection.append(d_loss)
+            
+            # save model
+            model.save("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
 
         elif args.mode == "gpt2wgan":
 
@@ -158,6 +161,9 @@ if __name__ == '__main__':
             g_loss_collection.append(g_loss)
             d_loss_collection.append(d_loss)
 
+            # save model
+            model.save("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
+
         else:
             print("[Error] Should specify one training mode!!!")
             break
@@ -170,8 +176,8 @@ if __name__ == '__main__':
 
     # save figure
     if args.mode == "gpt2gan":
-        save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, "g_loss")
-        save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, "d_loss")
+        save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.mode, "g_loss")
+        save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.mode, "d_loss")
     elif args.mode == "gpt2wgan":
-        save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, "g_loss")
-        save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, "d_loss")
+        save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.mode, "g_loss")
+        save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.mode, "d_loss")
