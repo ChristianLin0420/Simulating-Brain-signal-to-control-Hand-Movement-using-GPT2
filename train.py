@@ -26,7 +26,9 @@ def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
 
     # Batch and shuffle the data
     train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(buffer_size = buffer_size).batch(batch_size)
-    return train_dataset
+    print(train_dataset.shape)
+
+    return train_dataset, train_dataset.shape
 
 if __name__ == '__main__':
 
@@ -76,7 +78,7 @@ if __name__ == '__main__':
     current_round = 1
 
     # get datsets
-    datasets = initial_mnist_datset()
+    datasets, shape = initial_mnist_datset()
 
     # initial model
     config = GPT2Config(n_layer = int(args.num_layer), 
@@ -111,7 +113,7 @@ if __name__ == '__main__':
             )
             print(model.config)
 
-            model.build(datasets.shape)
+            model.build(shape)
 
             model.compile(
                 d_optimizer = d_optimizer,
@@ -144,7 +146,7 @@ if __name__ == '__main__':
             )
             print(model.config)
 
-            model.build(datasets.shape)
+            model.build(shape)
 
             model.compile(
                 d_optimizer = d_optimizer,
