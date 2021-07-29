@@ -19,6 +19,8 @@ class gpt2wgan(tf.keras.Model):
 
         self.noise_len = noise_len
         self.noise_dim = noise_dim
+
+        self.gp_weight = 10.0
         self.d_extra_steps = d_extra_steps
 
         self.seed = tf.random.normal([16, noise_len, noise_dim])
@@ -87,7 +89,10 @@ class gpt2wgan(tf.keras.Model):
             # Train the disciminator
             with tf.GradientTape() as tape:
                 predictions = self.discriminator(combined_images)
-                d_loss += self.loss_fn(labels, predictions)
+                # Calculate the gradient penalty
+                gp = self.gradient_penalty(real_images, generated_images, batch_size)
+                # Add the gradient penalty to the original discriminator loss
+                d_loss = self.loss_fn(labels, predictions) + gp * self.gp_weight
 
             grads = tape.gradient(d_loss, self.discriminator.trainable_weights)
             self.d_optimizer.apply_gradients(zip(grads, self.discriminator.trainable_weights))
