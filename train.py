@@ -135,8 +135,8 @@ if __name__ == '__main__':
             d_loss_collection.append(d_loss)
             
             # save model
-            tf.saved_model.save(model, "./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
             # model.save("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
+            model.save_weights("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
 
         elif args.mode == "gpt2wgan":
 
@@ -169,8 +169,8 @@ if __name__ == '__main__':
             d_loss_collection.append(d_loss)
 
             # save model
-            tf.saved_model.save(model, "./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
             # model.save("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
+            model.save_weights("./trained_model/" + str(args.mode) + "/" + str(time) + "/model_" + str(current_round))
 
         else:
             print("[Error] Should specify one training mode!!!")
