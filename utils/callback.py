@@ -10,7 +10,7 @@ class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
         number of no improvement, training stops.
     """
 
-    def __init__(self, patience = 0):
+    def __init__(self, patience = 5):
         super(EarlyStoppingAtMinLoss, self).__init__()
         self.patience = patience
         # best_weights to store the weights at which the minimum loss occurs.
@@ -26,6 +26,8 @@ class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs = None):
         current = logs.get("g_loss")
+
+        tf.summary.scalar('g_loss', current, step = epoch)
 
         if np.less(current, self.best):
             self.best = current

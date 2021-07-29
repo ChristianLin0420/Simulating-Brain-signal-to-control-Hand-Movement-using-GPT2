@@ -36,7 +36,7 @@ if __name__ == '__main__':
     parser.add_argument("--noise_len", default = 784)
     parser.add_argument("--noise_hidden_dim", default = 32)
     parser.add_argument("--example_to_generate", default = 16)
-    parser.add_argument("--num_layer", default = 4)
+    parser.add_argument("--num_layer", default = 2)
     parser.add_argument("--num_head", default = 4)
     parser.add_argument("--num_round", default = 3)
     parser.add_argument("--use_gpu", default = True)  
@@ -93,6 +93,9 @@ if __name__ == '__main__':
             check_folders(time = time, model_name = 'gan')
             tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = './logs/gpt2gan/' + str(time), histogram_freq = 1)
 
+            file_writer = tf.summary.create_file_writer('./logs/gpt2gan/' + str(time) + "/metrics")
+            file_writer.set_as_default()
+
             model = gpt2gan(
                 config = config,
                 noise_len = int(args.noise_len),
@@ -109,15 +112,12 @@ if __name__ == '__main__':
             history = model.fit(
                 datasets.take(80), 
                 epochs = int(args.epochs), 
-                verbose = 2, 
+                verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), tensorboard_callback]
             )
 
-            g_loss = history['g_loss']
-            d_loss = history['d_loss']
-
-            print(g_loss)
-            print(d_loss)
+            g_loss = history.history['g_loss']
+            d_loss = history.history['d_loss']
 
         elif args.mode == "gpt2wgan":
             
