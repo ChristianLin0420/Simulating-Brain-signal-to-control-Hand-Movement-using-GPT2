@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument("--mode", default = "gpt2gan")
     parser.add_argument("--buffer_size", default = 1000)
     parser.add_argument("--batch_size", default = 8)
-    parser.add_argument("--epochs", default = 200)
+    parser.add_argument("--epochs", default = 100)
     parser.add_argument("--noise_len", default = 784)
     parser.add_argument("--noise_hidden_dim", default = 32)
     parser.add_argument("--example_to_generate", default = 16)
@@ -120,7 +120,7 @@ if __name__ == '__main__':
             )
 
             history = model.fit(
-                datasets.take(80), 
+                datasets, 
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.mode), tensorboard_callback]
@@ -154,7 +154,7 @@ if __name__ == '__main__':
             )
 
             history = model.fit(
-                datasets.take(80), 
+                datasets, 
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.mode), tensorboard_callback]
