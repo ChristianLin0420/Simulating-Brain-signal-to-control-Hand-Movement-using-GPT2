@@ -411,10 +411,6 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         hidden_states = self.ln_f(hidden_states)
         hidden_states = tf.reshape(hidden_states, output_shape)
-
-#         print('-' * 80)
-#         print("hidden_states shape: {}".format(shape_list(hidden_states)))
-#         print("hidden_states: {}".format(hidden_states))
         
         # Add last hidden state
         if inputs["output_hidden_states"]:
@@ -432,18 +428,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
         hidden_states = self.transformer(hidden_states)
-#         print("hidden_states after transformation: {}".format(hidden_states))
-
-#         print('-' * 80)
 
         return hidden_states
-
-        # return TFBaseModelOutputWithPast(
-        #     last_hidden_state=hidden_states,
-        #     past_key_values=presents,
-        #     hidden_states=all_hidden_states,
-        #     attentions=all_attentions,
-        # )
 
 class TFGPT2PreTrainedModel(TFPreTrainedModel):
     """

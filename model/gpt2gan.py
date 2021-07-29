@@ -19,6 +19,7 @@ class gpt2gan(tf.keras.Model):
 
         self.noise_len = noise_len
         self.noise_dim = noise_dim
+        self.seed = tf.random.normal([16, noise_len, noise_dim])
 
         self.config = config
 
@@ -70,5 +71,9 @@ class gpt2gan(tf.keras.Model):
 
         grads = tape.gradient(g_loss, self.generator.trainable_weights)
         self.g_optimizer.apply_gradients(zip(grads, self.generator.trainable_weights))
+
+        # generate image from given seed
+        predictions = self.generator(self.seed, training = False)
         
-        return {"d_loss": d_loss, "g_loss": g_loss}
+        
+        return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}

@@ -2,13 +2,15 @@
 
 import os
 import argparse
+import numpy as np
 import tensorflow as tf
 
 from datetime import datetime
 from tensorflow import keras
  
 from folder import check_folders
-from utils.callback import EarlyStoppingAtMinLoss
+from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages
+from utils.model_monitor import save_loss_range_record, save_result_as_gif
 
 from model.gpt2gan import gpt2gan
 from model.gpt2wgan import gpt2wgan
@@ -71,6 +73,7 @@ if __name__ == '__main__':
     now = datetime.now()
     time = now.strftime("%d_%m_%Y_%H_%M_%S")
     round_num = int(args.num_round)
+    current_round = 1
 
     # get datsets
     datasets = initial_mnist_datset()
@@ -81,20 +84,25 @@ if __name__ == '__main__':
                         n_embd = int(args.noise_hidden_dim), 
                         n_positions = int(args.noise_len))
 
+    g_loss_collection = []
+    d_loss_collection = []
 
-    while round_num > 0:
+    while round_num >= current_round:
 
         d_optimizer = keras.optimizers.Adam(learning_rate = 0.0003)
         g_optimizer = keras.optimizers.Adam(learning_rate = 0.0003)
         loss_fn = keras.losses.BinaryCrossentropy(from_logits = True)
 
+        check_folders(time = time, model_name = args.mode)
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = './logs/' + str(args.mode) + '/' + str(time) + '/' + str(current_round), histogram_freq = 1)
+
+        file_writer = tf.summary.create_file_writer('./logs/' + str(args.mode) + '/' + str(time) + "/" + str(current_round) + "/metrics")
+        file_writer.set_as_default()
+
+        # create git to observe the training performance
+        save_result_as_gif(time, args.mode, current_round)
+
         if args.mode == "gpt2gan": 
-
-            check_folders(time = time, model_name = 'gan')
-            tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = './logs/gpt2gan/' + str(time), histogram_freq = 1)
-
-            file_writer = tf.summary.create_file_writer('./logs/gpt2gan/' + str(time) + "/metrics")
-            file_writer.set_as_default()
 
             model = gpt2gan(
                 config = config,
@@ -113,20 +121,57 @@ if __name__ == '__main__':
                 datasets.take(80), 
                 epochs = int(args.epochs), 
                 verbose = 1, 
-                callbacks = [EarlyStoppingAtMinLoss(), tensorboard_callback]
+                callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.mode), tensorboard_callback]
             )
 
             g_loss = history.history['g_loss']
             d_loss = history.history['d_loss']
 
-        elif args.mode == "gpt2wgan":
-            
-            check_folders(time = time, model_name = 'wgan')
+            g_loss_collection.append(g_loss)
+            d_loss_collection.append(d_loss)
 
-            pass
+        elif args.mode == "gpt2wgan":
+
+            model = gpt2wgan(
+                config = config,
+                noise_len = int(args.noise_len),
+                noise_dim = int(args.noise_hidden_dim)
+            )
+            print(model.config)
+
+            model.compile(
+                d_optimizer = d_optimizer,
+                g_optimizer = g_optimizer,
+                loss_fn = loss_fn
+            )
+
+            history = model.fit(
+                datasets.take(80), 
+                epochs = int(args.epochs), 
+                verbose = 1, 
+                callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.mode), tensorboard_callback]
+            )
+
+            g_loss = history.history['g_loss']
+            d_loss = history.history['d_loss']
+
+            g_loss_collection.append(g_loss)
+            d_loss_collection.append(d_loss)
 
         else:
             print("[Error] Should specify one training mode!!!")
             break
+        
+        # create git to observe the training performance
+        save_result_as_gif(time, args.mode, current_round)
+        
+        current_round += 1
 
-        round_num -= 1
+
+    # save figure
+    if args.mode == "gpt2gan":
+        save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, "g_loss")
+        save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, "d_loss")
+    elif args.mode == "gpt2wgan":
+        save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, "g_loss")
+        save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, "d_loss")
