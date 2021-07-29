@@ -16,8 +16,6 @@ from model.gpt2gan import gpt2gan
 from model.gpt2wgan import gpt2wgan
 from config.config_gpt2 import GPT2Config
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 
 def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
     (train_images, _), (_, _) = tf.keras.datasets.mnist.load_data()
@@ -42,6 +40,7 @@ if __name__ == '__main__':
     parser.add_argument("--num_head", default = 4)
     parser.add_argument("--num_round", default = 3)
     parser.add_argument("--use_gpu", default = True)  
+    parser.add_argument('--gpu_id', default = 0)
     parser.add_argument("--load_model", default = False)              
     args = parser.parse_args()
 
@@ -57,7 +56,10 @@ if __name__ == '__main__':
     print("{0: <{width}}: {val}".format("num_head", width = width, val = args.num_head))
     print("{0: <{width}}: {val}".format("num_round", width = width, val = args.num_round))
     print("{0: <{width}}: {val}".format("use_gpu", width = width, val = args.use_gpu))
+    print("{0: <{width}}: {val}".format("gpu_id", width = width, val = args.gpu_id))
     print("{0: <{width}}: {val}".format("load_model", width = width, val = args.load_model))
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 
     # if use_gpu is TRUE, then get one and run the program on it
     if args.use_gpu:
