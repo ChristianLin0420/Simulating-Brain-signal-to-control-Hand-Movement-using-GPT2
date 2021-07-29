@@ -21,6 +21,8 @@ class gpt2wgan(tf.keras.Model):
         self.noise_dim = noise_dim
         self.d_extra_steps = d_extra_steps
 
+        self.seed = tf.random.normal([16, noise_len, noise_dim])
+
         self.config = config
 
     def compile(self, d_optimizer, g_optimizer, loss_fn):
@@ -104,5 +106,8 @@ class gpt2wgan(tf.keras.Model):
 
         grads = tape.gradient(g_loss, self.generator.trainable_weights)
         self.g_optimizer.apply_gradients(zip(grads, self.generator.trainable_weights))
+
+        # generate image from given seed
+        predictions = self.generator(self.seed, training = False)
         
-        return {"d_loss": d_loss / self.d_extra_steps, "g_loss": g_loss}
+        return {"d_loss": d_loss / self.d_extra_steps, "g_loss": g_loss, "predictions": predictions}
