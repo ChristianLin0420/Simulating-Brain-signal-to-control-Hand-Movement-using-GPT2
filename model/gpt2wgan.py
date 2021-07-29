@@ -12,7 +12,7 @@ from .discriminator import Discriminator
 class gpt2wgan(tf.keras.Model):
 
     def __init__(self, config, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, **kwargs):
-        super(gpt2gan, self).__init__()
+        super(gpt2wgan, self).__init__()
 
         self.generator = TFGPT2MainLayer(config = config, name = "name")
         self.discriminator = Discriminator(config = config, name = "discriminator")
@@ -24,10 +24,13 @@ class gpt2wgan(tf.keras.Model):
         self.config = config
 
     def compile(self, d_optimizer, g_optimizer, loss_fn):
-        super(gpt2gan, self).compile()
+        super(gpt2wgan, self).compile()
         self.d_optimizer = d_optimizer
         self.g_optimizer = g_optimizer
         self.loss_fn = loss_fn
+
+    def build(self, input_shape):
+        return super().build(input_shape)
 
     def gradient_penalty(self, 
                          real_images, 

@@ -23,6 +23,9 @@ class gpt2gan(tf.keras.Model):
 
         self.config = config
 
+    def build(self, input_shape):
+        return super().build(input_shape)
+
     def compile(self, d_optimizer, g_optimizer, loss_fn):
         super(gpt2gan, self).compile()
         self.d_optimizer = d_optimizer

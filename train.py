@@ -111,6 +111,8 @@ if __name__ == '__main__':
             )
             print(model.config)
 
+            model.build(datasets.shape)
+
             model.compile(
                 d_optimizer = d_optimizer,
                 g_optimizer = g_optimizer,
@@ -141,6 +143,8 @@ if __name__ == '__main__':
                 noise_dim = int(args.noise_hidden_dim)
             )
             print(model.config)
+
+            model.build(datasets.shape)
 
             model.compile(
                 d_optimizer = d_optimizer,
