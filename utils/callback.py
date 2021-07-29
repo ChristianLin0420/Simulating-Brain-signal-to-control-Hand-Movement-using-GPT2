@@ -1,8 +1,9 @@
 
+from datetime import time
 import numpy as np
 import tensorflow as tf
 
-from .model_monitor import generate_and_save_images
+from .model_monitor import generate_and_save_images, save_result_as_gif
 
 class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
     """Stop training when the loss is at its min, i.e. the loss stops decreasing.
@@ -67,3 +68,7 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
                                     n_round =  self.n_round, 
                                     epoch = epoch, 
                                     model_name = self.model_name    )
+
+        save_result_as_gif( time = self.time, 
+                            model_name = self.model_name, 
+                            n_round = self.n_round  )
