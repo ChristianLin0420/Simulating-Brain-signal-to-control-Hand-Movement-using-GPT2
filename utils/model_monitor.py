@@ -64,10 +64,10 @@ def save_loss_record(lst_iter, g_loss, d_loss, time, model_name, n_round):
     plt.close()
 
 def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
-    diractory = 'results/training_loss/{}/{}'.format(model_name, time)
+    directory = 'results/training_loss/{}/{}'.format(model_name, time)
 
-    if not os.path.exists(diractory):
-        os.mkdir(diractory)
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
     title = "{}_average".format(line_name)
 

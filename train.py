@@ -26,8 +26,6 @@ def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
 
     # Batch and shuffle the data
     train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(buffer_size = buffer_size).batch(batch_size)
-    print(np.shape(np.asarray(train_dataset)))
-
     return train_dataset, np.shape(np.asarray(train_dataset))
 
 if __name__ == '__main__':

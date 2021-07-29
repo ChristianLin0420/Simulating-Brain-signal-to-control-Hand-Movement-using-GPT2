@@ -35,8 +35,10 @@ def is_results_folder_exist(time: str = None, model_name: str = 'gpt2gan'):
     results_dir = './results'
     img_dir = results_dir +  '/img_results'
     loss_dir = results_dir + '/training_loss'
-    gpt2gan_dir = img_dir + '/gpt2gan'
-    gpt2wgan_dir = loss_dir + '/gpt2wgan'
+    gpt2gan_img_dir = img_dir + '/gpt2gan'
+    gpt2gan_loss_dir = loss_dir + '/gpt2gan'
+    gpt2wgan_img_dir = img_dir + '/gpt2wgan'
+    gpt2wgan_loss_dir = loss_dir + '/gpt2wgan'
 
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
@@ -47,23 +49,35 @@ def is_results_folder_exist(time: str = None, model_name: str = 'gpt2gan'):
     if not os.path.exists(loss_dir):
         os.mkdir(loss_dir)
 
-    if not os.path.exists(gpt2gan_dir):
-        os.mkdir(gpt2gan_dir)
+    if not os.path.exists(gpt2gan_img_dir):
+        os.mkdir(gpt2gan_img_dir)
 
-    if not os.path.exists(gpt2wgan_dir):
-        os.mkdir(gpt2wgan_dir)
+    if not os.path.exists(gpt2gan_loss_dir):
+        os.mkdir(gpt2gan_loss_dir)
 
-    time_dir = ''
+    if not os.path.exists(gpt2wgan_img_dir):
+        os.mkdir(gpt2wgan_img_dir)
+
+    if not os.path.exists(gpt2wgan_loss_dir):
+        os.mkdir(gpt2wgan_loss_dir)
+
+    img_time_dir = ''
+    loss_time_dir = ''
 
     if model_name == 'gpt2gan':
-        time_dir = gpt2gan_dir + '/' + time
+        img_time_dir = gpt2gan_img_dir + '/' + time
+        loss_time_dir = gpt2gan_loss_dir + '/' + time
     elif model_name == 'gpt2wgan':
-        time_dir = gpt2wgan_dir + '/' + time
+        img_time_dir = gpt2wgan_img_dir + '/' + time
+        loss_time_dir = gpt2wgan_loss_dir + '/' + time
     else:
         print("[ERROR] is_logs_folder_exist() from setup.py has wrong model name input")
     
-    if not os.path.exists(time_dir):
-        os.mkdir(time_dir)
+    if not os.path.exists(img_time_dir):
+        os.mkdir(img_time_dir)
+
+    if not os.path.exists(loss_time_dir):
+        os.mkdir(loss_time_dir)
 
 def is_trained_model_folder_exist(time: str = None, model_name: str = 'gpt2gan'):
 
