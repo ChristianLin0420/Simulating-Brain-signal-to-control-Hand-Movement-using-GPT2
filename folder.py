@@ -3,7 +3,7 @@ import os
 
 from datetime import datetime
 
-def is_logs_folder_exist(time: str = None, model_name: str = 'gan'):
+def is_logs_folder_exist(time: str = None, model_name: str = 'gpt2gan'):
 
     logs_dir = './logs'
     gpt2gan_dir = logs_dir + '/gpt2gan'
@@ -20,9 +20,9 @@ def is_logs_folder_exist(time: str = None, model_name: str = 'gan'):
 
     time_dir = ''
 
-    if model_name == 'gan':
+    if model_name == 'gpt2gan':
         time_dir = gpt2gan_dir + '/' + time
-    elif model_name == 'wgan':
+    elif model_name == 'gpt2wgan':
         time_dir = gpt2wgan_dir + '/' + time
     else:
         print("[ERROR] is_logs_folder_exist() from setup.py has wrong model name input")
@@ -30,7 +30,7 @@ def is_logs_folder_exist(time: str = None, model_name: str = 'gan'):
     if not os.path.exists(time_dir):
         os.mkdir(time_dir)
 
-def is_results_folder_exist(time: str = None, model_name: str = 'gan'):
+def is_results_folder_exist(time: str = None, model_name: str = 'gpt2gan'):
 
     results_dir = './results'
     img_dir = results_dir +  '/img_results'
@@ -55,9 +55,9 @@ def is_results_folder_exist(time: str = None, model_name: str = 'gan'):
 
     time_dir = ''
 
-    if model_name == 'gan':
+    if model_name == 'gpt2gan':
         time_dir = gpt2gan_dir + '/' + time
-    elif model_name == 'wgan':
+    elif model_name == 'gpt2wgan':
         time_dir = gpt2wgan_dir + '/' + time
     else:
         print("[ERROR] is_logs_folder_exist() from setup.py has wrong model name input")
@@ -65,7 +65,7 @@ def is_results_folder_exist(time: str = None, model_name: str = 'gan'):
     if not os.path.exists(time_dir):
         os.mkdir(time_dir)
 
-def is_trained_model_folder_exist(time: str = None, model_name: str = 'gan'):
+def is_trained_model_folder_exist(time: str = None, model_name: str = 'gpt2gan'):
 
     trained_model_dir = './trained_model'
     gpt2gan_dir = trained_model_dir + '/gpt2gan'
@@ -82,9 +82,9 @@ def is_trained_model_folder_exist(time: str = None, model_name: str = 'gan'):
 
     time_dir = ''
 
-    if model_name == 'gan':
+    if model_name == 'gpt2gan':
         time_dir = gpt2gan_dir + '/' + time
-    elif model_name == 'wgan':
+    elif model_name == 'gpt2wgan':
         time_dir = gpt2wgan_dir + '/' + time
     else:
         print("[ERROR] is_logs_folder_exist() from setup.py has wrong model name input")
@@ -92,7 +92,7 @@ def is_trained_model_folder_exist(time: str = None, model_name: str = 'gan'):
     if not os.path.exists(time_dir):
         os.mkdir(time_dir)
 
-def check_folders(time: str = '', model_name: str = 'gan'):
+def check_folders(time: str = '', model_name: str = 'gpt2gan'):
 
     is_logs_folder_exist(time = time, model_name = model_name)
     is_results_folder_exist(time = time, model_name = model_name)
