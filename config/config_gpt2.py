@@ -1,4 +1,10 @@
 
+import os
+import json
+import numpy as np
+import matplotlib.pyplot as plt
+
+from logging import error
 from .config_utils import PretrainedConfig
 
 '''
@@ -152,3 +158,102 @@ class GPT2Config(PretrainedConfig):
     @property
     def num_hidden_layers(self):
         return self.n_layer
+
+def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
+    directory = 'results/training_loss/{}/{}'.format(model_name, time)
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+    title = "{}_average".format(line_name)
+
+    l = np.asarray(loss)
+    mean = np.mean(l, axis = 0)
+    standard_dev = np.std(l, axis = 0)
+
+    plt.figure(figsize=(15,5))
+    plt.plot(lst_iter, mean, '-')
+    plt.fill_between(lst_iter, mean - standard_dev, mean + standard_dev, alpha = 0.2)
+
+    plt.xlabel("n iteration")
+    plt.legend(loc = 'upper left')
+    plt.title(title)
+
+    # save image
+    plt.savefig("results/training_loss/{}/{}/{}.png".format(model_name, time, line_name))  # should before show method
+    plt.close()
+
+    
+def save_model_config(config, model_name, time, current_round):
+
+    file_path = "./trained_model/" + str(model_name) + "/" + str(time) + "/model_" + str(current_round) + ".txt"
+
+    data = {
+        "vocab_size": config.vocab_size,
+        "n_positions": config.n_postions,
+        "n_ctx": config.n_ctx,
+        "n_embd": config.n_embd,
+        "n_layer": config.n_layer,
+        "n_head": config.n_head,
+        "n_inner": config.n_inner,
+        "activation_function": config.activation_function,
+        "resid_pdrop": config.resid_pdrop,
+        "embd_pdrop": config.embd_pdrop,
+        "attn_pdrop": config.attn_pdrop,
+        "layer_norm_epsilon": config.layer_norm_epsilon,
+        "initializer_range": config.initializer_range,
+        "summary_type": config.summary_type,
+        "summary_use_proj": config.summary_use_proj,
+        "summary_activation": config.summary_activation,
+        "summary_proj_to_labels": config.summary_proj_to_labels,
+        "summary_first_dropout": config.summary_first_dropout,
+        "scale_attn_weights": config.scale_attn_weights,
+        "gradient_checkpointing": config.gradient_checkpointing,
+        "use_cache": config.use_cache,
+        "bos_token_id": config.bos_token_id,
+        "eos_token_id": config.eos_token_id,
+    }
+
+    jsonStr = json.dumps(data)
+
+    with open(file = file_path, mode = 'w') as f:
+        f.write(jsonStr)
+
+def load_model_config(model_path):
+
+    if not os.path.exists(model_path):
+        error("[model_monitor.py] load_model_config: given model path is invalid")
+        return None
+    else:
+        with open(model_path) as f:
+            d = json.load(f)
+
+        config = GPT2Config(
+            vocab_size = int(d["vocab_size"]),
+            n_positions = int(d["n_positions"]),
+            n_ctx = int(d["n_ctx"]),
+            n_embd = int(d["n_embd"]),
+            n_layer = int(d["n_layer"]),
+            n_head = int(d["n_head"]),
+            n_inner = None if str(d["n_inner"]) == "None" else int(d["n_inner"]),
+            activation_function = str(d["activation_function"]),
+            resid_pdrop = float(d["resid_pdrop"]),
+            embd_pdrop = float(d["embd_pdrop"]),
+            attn_pdrop = float(d["attn_pdrop"]),
+            layer_norm_epsilon = float(d["layer_norm_epsilon"]),
+            initializer_range = float(d["initializer_range"]),
+            summary_type = str(d["summary_type"]),
+            summary_use_proj = bool(d["summary_use_proj"]),
+            summary_activation = None if str(d["summary_activation"]) == "None" else str(d["summary_activation"]),
+            summary_proj_to_labels = bool(d["summary_proj_to_labels"]),
+            summary_first_dropout = float(d["summary_first_dropout"]),
+            scale_attn_weights = bool(d["scale_attn_weights"]),
+            gradient_checkpointing = bool(d["gradient_checkpointing"]),
+            use_cache = bool(d["use_cache"]),
+            bos_token_id = int(d["bos_token_id"]),
+            eos_token_id = int(d["eos_token_id"]),
+        )
+
+        return config
+
+
