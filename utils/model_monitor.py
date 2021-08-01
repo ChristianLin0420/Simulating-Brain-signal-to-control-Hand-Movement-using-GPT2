@@ -111,3 +111,27 @@ def save_loss_record(lst_iter, g_loss, d_loss, time, model_name, n_round):
     plt.savefig("results/training_loss/{}/{}/{}/loss.png".format(model_name, time, n_round))  # should before show method
     plt.close()
 
+
+def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
+    directory = 'results/training_loss/{}/{}'.format(model_name, time)
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+    title = "{}_average".format(line_name)
+
+    l = np.asarray(loss)
+    mean = np.mean(l, axis = 0)
+    standard_dev = np.std(l, axis = 0)
+
+    plt.figure(figsize=(15,5))
+    plt.plot(lst_iter, mean, '-')
+    plt.fill_between(lst_iter, mean - standard_dev, mean + standard_dev, alpha = 0.2)
+
+    plt.xlabel("n iteration")
+    plt.legend(loc = 'upper left')
+    plt.title(title)
+
+    # save image
+    plt.savefig("results/training_loss/{}/{}/{}.png".format(model_name, time, line_name))  # should before show method
+    plt.close()
