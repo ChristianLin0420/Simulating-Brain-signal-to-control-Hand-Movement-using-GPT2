@@ -167,6 +167,8 @@ def find_random_vector(model_path, model, noise_len: int = 784, noise_dim: int =
             seed = np.random.random([1, noise_len, noise_dim])
             
             prediction = model.generator(seed, training = False)
+            print(prediction.shape)
+            print(prediction)
             show_generated_image(prediction)
 
             available = input("is this generated image avaliable(no/yes): ")
