@@ -156,34 +156,31 @@ def training(args, datasets, time):
 
 def find_random_vector(model_path, noise_len: int = 784, noise_dim: int = 32):
 
-    if not os.path.exists(model_path):
-        error("Invalid model path")
+    model = load_model(model_path)
+
+    if model is None:
+        error("Return model is None")
     else:
-        model = load_model(model_path)
+        end = False
 
-        if model is None:
-            error("Return model is None")
-        else:
-            end = False
+        while not end:
+            seed = np.random.random([1, noise_len, noise_dim])
+            
+            prediction = model.generator(seed, training = False)
+            show_generated_image(prediction)
 
-            while not end:
-                seed = np.random.random([1, noise_len, noise_dim])
-                
-                prediction = model.generator(seed, training = False)
-                show_generated_image(prediction)
+            available = input("is this generated image avaliable(no/yes): ")
 
-                available = input("is this generated image avaliable(no/yes): ")
-
-                if available == 'yes':
-                    vector_name = input("please enter image name: ")
-                    print("vector_name: {}".format(vector_name))
-                    save_random_vector(model_path, seed, vector_name)
-                elif available == "":
-                    end = True
-                else:
-                    print("Restart generating image by random vector")
-                
-                plt.close()
+            if available == 'yes':
+                vector_name = input("please enter image name: ")
+                print("vector_name: {}".format(vector_name))
+                save_random_vector(model_path, seed, vector_name)
+            elif available == "":
+                end = True
+            else:
+                print("Restart generating image by random vector")
+            
+            plt.close()
 
 
 if __name__ == '__main__':
