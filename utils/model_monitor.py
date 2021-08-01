@@ -17,7 +17,7 @@ def show_generated_image(prediction):
     
     _ = plt.figure()
 
-    plt.imshow(prediction[:, :, :, 0] * 127.5 + 127.5, cmap = 'gray')
+    plt.imshow(prediction[0] * 127.5 + 127.5, cmap = 'gray')
     plt.axis('off')
 
     plt.show()
