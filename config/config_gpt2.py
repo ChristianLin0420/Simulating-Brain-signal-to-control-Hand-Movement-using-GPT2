@@ -166,7 +166,7 @@ def save_model_config(config, model_name, time, current_round):
 
     data = {
         "vocab_size": config.vocab_size,
-        "n_positions": config.n_postions,
+        "n_positions": config.n_positions,
         "n_ctx": config.n_ctx,
         "n_embd": config.n_embd,
         "n_layer": config.n_layer,
