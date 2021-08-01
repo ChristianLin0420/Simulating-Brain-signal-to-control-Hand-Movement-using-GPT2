@@ -176,7 +176,7 @@ def find_random_vector(model_path, model, noise_len: int = 784, noise_dim: int =
             if available == 'yes':
                 vector_name = input("please enter image name: ")
                 print("vector_name: {}".format(vector_name))
-                save_random_vector(model_path, seed, vector_name)
+                save_random_vector(model_path, seed.tolist(), vector_name)
             elif available == "":
                 end = True
             else:
