@@ -154,9 +154,9 @@ def training(args, datasets, time):
         save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
         
 
-def find_random_vector(model_path, noise_len: int = 784, noise_dim: int = 32):
+def find_random_vector(model_path, model, noise_len: int = 784, noise_dim: int = 32):
 
-    model = load_model(model_path)
+    model = load_model(model_path, model, noise_len, noise_dim)
 
     if model is None:
         error("Return model is None")
@@ -247,7 +247,7 @@ if __name__ == '__main__':
         if args.model_path == None:
             error("Should provide model path to load")
         else:
-            find_random_vector(model_path = args.model_path)
+            find_random_vector(model_path = args.model_path, model = str(args.model))
     else:
         pass
 
