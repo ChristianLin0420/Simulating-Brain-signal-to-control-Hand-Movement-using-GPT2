@@ -29,8 +29,8 @@ def save_random_vector(path, seed, name):
 
     filepath = path + "/" + str(name) + ".txt"
 
-    tmp = np.asarray(seed)
-    data = {"data": tmp.reshape(-1)}
+    # tmp = np.asarray(seed)
+    data = {"data": seed}
     
     jsonStr = json.dumps(data)
 
@@ -48,10 +48,10 @@ def load_random_vector(path, noise_len: int = 784, noise_dim: int = 32):
             data = json.load(f)
         
         arr = data["data"]
-        tmp = np.asarray(arr)
-        vector = tmp.reshape([1, noise_len, noise_dim])
+        # tmp = np.asarray(arr)
+        # vector = tmp.reshape([1, noise_len, noise_dim])
 
-        return vector
+        return arr
 
     return None
 
