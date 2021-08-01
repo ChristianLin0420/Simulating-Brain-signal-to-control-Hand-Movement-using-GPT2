@@ -92,7 +92,7 @@ def training(args, datasets, time):
             d_loss_collection.append(d_loss)
             
             # save training loss figure
-            save_loss_record(np.arange(1, len(g_loss_collection) + 1), g_loss, d_loss, time, str(args.model), current_round)
+            save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
             
             # save model
             save_model_config(config, str(args.model), time, current_round)
@@ -129,7 +129,7 @@ def training(args, datasets, time):
             d_loss_collection.append(d_loss)
 
             # save training loss figure
-            save_loss_record(np.arange(1, len(g_loss_collection) + 1), g_loss, d_loss, time, str(args.model), current_round)
+            save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
 
             # save model
             save_model_config(config, str(args.model), time, current_round)
