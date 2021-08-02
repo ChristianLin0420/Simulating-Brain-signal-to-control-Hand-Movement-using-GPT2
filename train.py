@@ -135,6 +135,9 @@ def training(args, datasets, time):
             save_model_config(config, str(args.model), time, current_round)
             model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
 
+        elif args.model == "gpt2cgan":
+            pass
+
         else:
             print("[Error] Should specify one training model!!!")
             break
