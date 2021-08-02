@@ -245,7 +245,7 @@ if __name__ == '__main__':
     datasets, shape = initial_mnist_datset()
 
     if args.mode == "training":
-        training(args = args, datasets = datasets.take(80), time = time)
+        training(args = args, datasets = datasets, time = time)
     elif args.mode == "testing":
         pass
     elif args.mode == "find_vector":
