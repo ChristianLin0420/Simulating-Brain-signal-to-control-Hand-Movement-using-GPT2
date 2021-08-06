@@ -32,7 +32,9 @@ class gpt2gan(tf.keras.Model):
         self.g_optimizer = g_optimizer
         self.loss_fn = loss_fn
 
-    def train_step(self, real_images):
+    def train_step(self, datasets):
+
+        real_images, _ = datasets
         
         # Sample random points in the latent space
         batch_size = tf.shape(real_images)[0]

@@ -59,7 +59,9 @@ class gpt2wgan(tf.keras.Model):
         gp = tf.reduce_mean((norm - 1.0) ** 2)
         return gp
 
-    def train_step(self, real_images):
+    def train_step(self, datasets):
+
+        real_images, _ = datasets
         
         # Sample random points in the latent space
         batch_size = tf.shape(real_images)[0]

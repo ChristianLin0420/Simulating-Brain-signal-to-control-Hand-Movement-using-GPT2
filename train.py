@@ -16,6 +16,7 @@ from utils.model_monitor import save_loss_range_record, save_loss_record, save_r
 
 from model.gpt2gan import gpt2gan
 from model.gpt2wgan import gpt2wgan
+from model.gpt2cgan import gpt2cgan
 from model.model_utils import load_model
 from config.config_gpt2 import GPT2Config, save_model_config, load_model_config
 
@@ -24,15 +25,16 @@ LEARNING_RATE = 0.0003
 
 
 def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
-    (train_images, _), (_, _) = tf.keras.datasets.mnist.load_data()
+    (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
     train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
     train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    train_labels = keras.utils.to_categorical(train_labels, 10)
 
     # Batch and shuffle the data
-    train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(buffer_size = buffer_size).batch(batch_size)
+    train_dataset = tf.data.Dataset.from_tensor_slices(train_images, train_labels).shuffle(buffer_size = buffer_size).batch(batch_size)
     return train_dataset, np.shape(np.asarray(train_dataset))
 
-def training(args, datasets, time):
+def training(args, datasets, time, num_classes: int = 10):
     # initial model
     config = GPT2Config(n_layer = int(args.num_layer), 
                         n_head = int(args.num_head), 
@@ -136,7 +138,47 @@ def training(args, datasets, time):
             model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
 
         elif args.model == "gpt2cgan":
-            pass
+
+            print("original noise dim is {}".format(config["noise_dim"]))
+            
+            config["noise_dim"] += num_classes
+
+            print("original noise dim is {}".format(config["noise_dim"]))
+
+            model = gpt2cgan(
+                config = config,
+                noise_len = int(args.noise_len),
+                noise_dim = int(args.noise_hidden_dim)
+            )
+            print(model.config)
+
+            model.build(shape)
+
+            model.compile(
+                d_optimizer = d_optimizer,
+                g_optimizer = g_optimizer,
+                loss_fn = loss_fn
+            )
+
+            history = model.fit(
+                datasets, 
+                epochs = int(args.epochs), 
+                verbose = 1, 
+                callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model), tensorboard_callback]
+            )
+
+            g_loss = history.history['g_loss']
+            d_loss = history.history['d_loss']
+
+            g_loss_collection.append(g_loss)
+            d_loss_collection.append(d_loss)
+
+            # save training loss figure
+            save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+
+            # save model
+            save_model_config(config, str(args.model), time, current_round)
+            model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
 
         else:
             print("[Error] Should specify one training model!!!")
@@ -192,7 +234,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default = 'training')
-    parser.add_argument("--model", default = "gpt2gan")
+    parser.add_argument("--model", default = "gpt2cgan")
     parser.add_argument("--buffer_size", default = 1000)
     parser.add_argument("--batch_size", default = 8)
     parser.add_argument("--epochs", default = 100)

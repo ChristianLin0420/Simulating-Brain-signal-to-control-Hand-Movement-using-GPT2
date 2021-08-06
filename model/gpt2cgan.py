@@ -1,5 +1,6 @@
 
 import tensorflow as tf
+from tensorflow.python.ops.gen_math_ops import real
 
 from .gpt2 import TFGPT2MainLayer
 from .discriminator import Discriminator
@@ -59,7 +60,12 @@ class gpt2cgan(tf.keras.Model):
         gp = tf.reduce_mean((norm - 1.0) ** 2)
         return gp
 
-    def train_step(self, real_images):
+    def train_step(self, datasets):
+
+        real_images, real_labels = datasets
+
+        print(real_images)
+        print(real_labels)
         
         # Sample random points in the latent space
         batch_size = tf.shape(real_images)[0]
@@ -67,6 +73,12 @@ class gpt2cgan(tf.keras.Model):
 
         for _ in range(self.d_extra_steps):
             random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
+
+            # one hot information
+            one_hot_labels = tf.expand_dims(real_labels, axis = 1)
+            one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
+
+            random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
 
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
