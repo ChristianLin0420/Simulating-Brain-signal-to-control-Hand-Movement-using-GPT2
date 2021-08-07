@@ -49,3 +49,5 @@ random_latent_vectors = tf.concat(
 
 print("modified latent vectors:")
 print(random_latent_vectors)
+
+print("Hello")
