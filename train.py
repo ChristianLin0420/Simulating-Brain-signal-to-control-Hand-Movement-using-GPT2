@@ -31,10 +31,11 @@ def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
     train_labels = keras.utils.to_categorical(train_labels, 10)
 
     # Batch and shuffle the data
-    train_dataset = tf.data.Dataset.from_tensor_slices(train_images, train_labels).shuffle(buffer_size = buffer_size).batch(batch_size)
+    train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels)).shuffle(buffer_size = buffer_size).batch(batch_size)
     return train_dataset, np.shape(np.asarray(train_dataset))
 
 def training(args, datasets, time, num_classes: int = 10):
+    
     # initial model
     config = GPT2Config(n_layer = int(args.num_layer), 
                         n_head = int(args.num_head), 
@@ -60,7 +61,7 @@ def training(args, datasets, time, num_classes: int = 10):
         file_writer.set_as_default()
 
         # create git to observe the training performance
-        save_result_as_gif(time, args.model, current_round)
+        # save_result_as_gif(time, args.model, current_round)
 
         if args.model == "gpt2gan": 
 
@@ -139,11 +140,11 @@ def training(args, datasets, time, num_classes: int = 10):
 
         elif args.model == "gpt2cgan":
 
-            print("original noise dim is {}".format(config["noise_dim"]))
+            print("original noise dim is {}".format(config.n_embd))
             
-            config["noise_dim"] += num_classes
+            config.n_embd += num_classes
 
-            print("original noise dim is {}".format(config["noise_dim"]))
+            print("original noise dim is {}".format(config.n_embd))
 
             model = gpt2cgan(
                 config = config,
@@ -161,7 +162,7 @@ def training(args, datasets, time, num_classes: int = 10):
             )
 
             history = model.fit(
-                datasets, 
+                datasets.take(2), 
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model), tensorboard_callback]
@@ -237,12 +238,12 @@ if __name__ == '__main__':
     parser.add_argument("--model", default = "gpt2cgan")
     parser.add_argument("--buffer_size", default = 1000)
     parser.add_argument("--batch_size", default = 8)
-    parser.add_argument("--epochs", default = 100)
+    parser.add_argument("--epochs", default = 50)
     parser.add_argument("--noise_len", default = 784)
     parser.add_argument("--noise_hidden_dim", default = 32)
     parser.add_argument("--example_to_generate", default = 16)
     parser.add_argument("--num_layer", default = 2)
-    parser.add_argument("--num_head", default = 4)
+    parser.add_argument("--num_head", default = 6)
     parser.add_argument("--num_round", default = 3)
     parser.add_argument("--use_gpu", default = True)  
     parser.add_argument('--gpu_id', default = 0)

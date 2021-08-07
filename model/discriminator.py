@@ -3,8 +3,8 @@ import tensorflow as tf
 
 class Discriminator(tf.keras.layers.Layer):
 
-    def __init__(self, img_size, num_channel, config,  **kwargs) -> None:
-        super().__init__(img_size, num_channel, config, **kwargs)
+    def __init__(self, config,  **kwargs) -> None:
+        super().__init__(config, **kwargs)
 
         self.conv2D_a = tf.keras.layers.Conv2D(64, (5, 5), strides = (2, 2), padding = 'same')
         self.relu_a = tf.keras.layers.LeakyReLU()

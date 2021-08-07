@@ -378,6 +378,10 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         position_embeds = tf.cast(position_embeds, dtype=inputs["inputs_embeds"].dtype)
         token_type_embeds = tf.cast(token_type_embeds, dtype=inputs["inputs_embeds"].dtype)
+        print("-" * 80)
+        print(position_embeds)
+        print(token_type_embeds)
+        print(inputs["inputs_embeds"])
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
         hidden_states = self.drop(hidden_states, training=inputs["training"])
 

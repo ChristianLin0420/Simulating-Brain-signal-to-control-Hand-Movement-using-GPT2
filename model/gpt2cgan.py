@@ -20,7 +20,13 @@ class gpt2cgan(tf.keras.Model):
         self.gp_weight = 10.0
         self.d_extra_steps = d_extra_steps
 
+        # add one hot vector for every seed
         self.seed = tf.random.normal([16, noise_len, noise_dim])
+        l = tf.constant([x % 10 for x in range(16)])
+        one_hot = tf.one_hot(l, depth = 10)
+        one_hot = tf.expand_dims(one_hot, axis = 1)
+        one_hot = tf.repeat(one_hot, repeats = noise_len, axis = 1)
+        self.seed = tf.concat([self.seed, one_hot], axis = 2)
 
         self.config = config
 
@@ -62,10 +68,21 @@ class gpt2cgan(tf.keras.Model):
 
     def train_step(self, datasets):
 
+        real_images = tf.constant(0)
+        real_labels = tf.constant(0)
+
         real_images, real_labels = datasets
+
+        # for image, label in datasets:
+        #     real_images = image
+        #     real_labels = label
 
         print(real_images)
         print(real_labels)
+
+        # one hot information
+        one_hot_labels = tf.expand_dims(real_labels, axis = 1)
+        one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
         
         # Sample random points in the latent space
         batch_size = tf.shape(real_images)[0]
@@ -73,10 +90,6 @@ class gpt2cgan(tf.keras.Model):
 
         for _ in range(self.d_extra_steps):
             random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
-
-            # one hot information
-            one_hot_labels = tf.expand_dims(real_labels, axis = 1)
-            one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
 
             random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
 
@@ -107,7 +120,8 @@ class gpt2cgan(tf.keras.Model):
 
         # Sample random points in the latent space
         random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
-
+        random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
+        
         # Assemble labels that say "all real images"
         misleading_labels = tf.zeros((batch_size, 1))
 
