@@ -99,7 +99,7 @@ def save_loss_record(lst_iter, g_loss, d_loss, time, model_name, n_round):
 
     title = "{}_loss".format(model_name)
 
-    plt.figure(figsize=(15,5))
+    plt.figure(figsize=(8,5))
     plt.plot(lst_iter, g_loss, '-b', label = 'generator_loss', linewidth = 2)
     plt.plot(lst_iter, d_loss, '-r', label = 'discriminator_loss', linewidth = 2)
 
@@ -124,7 +124,7 @@ def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
     mean = np.mean(l, axis = 0)
     standard_dev = np.std(l, axis = 0)
 
-    plt.figure(figsize=(15,5))
+    plt.figure(figsize=(8,5))
     plt.plot(lst_iter, mean, '-')
     plt.fill_between(lst_iter, mean - standard_dev, mean + standard_dev, alpha = 0.2)
 
