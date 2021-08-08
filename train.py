@@ -47,6 +47,7 @@ def training(args, datasets, time, num_classes: int = 10):
 
     round_num = int(args.num_round)
     current_round = 1
+    add_class_dim = False
 
     while round_num >= current_round:
 
@@ -142,7 +143,9 @@ def training(args, datasets, time, num_classes: int = 10):
 
             print("original noise dim is {}".format(config.n_embd))
             
-            config.n_embd += num_classes
+            if not add_class_dim:
+                config.n_embd += num_classes
+                add_class_dim = True
 
             print("original noise dim is {}".format(config.n_embd))
 
