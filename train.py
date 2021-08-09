@@ -47,7 +47,13 @@ def training(args, datasets, time, num_classes: int = 10):
 
     round_num = int(args.num_round)
     current_round = 1
+    last_dim = 1
     add_class_dim = False
+
+    for images, labels in datasets:
+        print("last dimension of the current datasets: {}".format(int(tf.shape(i)[-1])))
+        last_dim = int(tf.shape(images)[-1])
+        break
 
     while round_num >= current_round:
 
@@ -62,7 +68,6 @@ def training(args, datasets, time, num_classes: int = 10):
         file_writer.set_as_default()
 
         # create git to observe the training performance
-        # save_result_as_gif(time, args.model, current_round)
 
         if args.model == "gpt2gan": 
 
@@ -152,7 +157,8 @@ def training(args, datasets, time, num_classes: int = 10):
             model = gpt2cgan(
                 config = config,
                 noise_len = int(args.noise_len),
-                noise_dim = int(args.noise_hidden_dim)
+                noise_dim = int(args.noise_hidden_dim), 
+                last_dim = last_dim
             )
             print(model.config)
 

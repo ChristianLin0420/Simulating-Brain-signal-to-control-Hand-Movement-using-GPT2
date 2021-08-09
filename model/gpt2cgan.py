@@ -8,10 +8,10 @@ from .discriminator import Discriminator
 
 class gpt2cgan(tf.keras.Model):
 
-    def __init__(self, config, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, **kwargs):
+    def __init__(self, config, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
         super(gpt2cgan, self).__init__()
 
-        self.generator = TFGPT2MainLayer(config = config, name = "name")
+        self.generator = TFGPT2MainLayer(config = config, name = "name", last_dim = last_dim)
         self.discriminator = Discriminator(config = config, name = "discriminator")
 
         self.noise_len = noise_len
@@ -76,6 +76,8 @@ class gpt2cgan(tf.keras.Model):
         # for image, label in datasets:
         #     real_images = image
         #     real_labels = label
+
+        real_images = tf.image.grayscale_to_rgb(real_images)
 
         print(real_images)
         print(real_labels)

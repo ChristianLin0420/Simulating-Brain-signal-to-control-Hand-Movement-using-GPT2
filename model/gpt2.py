@@ -183,14 +183,15 @@ class TFBlock(tf.keras.layers.Layer):
         return outputs  # x, present, (attentions)
 
 class TFImageTransformer(tf.keras.layers.Layer):
-    def __init__(self, nx, initializer_range, **kwargs):
+    def __init__(self, nx, initializer_range, last_dim: int = 1, **kwargs):
         super().__init__(**kwargs)
         self.nx = nx
         self.initializer_range = initializer_range
+        self.build(last_dim = last_dim)
 
-    def build(self, input_shape):
+    def build(self, input_shape = None, last_dim: int = 1):
         self.transformer = self.add_weight(
-            "transformer", shape = [self.nx, 1], initializer=get_initializer(self.initializer_range)
+            "transformer", shape = [self.nx, last_dim], initializer=get_initializer(self.initializer_range)
         )
 
     def call(self, inputs):
@@ -198,10 +199,11 @@ class TFImageTransformer(tf.keras.layers.Layer):
 
         x = tf.reshape(inputs, [-1, self.nx])
         x = tf.matmul(x, self.transformer)
+        last_dim = shape_list(x)[-1]
 
         size = int(sl ** 0.5)
 
-        return tf.reshape(x, [bz, size, size, 1])
+        return tf.reshape(x, [bz, size, size, last_dim])
 
 
 
@@ -209,7 +211,7 @@ class TFImageTransformer(tf.keras.layers.Layer):
 class TFGPT2MainLayer(tf.keras.layers.Layer):
     config_class = GPT2Config
 
-    def __init__(self, config, *inputs, **kwargs):
+    def __init__(self, config, last_dim: int = 1, *inputs, **kwargs):
         super().__init__(*inputs, **kwargs)
 
         self.config = config
@@ -230,7 +232,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
         self.h = [TFBlock(config.n_ctx, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
-        self.transformer = TFImageTransformer(config.n_embd, config.initializer_range)
+        self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
 
     def build(self, input_shape):
         with tf.name_scope("wpe"):
