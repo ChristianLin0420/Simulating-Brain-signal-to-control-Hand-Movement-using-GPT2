@@ -201,8 +201,8 @@ class TFImageTransformer(tf.keras.layers.Layer):
         x = tf.matmul(x, self.transformer)
         last_dim = shape_list(self.transformer)[-1]
 
-        print("-" * 100)
-        print("transformer last dimension: {}".format(last_dim))
+        # print("-" * 100)
+        # print("transformer last dimension: {}".format(last_dim))
 
         size = int(sl ** 0.5)
 
@@ -391,7 +391,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         hidden_states = self.drop(hidden_states, training=inputs["training"])
 
         # output_shape = input_shape + [shape_list(hidden_states)[-1]]
-        print("input_shape: {}".format(input_shape))
+        # print("input_shape: {}".format(input_shape))
         output_shape = input_shape
 
         presents = () if inputs["use_cache"] else None
@@ -421,8 +421,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         hidden_states = self.ln_f(hidden_states)
         hidden_states = tf.reshape(hidden_states, output_shape)
-        print("-" * 100)
-        print("output_shape: {}".format(output_shape))
+        # print("-" * 100)
+        # print("output_shape: {}".format(output_shape))
         
         # Add last hidden state
         if inputs["output_hidden_states"]:
