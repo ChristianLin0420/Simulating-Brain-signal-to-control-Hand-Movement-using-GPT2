@@ -12,13 +12,13 @@ from tensorflow import keras
  
 from folder import check_folders
 from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages
-from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image, load_random_vector
+from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image
 
 from model.gpt2gan import gpt2gan
 from model.gpt2wgan import gpt2wgan
 from model.gpt2cgan import gpt2cgan
 from model.model_utils import load_model
-from config.config_gpt2 import GPT2Config, save_model_config, load_model_config
+from config.config_gpt2 import GPT2Config, save_model_config
 
 
 LEARNING_RATE = 0.0003
@@ -168,7 +168,7 @@ def training(args, datasets, time, num_classes: int = 10):
             )
 
             history = model.fit(
-                datasets.take(1), 
+                datasets, 
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model), tensorboard_callback]

@@ -70,8 +70,8 @@ class gpt2cgan(tf.keras.Model):
 
     def train_step(self, datasets):
 
-        real_images = tf.constant(0)
-        real_labels = tf.constant(0)
+        # real_images = tf.constant(0)
+        # real_labels = tf.constant(0)
 
         print("dataset: {}".format(datasets))
 
@@ -95,6 +95,9 @@ class gpt2cgan(tf.keras.Model):
         
         # Sample random points in the latent space
         batch_size = tf.shape(real_images)[0]
+        print("*" * 100)
+        print(type(batch_size))
+        print(batch_size)
         d_loss = 0
 
         for _ in range(self.d_extra_steps):
