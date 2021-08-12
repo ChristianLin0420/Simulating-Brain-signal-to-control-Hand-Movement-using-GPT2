@@ -71,9 +71,7 @@ def generate_and_save_images(predictions, time, n_round, epoch, model_name):
         if predictions.shape[-1] == 1:
             plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap = 'gray')
         elif predictions.shape[-1] == 3:
-            # plt.imshow(cv2.cvtColor(predictions[i, :, :, :], cv2.COLOR_BGR2RGB))
-            plt.imshow(predictions[i, :, :, :])
-            # pass
+            plt.imshow(predictions[i, :, :, :] * 127.5 + 127.5)
         else:
             error("Last dimension of the prediction is invalid")
             

@@ -11,8 +11,9 @@ def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
     train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
     train_labels = keras.utils.to_categorical(train_labels, 10)
 
-    print(train_images[0])
-
+    train_images = np.repeat(train_images, 3, axis = 3)
+    
+    print(train_images.shape)
     # Batch and shuffle the data
     train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels)).shuffle(buffer_size = buffer_size).batch(batch_size)
     return train_dataset, np.shape(np.asarray(train_dataset))

@@ -70,24 +70,19 @@ class gpt2cgan(tf.keras.Model):
 
     def train_step(self, datasets):
 
-        # real_images = tf.constant(0)
-        # real_labels = tf.constant(0)
+        real_images = tf.constant(0)
+        real_labels = tf.constant(0)
 
         # print("dataset: {}".format(datasets))
 
         real_images, real_labels = datasets
 
+        print("-" * 100)
+        print(real_labels.shape)
+
         # for image, label in datasets:
         #     real_images = image
         #     real_labels = label
-
-        if self.last_dim > 1:
-            real_images = tf.image.grayscale_to_rgb(real_images)
-
-        # print(real_images)
-        # print(real_labels)
-        # print(type(real_images))
-        # print(type(real_labels))
 
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
@@ -95,8 +90,7 @@ class gpt2cgan(tf.keras.Model):
         
         # Sample random points in the latent space
         batch_size = 8
-        # print("*" * 100)
-        # print(type(batch_size))
+        # print("-" * 100)
         # print(batch_size)
         d_loss = 0
 
@@ -149,4 +143,4 @@ class gpt2cgan(tf.keras.Model):
         # generate image from given seed
         predictions = self.generator(self.seed, training = False)
         
-        return {"d_loss": d_loss / self.d_extra_steps, "g_loss": g_loss, "predictions": predictions}
+        return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}

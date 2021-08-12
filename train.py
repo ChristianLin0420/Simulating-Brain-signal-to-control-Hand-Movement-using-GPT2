@@ -28,11 +28,21 @@ def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
     (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
     train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
     train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    train_images = np.repeat(train_images, 3, axis = 3)
     train_labels = keras.utils.to_categorical(train_labels, 10)
 
     # Batch and shuffle the data
     train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels)).shuffle(buffer_size = buffer_size).batch(batch_size)
     return train_dataset, np.shape(np.asarray(train_dataset))
+
+def dataset_np():
+    (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
+    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
+    train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    train_images = np.repeat(train_images, 3, axis = 3)
+    train_labels = keras.utils.to_categorical(train_labels, 10)
+
+    return (train_images, train_labels)
 
 def training(args, datasets, time, num_classes: int = 10):
     
@@ -168,7 +178,8 @@ def training(args, datasets, time, num_classes: int = 10):
             )
 
             history = model.fit(
-                datasets, 
+                x = datasets[0],
+                y = datasets[1],
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model), tensorboard_callback]
@@ -293,7 +304,8 @@ if __name__ == '__main__':
     time = now.strftime("%d_%m_%Y_%H_%M_%S")
 
     # get datsets
-    datasets, shape = initial_mnist_datset()
+    # datasets, shape = initial_mnist_datset()
+    datasets = dataset_np()
 
     if args.mode == "training":
         training(args = args, datasets = datasets, time = time)
