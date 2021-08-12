@@ -86,7 +86,7 @@ def training(args, datasets, time, num_classes: int = 10):
 
             print(model.config)
 
-            model.build(shape)
+            # model.build(shape)
 
             model.compile(
                 d_optimizer = d_optimizer,
@@ -123,7 +123,7 @@ def training(args, datasets, time, num_classes: int = 10):
             )
             print(model.config)
 
-            model.build(shape)
+            # model.build(shape)
 
             model.compile(
                 d_optimizer = d_optimizer,
@@ -169,7 +169,7 @@ def training(args, datasets, time, num_classes: int = 10):
             )
             print(model.config)
 
-            model.build(shape)
+            # model.build(shape)
 
             model.compile(
                 d_optimizer = d_optimizer,

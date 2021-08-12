@@ -68,16 +68,17 @@ class gpt2cgan(tf.keras.Model):
         gp = tf.reduce_mean((norm - 1.0) ** 2)
         return gp
 
-    def train_step(self, datasets):
+    def train_step(self, data):
 
-        real_images = tf.constant(0)
-        real_labels = tf.constant(0)
+        # real_images = tf.constant(0)
+        # real_labels = tf.constant(0)
 
         # print("dataset: {}".format(datasets))
 
-        real_images, real_labels = datasets
+        real_images, real_labels = data
 
         print("-" * 100)
+        print(real_images.shape)
         print(real_labels.shape)
 
         # for image, label in datasets:
