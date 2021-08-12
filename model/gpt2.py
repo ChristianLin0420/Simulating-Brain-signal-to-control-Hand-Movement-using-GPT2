@@ -187,11 +187,11 @@ class TFImageTransformer(tf.keras.layers.Layer):
         super().__init__(**kwargs)
         self.nx = nx
         self.initializer_range = initializer_range
-        # self.build(last_dim = last_dim)
+        self.build(last_dim = last_dim)
 
     def build(self, input_shape = None, last_dim: int = 1):
         self.transformer = self.add_weight(
-            "transformer", shape = [self.nx, 1], initializer=get_initializer(self.initializer_range)
+            "transformer", shape = [self.nx, last_dim], initializer=get_initializer(self.initializer_range)
         )
 
     def call(self, inputs):
@@ -380,10 +380,10 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         position_embeds = tf.cast(position_embeds, dtype=inputs["inputs_embeds"].dtype)
         token_type_embeds = tf.cast(token_type_embeds, dtype=inputs["inputs_embeds"].dtype)
-        print("-" * 80)
-        print(position_embeds)
-        print(token_type_embeds)
-        print(inputs["inputs_embeds"])
+        # print("-" * 80)
+        # print(position_embeds)
+        # print(token_type_embeds)
+        # print(inputs["inputs_embeds"])
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
         hidden_states = self.drop(hidden_states, training=inputs["training"])
 

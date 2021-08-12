@@ -250,7 +250,7 @@ if __name__ == '__main__':
     parser.add_argument("--example_to_generate", default = 16)
     parser.add_argument("--num_layer", default = 2)
     parser.add_argument("--num_head", default = 6)
-    parser.add_argument("--num_last_dim", default = 1)
+    parser.add_argument("--num_last_dim", default = 3)
     parser.add_argument("--num_round", default = 3)
     parser.add_argument("--use_gpu", default = True)  
     parser.add_argument('--gpu_id', default = 0)
