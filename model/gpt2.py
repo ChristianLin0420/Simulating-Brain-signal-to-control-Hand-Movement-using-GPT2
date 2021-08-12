@@ -199,7 +199,7 @@ class TFImageTransformer(tf.keras.layers.Layer):
 
         x = tf.reshape(inputs, [-1, self.nx])
         x = tf.matmul(x, self.transformer)
-        last_dim = shape_list(x)[-1]
+        last_dim = shape_list(self.transformer)[-1]
 
         print("-" * 100)
         print("transformer last dimension: {}".format(last_dim))
