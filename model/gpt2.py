@@ -187,11 +187,11 @@ class TFImageTransformer(tf.keras.layers.Layer):
         super().__init__(**kwargs)
         self.nx = nx
         self.initializer_range = initializer_range
-        self.build(last_dim = last_dim)
+        self.last_dim = last_dim
 
-    def build(self, input_shape = None, last_dim: int = 1):
+    def build(self, input_shape = None):
         self.transformer = self.add_weight(
-            "transformer", shape = [self.nx, last_dim], initializer=get_initializer(self.initializer_range)
+            "transformer", shape = [self.nx, self.last_dim], initializer=get_initializer(self.initializer_range)
         )
 
     def call(self, inputs):
@@ -235,9 +235,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
         self.h = [TFBlock(config.n_ctx, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
-        self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
-
-        self.transformer.build(last_dim = last_dim)
+        self.transformer = TFImageTransformer(config.n_embd, config.initializer_range)
 
     def build(self, input_shape):
         with tf.name_scope("wpe"):
