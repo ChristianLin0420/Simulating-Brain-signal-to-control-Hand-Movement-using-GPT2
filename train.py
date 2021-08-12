@@ -47,13 +47,10 @@ def training(args, datasets, time, num_classes: int = 10):
 
     round_num = int(args.num_round)
     current_round = 1
-    last_dim = 1
+    last_dim = int(args.num_last_dim)
     add_class_dim = False
 
-    for images, labels in datasets:
-        print("last dimension of the current datasets: {}".format(int(tf.shape(images)[-1])))
-        last_dim = int(tf.shape(images)[-1])
-        break
+    print("last dimension of the current datasets: {}".format(last_dim))
 
     while round_num >= current_round:
 
@@ -171,7 +168,7 @@ def training(args, datasets, time, num_classes: int = 10):
             )
 
             history = model.fit(
-                datasets, 
+                datasets.take(1), 
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model), tensorboard_callback]
@@ -253,6 +250,7 @@ if __name__ == '__main__':
     parser.add_argument("--example_to_generate", default = 16)
     parser.add_argument("--num_layer", default = 2)
     parser.add_argument("--num_head", default = 6)
+    parser.add_argument("--num_last_dim", default = 3)
     parser.add_argument("--num_round", default = 3)
     parser.add_argument("--use_gpu", default = True)  
     parser.add_argument('--gpu_id', default = 0)
@@ -271,6 +269,7 @@ if __name__ == '__main__':
     print("{0: <{width}}: {val}".format("example_to_generate", width = width, val = args.example_to_generate))
     print("{0: <{width}}: {val}".format("num_layer", width = width, val = args.num_layer))
     print("{0: <{width}}: {val}".format("num_head", width = width, val = args.num_head))
+    print("{0: <{width}}: {val}".format("num_last_dim", width = width, val = args.num_last_dim))
     print("{0: <{width}}: {val}".format("num_round", width = width, val = args.num_round))
     print("{0: <{width}}: {val}".format("use_gpu", width = width, val = args.use_gpu))
     print("{0: <{width}}: {val}".format("gpu_id", width = width, val = args.gpu_id))

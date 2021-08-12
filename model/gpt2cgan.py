@@ -28,6 +28,8 @@ class gpt2cgan(tf.keras.Model):
         one_hot = tf.repeat(one_hot, repeats = noise_len, axis = 1)
         self.seed = tf.concat([self.seed, one_hot], axis = 2)
 
+        self.last_dim = last_dim
+
         self.config = config
 
     def compile(self, d_optimizer, g_optimizer, loss_fn):
@@ -77,7 +79,8 @@ class gpt2cgan(tf.keras.Model):
         #     real_images = image
         #     real_labels = label
 
-        real_images = tf.image.grayscale_to_rgb(real_images)
+        if self.last_dim:
+            real_images = tf.image.grayscale_to_rgb(real_images)
 
         print(real_images)
         print(real_labels)
