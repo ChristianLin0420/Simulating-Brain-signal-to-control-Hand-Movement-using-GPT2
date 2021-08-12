@@ -70,18 +70,19 @@ class gpt2cgan(tf.keras.Model):
 
     def train_step(self, datasets):
 
-        # real_images = tf.constant(0)
-        # real_labels = tf.constant(0)
+        real_images = tf.constant(0)
+        real_labels = tf.constant(0)
 
         print("dataset: {}".format(datasets))
 
-        real_images, real_labels = datasets
+        # real_images, real_labels = datasets
 
-        # for image, label in datasets:
-        #     real_images = image
-        #     real_labels = label
+        for image, label in datasets:
+            real_images = image
+            real_labels = label
 
         if self.last_dim > 1:
+            print("-*" * 100)
             real_images = tf.image.grayscale_to_rgb(real_images)
 
         print(real_images)
