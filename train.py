@@ -51,7 +51,7 @@ def training(args, datasets, time, num_classes: int = 10):
     add_class_dim = False
 
     for images, labels in datasets:
-        print("last dimension of the current datasets: {}".format(int(tf.shape(i)[-1])))
+        print("last dimension of the current datasets: {}".format(int(tf.shape(images)[-1])))
         last_dim = int(tf.shape(images)[-1])
         break
 
