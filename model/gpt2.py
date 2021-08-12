@@ -201,6 +201,9 @@ class TFImageTransformer(tf.keras.layers.Layer):
         x = tf.matmul(x, self.transformer)
         last_dim = shape_list(x)[-1]
 
+        print("-" * 100)
+        print("transformer last dimension: {}".format(last_dim))
+
         size = int(sl ** 0.5)
 
         return tf.reshape(x, [bz, size, size, last_dim])
@@ -388,6 +391,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         hidden_states = self.drop(hidden_states, training=inputs["training"])
 
         # output_shape = input_shape + [shape_list(hidden_states)[-1]]
+        print("input_shape: {}".format(input_shape))
         output_shape = input_shape
 
         presents = () if inputs["use_cache"] else None
