@@ -206,7 +206,7 @@ class TFImageTransformer(tf.keras.layers.Layer):
 
         size = int(sl ** 0.5)
 
-        return tf.reshape(x, [bz, size, size, last_dim])
+        return tf.reshape(x, [bz, size, size, 3])
 
 
 
