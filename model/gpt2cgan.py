@@ -38,8 +38,8 @@ class gpt2cgan(tf.keras.Model):
         self.g_optimizer = g_optimizer
         self.loss_fn = loss_fn
 
-    def build(self, input_shape):
-        return super().build(input_shape)
+    # def build(self, input_shape):
+    #     return super().build(input_shape)
 
     def gradient_penalty(self, 
                          real_images, 
@@ -146,5 +146,5 @@ class gpt2cgan(tf.keras.Model):
         
         return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}
 
-    def call(self, inputs, training, mask):
-        return super().call(inputs, training=training, mask=mask)
+    # def call(self, inputs, training, mask):
+    #     return super().call(inputs, training=training, mask=mask)

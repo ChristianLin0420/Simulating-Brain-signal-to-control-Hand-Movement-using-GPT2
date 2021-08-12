@@ -170,7 +170,7 @@ def training(args, datasets, time, num_classes: int = 10):
             )
             print(model.config)
 
-            model.build(datasets[0].shape)
+            # model.build(datasets[0].shape)
 
             model.compile(
                 d_optimizer = d_optimizer,
