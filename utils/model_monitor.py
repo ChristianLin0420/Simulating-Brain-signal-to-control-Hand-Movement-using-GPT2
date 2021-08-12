@@ -4,7 +4,7 @@
 import os
 import glob
 import json
-import cv2
+# import cv2
 from posixpath import join
 import imageio
 import numpy as np
@@ -71,7 +71,8 @@ def generate_and_save_images(predictions, time, n_round, epoch, model_name):
         if predictions.shape[-1] == 1:
             plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap = 'gray')
         elif predictions.shape[-1] == 3:
-            plt.imshow(cv2.cvtColor(predictions[i, :, :, :], cv2.COLOR_BGR2RGB))
+            # plt.imshow(cv2.cvtColor(predictions[i, :, :, :], cv2.COLOR_BGR2RGB))
+            pass
         else:
             error("Last dimension of the prediction is invalid")
             
