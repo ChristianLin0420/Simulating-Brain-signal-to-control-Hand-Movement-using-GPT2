@@ -73,6 +73,8 @@ class gpt2cgan(tf.keras.Model):
         real_images = tf.constant(0)
         real_labels = tf.constant(0)
 
+        print("dataset: {}".format(datasets))
+
         real_images, real_labels = datasets
 
         # for image, label in datasets:
@@ -84,6 +86,8 @@ class gpt2cgan(tf.keras.Model):
 
         print(real_images)
         print(real_labels)
+        print(type(real_images))
+        print(type(real_labels))
 
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
