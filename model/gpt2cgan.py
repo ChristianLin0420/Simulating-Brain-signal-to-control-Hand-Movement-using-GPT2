@@ -145,3 +145,6 @@ class gpt2cgan(tf.keras.Model):
         predictions = self.generator(self.seed, training = False)
         
         return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}
+
+    def call(self, inputs, training, mask):
+        return super().call(inputs, training=training, mask=mask)
