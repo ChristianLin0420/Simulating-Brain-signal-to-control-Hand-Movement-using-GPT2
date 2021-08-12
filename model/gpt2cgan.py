@@ -79,7 +79,7 @@ class gpt2cgan(tf.keras.Model):
         #     real_images = image
         #     real_labels = label
 
-        if self.last_dim:
+        if self.last_dim > 1:
             real_images = tf.image.grayscale_to_rgb(real_images)
 
         print(real_images)
