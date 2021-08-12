@@ -90,7 +90,7 @@ class gpt2cgan(tf.keras.Model):
         one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
         
         # Sample random points in the latent space
-        batch_size = 8
+        batch_size = real_images.shape[0]
         # print("-" * 100)
         # print(batch_size)
         d_loss = 0

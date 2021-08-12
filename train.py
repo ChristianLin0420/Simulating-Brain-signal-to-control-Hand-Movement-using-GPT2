@@ -55,6 +55,7 @@ def training(args, datasets, time, num_classes: int = 10):
     g_loss_collection = []
     d_loss_collection = []
 
+    batch_size = int(args.batch_size)
     round_num = int(args.num_round)
     current_round = 1
     last_dim = int(args.num_last_dim)
@@ -180,6 +181,7 @@ def training(args, datasets, time, num_classes: int = 10):
             history = model.fit(
                 x = datasets[0],
                 y = datasets[1],
+                batch_size = batch_size,
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model), tensorboard_callback]
