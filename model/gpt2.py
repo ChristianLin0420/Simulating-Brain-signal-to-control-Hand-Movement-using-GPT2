@@ -237,6 +237,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
         self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
 
+        self.transformer.build(last_dim = last_dim)
+
     def build(self, input_shape):
         with tf.name_scope("wpe"):
             self.wpe = self.add_weight(
