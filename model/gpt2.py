@@ -421,6 +421,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         hidden_states = self.ln_f(hidden_states)
         hidden_states = tf.reshape(hidden_states, output_shape)
+        print("-" * 100)
+        print("output_shape: {}".format(output_shape))
         
         # Add last hidden state
         if inputs["output_hidden_states"]:
