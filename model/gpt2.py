@@ -206,7 +206,7 @@ class TFImageTransformer(tf.keras.layers.Layer):
 
         size = int(sl ** 0.5)
 
-        return tf.reshape(x, [bz, size, size, 3])
+        return tf.reshape(x, [bz, size, size, last_dim])
 
 
 
@@ -235,7 +235,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
         self.h = [TFBlock(config.n_ctx, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
-        self.transformer = TFImageTransformer(config.n_embd, config.initializer_range)
+        self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
 
     def build(self, input_shape):
         with tf.name_scope("wpe"):
