@@ -168,7 +168,7 @@ def training(args, datasets, time, num_classes: int = 10):
             )
 
             history = model.fit(
-                datasets, 
+                datasets.take(1), 
                 epochs = int(args.epochs), 
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model), tensorboard_callback]
