@@ -1,4 +1,5 @@
 
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -18,7 +19,24 @@ def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
     train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels)).shuffle(buffer_size = buffer_size).batch(batch_size)
     return train_dataset, np.shape(np.asarray(train_dataset))
 
+os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+
+print("----- initial using GPU -----")
+
+# if use_gpu is TRUE, then get one and run the program on it
+try:
+    gpus = tf.config.list_physical_devices(device_type = 'GPU')
+    
+    if gpus:
+        tf.config.set_visible_devices(devices = gpus[0], device_type = 'GPU')
+except:
+    print("[No GPR] there is no availible gpu to use!!!")
+
+print("----- start using GPU -----")
+
+print("----- start preparing datasets ------")
 datasets, _ = initial_mnist_datset()
+print("----- finish preparing datasets ------")
 
 for image, label in datasets:
     # print(image)

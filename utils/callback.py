@@ -31,6 +31,8 @@ class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
         current = logs.get("g_loss")
         d = logs.get("d_loss")
 
+        print("d_loss: {}, g_loss: {}".format(d, current))
+
         tf.summary.scalar('g_loss', current, step = epoch)
         tf.summary.scalar('d_loss', d, step = epoch)
 
@@ -69,6 +71,8 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
                                     epoch = epoch, 
                                     model_name = self.model_name    )
 
+
         save_result_as_gif( time = self.time, 
                             model_name = self.model_name, 
                             n_round = self.n_round  )
+                            
