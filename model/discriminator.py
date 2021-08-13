@@ -27,11 +27,7 @@ class Discriminator(tf.keras.layers.Layer):
 
     def __call__(self, x, training = False):
         
-        print("-" * 100)
-        print(x.shape)
         x = self.conv_a(x)
-        print(x.shape)
-        print("-" * 100)
         x = self.relu_a(x)
         x = self.dropout_a(x, training = training)
 
