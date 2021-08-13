@@ -102,6 +102,9 @@ class gpt2cgan(tf.keras.Model):
 
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
+            print("-" * 100)
+            print("generated images: {}".format(generated_images.shape))
+            print(generated_images)
 
             # Combine them with real images
             combined_images = tf.concat([generated_images, real_images], axis=0)
@@ -143,6 +146,9 @@ class gpt2cgan(tf.keras.Model):
 
         # generate image from given seed
         predictions = self.generator(self.seed, training = False)
+
+        print("-" * 100)
+        print("d loss: {}, g loss: {}".format(d_loss, g_loss))
         
         return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}
 
