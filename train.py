@@ -38,7 +38,7 @@ def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
 def dataset_np(last_dim: int = 1):
     (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
     train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
 
     if last_dim == 3:
         train_images = np.repeat(train_images, 3, axis = 3)
