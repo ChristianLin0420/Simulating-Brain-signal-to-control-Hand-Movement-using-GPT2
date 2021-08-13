@@ -42,7 +42,7 @@ def dataset_np():
     train_images = np.repeat(train_images, 3, axis = 3)
     train_labels = keras.utils.to_categorical(train_labels, 10)
 
-    return (train_images[:100], train_labels[:100])
+    return (train_images[:80], train_labels[:80])
 
 def training(args, datasets, time, num_classes: int = 10):
     
