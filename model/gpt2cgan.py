@@ -148,7 +148,7 @@ class gpt2cgan(tf.keras.Model):
         predictions = self.generator(self.seed, training = False)
 
         print("-" * 100)
-        print("d loss: {}, g loss: {}".format(d_loss, g_loss))
+        print("d loss: {}, g loss: {}".format(float(d_loss), float(g_loss)))
         
         return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}
 
