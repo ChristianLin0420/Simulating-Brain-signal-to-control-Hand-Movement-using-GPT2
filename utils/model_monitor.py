@@ -77,7 +77,7 @@ def generate_and_save_images(predictions, time, n_round, epoch, model_name):
             #     predictions[i, :, :, :] = predictions[i, :, :, :] * 127.5 + 127.5
             #     print(predictions[i, :, :, :])
             predictions[i, :, :, :] = (predictions[i, :, :, :] * 127.5 + 127.5) / 255.0
-            plt.imshow(predictions[i, :, :, :], cmap = 'gray')
+            plt.imshow(predictions[i, :, :, :])
         else:
             error("Last dimension of the prediction is invalid")
             
