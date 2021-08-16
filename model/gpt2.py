@@ -1,5 +1,4 @@
 
-import numpy as np
 import tensorflow as tf
 
 from utils.model_utils import (
@@ -428,10 +427,9 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         hidden_states = self.activation_layer(hidden_states)
         print("-" * 100)
-        tmp = np.asarray(hidden_states)
-        print(np.max(tmp))
-        print(np.min(tmp))
-
+        print(tf.reduce_max(hidden_states))
+        print(tf.reduce_max(hidden_states))
+        
         hidden_states = self.transformer(hidden_states)
 
         return hidden_states
