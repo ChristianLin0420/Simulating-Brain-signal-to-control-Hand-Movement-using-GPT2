@@ -428,14 +428,6 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
         hidden_states = self.activation_layer(hidden_states)
-        print("-" * 100)
-        # proto_tensor = tf.make_tensor_proto(hidden_states)
-        # tmp = tf.make_ndarray(proto_tensor)
-        sess = tf.compat.v1.Session()
-        with sess.as_default():
-            print(tf.reduce_max(hidden_states).eval())
-            print(tf.reduce_min(hidden_states).eval())
-        
         hidden_states = self.transformer(hidden_states)
 
         return hidden_states
