@@ -201,9 +201,6 @@ class TFImageTransformer(tf.keras.layers.Layer):
         x = tf.matmul(x, self.transformer)
         last_dim = shape_list(self.transformer)[-1]
 
-        # print("-" * 100)
-        # print("transformer last dimension: {}".format(last_dim))
-
         size = int(sl ** 0.5)
 
         return tf.reshape(x, [bz, size, size, last_dim])
@@ -235,6 +232,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
         self.h = [TFBlock(config.n_ctx, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
+        self.activation_layer = tf.keras.layers.ReLU(1)
         self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
 
     def build(self, input_shape):
@@ -276,18 +274,6 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         training=False,
         **kwargs,
     ):
-
-        # print("input_ids = {}".format(input_ids))
-        # print("past = {}".format(past))
-        # print("attention_mask = {}".format(attention_mask))
-        # print("token_type_ids = {}".format(token_type_ids))
-        # print("position_ids = {}".format(position_ids))
-        # print("head_mask = {}".format(head_mask))
-        # print("inputs_embeds = {}".format(inputs_embeds))
-        # print("use_cache = {}".format(use_cache))
-        # print("output_attentions = {}".format(output_attentions))
-        # print("output_hidden_states = {}".format(output_hidden_states))
-        # print("return_dict = {}".format(return_dict))
 
         inputs = input_processing(
             func=self.call,
@@ -439,6 +425,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             print('-' * 80)
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
+        hidden_states = self.activation_layer(hidden_states)
         hidden_states = self.transformer(hidden_states)
 
         return hidden_states
