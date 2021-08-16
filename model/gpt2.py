@@ -427,9 +427,9 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             print('-' * 80)
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
-        hidden_states = self.activation_layer(hidden_states)
         hidden_states = self.transformer(hidden_states)
-
+        hidden_states = self.activation_layer(hidden_states)
+        
         return hidden_states
 
 class TFGPT2PreTrainedModel(TFPreTrainedModel):
