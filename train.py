@@ -46,7 +46,6 @@ def dataset_np(last_dim: int = 1):
     train_labels = keras.utils.to_categorical(train_labels, 10)
 
     return (train_images, train_labels)
-    # return (train_images[:2000], train_labels[:2000])
 
 def training(args, datasets, time, num_classes: int = 10):
     
@@ -65,29 +64,17 @@ def training(args, datasets, time, num_classes: int = 10):
     last_dim = int(args.num_last_dim)
     add_class_dim = False
 
-    # print("last dimension of the current datasets: {}".format(last_dim))
-
     while round_num >= current_round:
-
-        # print("----- start preparing optimizer and loss function ------")
 
         d_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
         g_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
         loss_fn = keras.losses.BinaryCrossentropy(from_logits = True)
-
-        # print("----- finish preparing optimizer and loss function ------")
-
-        # print("----- start preparing tensorboard ------")
 
         check_folders(time = time, model_name = args.model)
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = './logs/' + str(args.model) + '/' + str(time) + '/' + str(current_round), histogram_freq = 1)
 
         file_writer = tf.summary.create_file_writer('./logs/' + str(args.model) + '/' + str(time) + "/" + str(current_round) + "/metrics")
         file_writer.set_as_default()
-
-        # print("----- finish preparing tensorboard ------")
-
-        # create git to observe the training performance
 
         if args.model == "gpt2gan": 
 
@@ -165,16 +152,10 @@ def training(args, datasets, time, num_classes: int = 10):
             model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
 
         elif args.model == "gpt2cgan":
-
-            # print("----- start initializing gpt2cgan -----")
-
-            # print("original noise dim is {}".format(config.n_embd))
             
             if not add_class_dim:
                 config.n_embd += num_classes
                 add_class_dim = True
-
-            # print("original noise dim is {}".format(config.n_embd))
 
             model = gpt2cgan(
                 config = config,
@@ -183,23 +164,13 @@ def training(args, datasets, time, num_classes: int = 10):
                 last_dim = last_dim
             )
 
-            # print("----- finish initializing gpt2cgan -----")
-
             print(model.config)
-
-            # model.build(datasets[0].shape)
-
-            # print("----- start compiling gpt2cgan -----")
 
             model.compile(
                 d_optimizer = d_optimizer,
                 g_optimizer = g_optimizer,
                 loss_fn = loss_fn
             )
-
-            # print("----- finish compiling gpt2cgan -----")
-
-            # print("----- start fitting gpt2cgan -----")
 
             history = model.fit(
                 x = datasets[0],
@@ -209,8 +180,6 @@ def training(args, datasets, time, num_classes: int = 10):
                 verbose = 1, 
                 callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
             )
-
-            # print("----- finish fitting gpt2cgan -----")
 
             g_loss = history.history['g_loss']
             d_loss = history.history['d_loss']
@@ -319,7 +288,6 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 
-    # print("----- initial using GPU -----")
 
     # if use_gpu is TRUE, then get one and run the program on it
     if args.use_gpu:
@@ -329,12 +297,8 @@ if __name__ == '__main__':
             
             if gpus:
                 tf.config.set_visible_devices(devices = gpus[0], device_type = 'GPU')
-                # print("-" * 100)
-                # print("get gpu")
         except:
             print("[No GPR] there is no availible gpu to use!!!")
-
-    # print("----- start using GPU -----")
 
     # get environment parameters
     now = datetime.now()
@@ -342,10 +306,7 @@ if __name__ == '__main__':
 
     # get datsets
     # datasets, shape = initial_mnist_datset()
-
-    # print("----- start preparing datasets -----")
     datasets = dataset_np(int(args.num_last_dim))
-    # print("----- finish preparing datasets -----")
 
     if args.mode == "training":
         training(args = args, datasets = datasets, time = time)
