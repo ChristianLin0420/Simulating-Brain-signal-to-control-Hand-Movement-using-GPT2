@@ -1,6 +1,7 @@
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.client.session import Session
 
 from utils.model_utils import (
     keras_serializable,
@@ -430,8 +431,9 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         print("-" * 100)
         # proto_tensor = tf.make_tensor_proto(hidden_states)
         # tmp = tf.make_ndarray(proto_tensor)
-        print(tf.reduce_max(hidden_states).eval())
-        print(tf.reduce_min(hidden_states).eval())
+        sess = tf.compat.v1.Session()
+        print(tf.reduce_max(hidden_states).eval(sess.as_default()))
+        print(tf.reduce_min(hidden_states).eval(sess.as_default()))
         
         hidden_states = self.transformer(hidden_states)
 
