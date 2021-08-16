@@ -428,10 +428,10 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         hidden_states = self.activation_layer(hidden_states)
         print("-" * 100)
-        proto_tensor = tf.make_tensor_proto(hidden_states)
-        tmp = tf.make_ndarray(proto_tensor)
-        print(np.max(tmp))
-        print(np.min(tmp))
+        # proto_tensor = tf.make_tensor_proto(hidden_states)
+        # tmp = tf.make_ndarray(proto_tensor)
+        print(tf.reduce_max(hidden_states).eval())
+        print(tf.reduce_min(hidden_states).eval())
         
         hidden_states = self.transformer(hidden_states)
 
