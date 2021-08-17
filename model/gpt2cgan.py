@@ -102,10 +102,7 @@ class gpt2cgan(tf.keras.Model):
             # Combine them with real images
             fake_image_and_labels = tf.concat([generated_images, image_one_hot_labels], -1)
             real_image_and_labels = tf.concat([real_images, image_one_hot_labels], -1)
-            print(fake_image_and_labels.shape)
-            print(real_image_and_labels.shape)
             combined_images = tf.concat([fake_image_and_labels, real_image_and_labels], axis = 0)
-            print(combined_images.shape)
             
             # Assemble labels discriminating real from fake images
             labels = tf.concat(
@@ -119,7 +116,7 @@ class gpt2cgan(tf.keras.Model):
             with tf.GradientTape() as tape:
                 predictions = self.discriminator(combined_images)
                 # Calculate the gradient penalty
-                gp = self.gradient_penalty(real_images, generated_images, batch_size)
+                gp = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
                 # Add the gradient penalty to the original discriminator loss
                 d_loss = self.loss_fn(labels, predictions) + gp * self.gp_weight
 
