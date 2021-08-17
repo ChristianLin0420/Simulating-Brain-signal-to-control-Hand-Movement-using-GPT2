@@ -102,7 +102,10 @@ class gpt2cgan(tf.keras.Model):
             # Combine them with real images
             fake_image_and_labels = tf.concat([generated_images, image_one_hot_labels], -1)
             real_image_and_labels = tf.concat([real_images, image_one_hot_labels], -1)
+            print(fake_image_and_labels.shape)
+            print(real_image_and_labels.shape)
             combined_images = tf.concat([fake_image_and_labels, real_image_and_labels], axis = 0)
+            print(combined_images.shape)
             
             # Assemble labels discriminating real from fake images
             labels = tf.concat(
