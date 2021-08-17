@@ -204,8 +204,12 @@ class TFImageTransformer(tf.keras.layers.Layer):
         last_dim = shape_list(self.transformer)[-1]
 
         size = int(sl ** 0.5)
+        
+        result = tf.reshape(x, [bz, size, size, last_dim])
+        # result = tf.math.maximum(result, 1.0)
+        # result = tf.math.minimum(result, 0.0)
 
-        return tf.reshape(x, [bz, size, size, last_dim])
+        return result
 
 
 
@@ -427,8 +431,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             print('-' * 80)
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
+        # hidden_states = self.activation_layer(hidden_states)
         hidden_states = self.transformer(hidden_states)
-        hidden_states = self.activation_layer(hidden_states)
         
         return hidden_states
 

@@ -85,14 +85,21 @@ label = dataset[1][:5]
 #     image_one_hot_labels, (-1, image_size, image_size, num_classes)
 # )
 # print(image_one_hot_labels)
-print(image)
-print(np.max(image))
-print(np.min(image))
+# print(image)
+# print(np.max(image))
+# print(np.min(image))
 
 
-plt.imshow(image)
-plt.show()
+# plt.imshow(image)
+# plt.show()
 
+
+l = [-0.1, 0, 0.9, 1, 1.2]
+n = np.asarray(l)
+print(n)
+n = n if n <= 1.0 else 1.0
+
+print(n)
 
 
 
