@@ -44,11 +44,14 @@ import tensorflow as tf
 import numpy as np
 from tensorflow import keras
 
+import matplotlib.pyplot as plt
+from tensorflow.python.ops.gen_math_ops import imag
+
 
 def dataset_np(last_dim: int = 1):
     (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
     train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    # train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
 
     if last_dim == 3:
         train_images = np.repeat(train_images, 3, axis = 3)
@@ -60,15 +63,35 @@ def dataset_np(last_dim: int = 1):
 
 dataset = dataset_np(3)
 
+image = dataset[0][1]
 label = dataset[1][:5]
-print(label)
-one_hot_labels = np.expand_dims(label, axis = 1)
-print(one_hot_labels)
-one_hot_labels = np.repeat(one_hot_labels, repeats = 10, axis = 1)
-print(one_hot_labels)
+
+# print(label)
+# one_hot_labels = np.expand_dims(label, axis = 1)
+# print(one_hot_labels)
+# one_hot_labels = np.repeat(one_hot_labels, repeats = 10, axis = 1)
+# print(one_hot_labels)
+
+# image_size = 28
+# num_classes = 10
+
+# image_one_hot_labels = label[:, :, None, None]
+# print(image_one_hot_labels)
+# image_one_hot_labels = tf.repeat(
+#     image_one_hot_labels, repeats=[image_size * image_size]
+# )
+# print(image_one_hot_labels)
+# image_one_hot_labels = tf.reshape(
+#     image_one_hot_labels, (-1, image_size, image_size, num_classes)
+# )
+# print(image_one_hot_labels)
+print(image)
+print(np.max(image))
+print(np.min(image))
 
 
-
+plt.imshow(image)
+plt.show()
 
 
 

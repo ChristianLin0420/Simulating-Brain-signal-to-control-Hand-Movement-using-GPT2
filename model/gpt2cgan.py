@@ -69,29 +69,26 @@ class gpt2cgan(tf.keras.Model):
 
     def train_step(self, data):
 
-        # real_images = tf.constant(0)
-        # real_labels = tf.constant(0)
-
-        # print("dataset: {}".format(datasets))
-
         real_images, real_labels = data
 
-        # print("*" * 100)
-        # print(real_images.shape)
-        # print(real_labels.shape)
-
-        # for image, label in datasets:
-        #     real_images = image
-        #     real_labels = label
+        image_size_h = real_images.shape[1]
+        image_size_w = real_images.shape[2]
+        num_classes = real_images.shape[-1]
 
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
         one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
+
+        image_one_hot_labels = real_labels[:, :, None, None]
+        image_one_hot_labels = tf.repeat(
+            image_one_hot_labels, repeats = [image_size_h * image_size_w]
+        )
+        image_one_hot_labels = tf.reshape(
+            image_one_hot_labels, (-1, image_size_h, image_size_w, num_classes)
+        )
         
         # Sample random points in the latent space
         batch_size = real_images.shape[0]
-        # print("-" * 100)
-        # print(batch_size)
         d_loss = 0
 
         for _ in range(self.d_extra_steps):
@@ -101,12 +98,11 @@ class gpt2cgan(tf.keras.Model):
 
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
-            # print("-" * 100)
-            # print("generated images: {}".format(generated_images.shape))
-            # print(generated_images)
 
             # Combine them with real images
-            combined_images = tf.concat([generated_images, real_images], axis=0)
+            fake_image_and_labels = tf.concat([generated_images, image_one_hot_labels], -1)
+            real_image_and_labels = tf.concat([real_images, image_one_hot_labels], -1)
+            combined_images = tf.concat([fake_image_and_labels, real_image_and_labels], axis = 0)
             
             # Assemble labels discriminating real from fake images
             labels = tf.concat(
@@ -147,6 +143,3 @@ class gpt2cgan(tf.keras.Model):
         predictions = self.generator(self.seed, training = False)
         
         return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}
-
-    # def call(self, inputs, training, mask):
-    #     return super().call(inputs, training=training, mask=mask)
