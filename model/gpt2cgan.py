@@ -76,6 +76,7 @@ class gpt2cgan(tf.keras.Model):
         num_classes = real_images.shape[-1]
         print(image_size_h)
         print(image_size_w)
+        print(num_classes)
 
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
