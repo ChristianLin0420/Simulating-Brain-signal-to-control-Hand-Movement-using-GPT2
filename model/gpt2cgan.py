@@ -80,6 +80,7 @@ class gpt2cgan(tf.keras.Model):
         one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
 
         image_one_hot_labels = real_labels[:, :, None, None]
+        print(image_one_hot_labels.shape)
         image_one_hot_labels = tf.repeat(
             image_one_hot_labels, repeats = [image_size_h * image_size_w]
         )
