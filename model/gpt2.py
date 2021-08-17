@@ -206,8 +206,8 @@ class TFImageTransformer(tf.keras.layers.Layer):
         size = int(sl ** 0.5)
         
         result = tf.reshape(x, [bz, size, size, last_dim])
-        # result = tf.math.maximum(result, 1.0)
-        # result = tf.math.minimum(result, 0.0)
+        result = tf.math.maximum(result, -1.0)
+        result = tf.math.minimum(result, 1.0)
 
         return result
 

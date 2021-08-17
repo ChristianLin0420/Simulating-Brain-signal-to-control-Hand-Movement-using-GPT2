@@ -71,14 +71,14 @@ def generate_and_save_images(predictions, time, n_round, epoch, model_name):
         if predictions.shape[-1] == 1:
             plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap = 'gray')
         elif predictions.shape[-1] == 3:
-            if i == 0:
-                tmp = np.asarray(predictions[i, :, :, :])
-                print(np.max(tmp))
-                print(np.min(tmp))
-                tt = (predictions[i, :, :, :] * 127.5 + 127.5) / 255.0
-                tt = np.asarray(tt)
-                print(np.max(tt))
-                print(np.min(tt))
+            # if i == 0:
+            #     tmp = np.asarray(predictions[i, :, :, :])
+            #     print(np.max(tmp))
+            #     print(np.min(tmp))
+            #     tt = (predictions[i, :, :, :] * 127.5 + 127.5) / 255.0
+            #     tt = np.asarray(tt)
+            #     print(np.max(tt))
+            #     print(np.min(tt))
             pred = np.asarray(predictions[i, :, :, :])
             p_min = np.min(pred)
             # p_max = np.max()
