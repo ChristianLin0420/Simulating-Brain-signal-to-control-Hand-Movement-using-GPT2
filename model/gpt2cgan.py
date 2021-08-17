@@ -133,7 +133,9 @@ class gpt2cgan(tf.keras.Model):
         # Train the generator (note that we should *not* update the weights
         # of the discriminator)!
         with tf.GradientTape() as tape:
-            predictions = self.discriminator(self.generator(random_latent_vectors))
+            fake_images = self.generator(random_latent_vectors)
+            fake_image_and_labels = tf.concat([fake_images, image_one_hot_labels], -1)
+            predictions = self.discriminator(fake_image_and_labels)
             g_loss = self.loss_fn(misleading_labels, predictions)
 
         grads = tape.gradient(g_loss, self.generator.trainable_weights)
