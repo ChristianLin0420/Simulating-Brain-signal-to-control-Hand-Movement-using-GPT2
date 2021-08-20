@@ -2,6 +2,7 @@
 
 from logging import error
 import os
+import time
 import argparse
 from matplotlib import pyplot as plt
 import numpy as np
