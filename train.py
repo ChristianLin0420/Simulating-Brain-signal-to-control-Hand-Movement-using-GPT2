@@ -122,7 +122,7 @@ def load_dataset():
     print(train_data.shape)
     print(train_label.shape)
 
-    data_count = int(train_data.shape[0] / 8)
+    data_count = 150 #int(train_data.shape[0] / 8)
     data_count = data_count * 8
 
     print("--- %s seconds ---" % (tt.time() - start_time))
