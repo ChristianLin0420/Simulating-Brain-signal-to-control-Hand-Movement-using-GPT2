@@ -329,7 +329,7 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", default = 8)
     parser.add_argument("--epochs", default = 50)
     parser.add_argument("--noise_len", default = 1022)
-    parser.add_argument("--noise_hidden_dim", default = 32)
+    parser.add_argument("--noise_hidden_dim", default = 64)
     parser.add_argument("--example_to_generate", default = 16)
     parser.add_argument("--num_layer", default = 2)
     parser.add_argument("--num_head", default = 6)
