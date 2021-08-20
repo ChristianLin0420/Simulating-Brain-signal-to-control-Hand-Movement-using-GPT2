@@ -58,10 +58,11 @@ def load_dataset():
     train_data = np.asarray([])
     train_label = np.asarray([])
 
-    dirs = dirs[:40]
+    dirs = dirs[:20]
 
     for dir in dirs:
         path = ROOT_DIR + '/' + dir
+        print(path)
         _, dirs, files = os.walk(path).__next__()
 
         if len(files) == 2:
