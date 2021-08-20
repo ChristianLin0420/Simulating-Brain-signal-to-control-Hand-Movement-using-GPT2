@@ -203,10 +203,12 @@ class TFImageTransformer(tf.keras.layers.Layer):
         x = tf.matmul(x, self.transformer)
         last_dim = shape_list(self.transformer)[-1]
 
-        size = int(sl ** 0.5)
-        
-        result = tf.reshape(x, [bz, size, size, last_dim])
-        result = tf.math.maximum(result, -1.0)
+        # size = int(sl ** 0.5)
+        # result = tf.reshape(x, [bz, size, size, last_dim])
+        result = tf.reshape(x, [bz, 1022, last_dim, 1])
+
+        # result = tf.math.maximum(result, -1.0)
+        result = tf.math.maximum(result, 0.0)
         result = tf.math.minimum(result, 1.0)
 
         return result
