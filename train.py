@@ -47,7 +47,80 @@ def dataset_np(last_dim: int = 1):
 
     return (train_images, train_labels)
 
-def training(args, datasets, time, num_classes: int = 10):
+def load_dataset():
+    start_time = time.time()
+
+    ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
+
+    _, dirs, files = os.walk(ROOT_DIR).__next__()
+
+    train_data = np.asarray([])
+    train_label = np.asarray([])
+
+    dirs = dirs[:1]
+
+    for dir in dirs:
+        path = ROOT_DIR + '/' + dir
+        _, dirs, files = os.walk(path).__next__()
+
+        if len(files) == 2:
+            eye_open_filename = files[0]
+            eye_close_filename = files[1]
+
+            eye_open_path = path + '/' + eye_open_filename
+            eye_close_path = path + '/' + eye_close_filename
+
+            eye_open_data = np.load(eye_open_path, allow_pickle = True)
+            eye_close_data = np.load(eye_close_path, allow_pickle = True)
+
+            left_open_epoch = len(eye_open_data["left"])
+            right_open_epoch = len(eye_open_data["right"])
+            left_close_epoch = len(eye_close_data["left"])
+            right_close_epoch = len(eye_close_data["right"])
+
+            open_epoch = min(left_open_epoch, right_open_epoch)
+            close_epoch = min(left_close_epoch, right_close_epoch)
+            vertex_count = 1022
+            timestemp = 500
+
+            left_open_data = np.asarray(eye_open_data["left"][:open_epoch, :vertex_count, :timestemp])
+            right_open_data = np.asarray(eye_open_data["right"][:open_epoch, :vertex_count, :timestemp])
+            left_close_data = np.asarray(eye_close_data["left"][:close_epoch, :vertex_count, :timestemp])
+            right_close_data = np.asarray(eye_close_data["right"][:close_epoch, :vertex_count, :timestemp])
+
+            eye_open_data = np.concatenate((left_open_data, right_open_data), axis = 1)
+            eye_close_data = np.concatenate((left_close_data, right_close_data), axis = 1)
+
+            if len(train_data) == 0 and len(train_label) == 0:
+                train_data = eye_open_data
+                train_label = np.asarray([1] * open_epoch) 
+                train_data = np.concatenate((train_data, eye_close_data), axis = 0)
+                train_label = np.concatenate((train_label, np.asarray([0] * close_epoch)), axis = 0)
+            else:
+                assert train_data.shape[0] == train_label.shape[0]
+
+                train_data = np.concatenate((train_data, eye_open_data), axis = 0)
+                train_label = np.concatenate((train_label, np.asarray([1] * open_epoch)), axis = 0)
+                train_data = np.concatenate((train_data, eye_close_data), axis = 0)
+                train_label = np.concatenate((train_label, np.asarray([0] * close_epoch)), axis = 0)
+    
+    assert train_data.shape[0] == train_label.shape[0]
+
+    p = np.random.permutation(train_data.shape[0])
+    train_data = train_data[p]
+    train_label = train_label[p]
+
+    train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
+    train_label = keras.utils.to_categorical(train_label, 2)
+
+    data_count = int(train_data.shape[0] / 8)
+    data_count = data_count * 8
+
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    return (train_data[:data_count], train_label[:data_count])
+
+def training(args, datasets, time, num_classes: int = 2):
     
     # initial model
     config = GPT2Config(n_layer = int(args.num_layer), 
@@ -178,7 +251,7 @@ def training(args, datasets, time, num_classes: int = 10):
                 batch_size = batch_size,
                 epochs = int(args.epochs), 
                 verbose = 1, 
-                callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
+                callbacks = [EarlyStoppingAtMinLoss()]#, RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
             )
 
             g_loss = history.history['g_loss']
@@ -255,12 +328,12 @@ if __name__ == '__main__':
     parser.add_argument("--buffer_size", default = 1000)
     parser.add_argument("--batch_size", default = 8)
     parser.add_argument("--epochs", default = 50)
-    parser.add_argument("--noise_len", default = 784)
+    parser.add_argument("--noise_len", default = 1022)
     parser.add_argument("--noise_hidden_dim", default = 32)
     parser.add_argument("--example_to_generate", default = 16)
     parser.add_argument("--num_layer", default = 2)
     parser.add_argument("--num_head", default = 6)
-    parser.add_argument("--num_last_dim", default = 3)
+    parser.add_argument("--num_last_dim", default = 1)
     parser.add_argument("--num_round", default = 3)
     parser.add_argument("--use_gpu", default = True)  
     parser.add_argument('--gpu_id', default = 0)
@@ -306,7 +379,8 @@ if __name__ == '__main__':
 
     # get datsets
     # datasets, shape = initial_mnist_datset()
-    datasets = dataset_np(int(args.num_last_dim))
+    # datasets = dataset_np(int(args.num_last_dim))
+    datasets = load_dataset()
 
     if args.mode == "training":
         training(args = args, datasets = datasets, time = time)

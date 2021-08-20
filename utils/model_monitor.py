@@ -71,17 +71,7 @@ def generate_and_save_images(predictions, time, n_round, epoch, model_name):
         if predictions.shape[-1] == 1:
             plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap = 'gray')
         elif predictions.shape[-1] == 3:
-            # if i == 0:
-            #     tmp = np.asarray(predictions[i, :, :, :])
-            #     print(np.max(tmp))
-            #     print(np.min(tmp))
-            #     tt = (predictions[i, :, :, :] * 127.5 + 127.5) / 255.0
-            #     tt = np.asarray(tt)
-            #     print(np.max(tt))
-            #     print(np.min(tt))
             pred = np.asarray(predictions[i, :, :, :])
-            p_min = np.min(pred)
-            # p_max = np.max()
             predictions[i, :, :, :] = (predictions[i, :, :, :] * 127.5 + 127.5) / 255.0
             plt.imshow(predictions[i, :, :, :])
         else:
@@ -91,6 +81,8 @@ def generate_and_save_images(predictions, time, n_round, epoch, model_name):
 
     plt.savefig('results/img_results/{}/{}/{}/image_at_epoch_{:04d}.png'.format(model_name, time, n_round, epoch))
     plt.close()
+
+    
 
 
 def save_result_as_gif(time, model_name, n_round):
