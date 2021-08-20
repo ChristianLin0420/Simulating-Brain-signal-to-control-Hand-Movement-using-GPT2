@@ -2,7 +2,7 @@
 
 from logging import error
 import os
-import time
+import time as tt
 import argparse
 from matplotlib import pyplot as plt
 import numpy as np
@@ -49,7 +49,7 @@ def dataset_np(last_dim: int = 1):
     return (train_images, train_labels)
 
 def load_dataset():
-    start_time = time.time()
+    start_time = tt.time()
 
     ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
 
@@ -117,7 +117,7 @@ def load_dataset():
     data_count = int(train_data.shape[0] / 8)
     data_count = data_count * 8
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- %s seconds ---" % (tt.time() - start_time))
 
     return (train_data[:data_count], train_label[:data_count])
 
