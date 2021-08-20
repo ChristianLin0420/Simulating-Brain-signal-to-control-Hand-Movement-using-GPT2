@@ -58,7 +58,7 @@ def load_dataset():
     train_data = np.asarray([])
     train_label = np.asarray([])
 
-    dirs = dirs[:10]
+    dirs = dirs[:5]
 
     for dir in dirs:
         path = ROOT_DIR + '/' + dir
@@ -114,6 +114,9 @@ def load_dataset():
 
     train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
     train_label = keras.utils.to_categorical(train_label, 2)
+
+    train_data = train_data.astype(np.float32)
+    train_label = train_label.astype(np.float32)
 
     print("-" * 100)
     print(train_data.shape)
