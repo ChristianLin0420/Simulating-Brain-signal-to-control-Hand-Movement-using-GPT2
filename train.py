@@ -114,6 +114,10 @@ def load_dataset():
     train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
     train_label = keras.utils.to_categorical(train_label, 2)
 
+    print("-" * 100)
+    print(train_data.shape)
+    print(train_label.shape)
+
     data_count = int(train_data.shape[0] / 8)
     data_count = data_count * 8
 
@@ -329,7 +333,7 @@ if __name__ == '__main__':
     parser.add_argument("--buffer_size", default = 1000)
     parser.add_argument("--batch_size", default = 8)
     parser.add_argument("--epochs", default = 100)
-    parser.add_argument("--noise_len", default = 1022)
+    parser.add_argument("--noise_len", default = 2044)
     parser.add_argument("--noise_hidden_dim", default = 64)
     parser.add_argument("--example_to_generate", default = 16)
     parser.add_argument("--num_layer", default = 2)
