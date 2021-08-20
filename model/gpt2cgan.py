@@ -142,6 +142,6 @@ class gpt2cgan(tf.keras.Model):
         self.g_optimizer.apply_gradients(zip(grads, self.generator.trainable_weights))
 
         # generate image from given seed
-        predictions = None#self.generator(self.seed, training = False)
+        predictions = self.generator(self.seed, training = False)
         
         return {"d_loss": d_loss, "g_loss": g_loss, "predictions": predictions}
