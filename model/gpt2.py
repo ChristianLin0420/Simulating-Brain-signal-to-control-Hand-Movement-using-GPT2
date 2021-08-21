@@ -23,6 +23,16 @@ from utils.output import (
 from config.config_gpt2 import GPT2Config
 from utils.model_utils import TFPreTrainedModel
 
+
+# def stat_cuda(msg):
+#     print('--', msg)
+#     print('allocated: %dM, max allocated: %dM, cached: %dM, max cached: %dM' % (
+#         torch.cuda.memory_allocated() / 1024 / 1024,
+#         torch.cuda.max_memory_allocated() / 1024 / 1024,
+#         torch.cuda.memory_cached() / 1024 / 1024,
+#         torch.cuda.max_memory_cached() / 1024 / 1024
+#     ))
+
 ''' 
 ----- TFAttention -----
 
@@ -212,7 +222,6 @@ class TFImageTransformer(tf.keras.layers.Layer):
         result = tf.math.minimum(result, 1.0)
 
         return result
-
 
 
 @keras_serializable

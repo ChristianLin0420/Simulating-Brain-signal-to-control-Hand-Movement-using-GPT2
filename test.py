@@ -1,178 +1,86 @@
 
 
-# import os
-# import gdown
-# import tarfile
-
-# from numpy.random.mtrand import rand
-
-# output = 'test.npz'
-
-# def extract(tar_url, extract_path='.'):
-#     tar = tarfile.open(output, 'r')
-#     for item in tar:
-#         tar.extract(item, extract_path)
-#         if item.name.find(".tgz") != -1 or item.name.find(".tar") != -1:
-#             extract(item.name, "./" + item.name[:item.name.rfind('/')])
-
-# if not os.path.exists(output):
-#     url = 'https://drive.google.com/file/d/1-WyVlbk7njGie4FK6iM_ghuPcRHIrxCg/view?usp=sharing'
-#     gdown.download(url, output, quiet=False)
-# else:
-#     extract(output)
-
-# import numpy as np
-# import matplotlib.pyplot as plt
-# data = np.load('/Users/christianlin/Desktop/res/010002/010002_EC.npz', allow_pickle = True)
-
-# print(data["left"].shape)
-# print(data["right"].shape)
-# print(data['left'][0][0][:10])
-
-# random = np.random.random([28, 28, 3])
-# max = np.max(random)
-# min = np.min(random)
-
-# print(random)
-
-# random = (random - min) / (max - min)
-# plt.imshow(random)
-# plt.show()
-
-
-import tensorflow as tf
+import os
+import time
 import numpy as np
+
+from sys import getsizeof
 from tensorflow import keras
 
-import matplotlib.pyplot as plt
-from tensorflow.python.ops.gen_math_ops import imag
 
+start_time = time.time()
 
-def dataset_np(last_dim: int = 1):
-    (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
-    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
 
-    if last_dim == 3:
-        train_images = np.repeat(train_images, 3, axis = 3)
+subdirs, dirs, files = os.walk(ROOT_DIR).__next__()
 
-    train_labels = keras.utils.to_categorical(train_labels, 10)
+train_data = np.asarray([])
+train_label = np.asarray([])
 
-    return (train_images, train_labels)
+dirs = dirs[:5]
 
+for dir in dirs:
+    path = ROOT_DIR + '/' + dir
+    subdirs, dirs, files = os.walk(path).__next__()
 
-dataset = dataset_np(3)
+    if len(files) == 2:
+        eye_open_filename = files[0]
+        eye_close_filename = files[1]
 
-image = dataset[0][1]
-label = dataset[1][:5]
+        eye_open_path = path + '/' + eye_open_filename
+        eye_close_path = path + '/' + eye_close_filename
 
-# print(label)
-# one_hot_labels = np.expand_dims(label, axis = 1)
-# print(one_hot_labels)
-# one_hot_labels = np.repeat(one_hot_labels, repeats = 10, axis = 1)
-# print(one_hot_labels)
+        eye_open_data = np.load(eye_open_path, allow_pickle = True)
+        eye_close_data = np.load(eye_close_path, allow_pickle = True)
 
-# image_size = 28
-# num_classes = 10
+        left_open_epoch = len(eye_open_data["left"])
+        right_open_epoch = len(eye_open_data["right"])
+        left_close_epoch = len(eye_close_data["left"])
+        right_close_epoch = len(eye_close_data["right"])
 
-# image_one_hot_labels = label[:, :, None, None]
-# print(image_one_hot_labels)
-# image_one_hot_labels = tf.repeat(
-#     image_one_hot_labels, repeats=[image_size * image_size]
-# )
-# print(image_one_hot_labels)
-# image_one_hot_labels = tf.reshape(
-#     image_one_hot_labels, (-1, image_size, image_size, num_classes)
-# )
-# print(image_one_hot_labels)
-# print(image)
-# print(np.max(image))
-# print(np.min(image))
+        open_epoch = min(left_open_epoch, right_open_epoch)
+        close_epoch = min(left_close_epoch, right_close_epoch)
+        vertex_count = 1022
+        timestemp = 500
 
+        left_open_data = np.asarray(eye_open_data["left"][:open_epoch, :vertex_count, :timestemp])
+        right_open_data = np.asarray(eye_open_data["right"][:open_epoch, :vertex_count, :timestemp])
+        left_close_data = np.asarray(eye_close_data["left"][:close_epoch, :vertex_count, :timestemp])
+        right_close_data = np.asarray(eye_close_data["right"][:close_epoch, :vertex_count, :timestemp])
 
-# plt.imshow(image)
-# plt.show()
+        eye_open_data = np.concatenate((left_open_data, right_open_data), axis = 1)
+        eye_close_data = np.concatenate((left_close_data, right_close_data), axis = 1)
 
+        if len(train_data) == 0 and len(train_label) == 0:
+            train_data = eye_open_data
+            train_label = np.asarray([1] * open_epoch) 
+            train_data = np.concatenate((train_data, eye_close_data), axis = 0)
+            train_label = np.concatenate((train_label, np.asarray([0] * close_epoch)), axis = 0)
+        else:
+            assert train_data.shape[0] == train_label.shape[0]
+            
+            train_data = np.concatenate((train_data, eye_open_data), axis = 0)
+            train_label = np.concatenate((train_label, np.asarray([1] * open_epoch)), axis = 0)
+            train_data = np.concatenate((train_data, eye_close_data), axis = 0)
+            train_label = np.concatenate((train_label, np.asarray([0] * close_epoch)), axis = 0)
 
-l = [-0.1, 0, 0.9, 1, 1.2]
-n = np.asarray(l)
-print(n)
-n = n if n <= 1.0 else 1.0
+assert train_data.shape[0] == train_label.shape[0]
 
-print(n)
+p = np.random.permutation(train_data.shape[0])
+train_data = train_data[p]
+train_label = train_label[p]
 
+data_count = int(train_data.shape[0] / 8)
+data_count = data_count * 8
 
+train_data = train_data[:data_count]
+train_label = train_label[:data_count]
 
+train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
+train_label = keras.utils.to_categorical(train_label, 2)
 
+print("train data size: {}".format(getsizeof(train_data)))
+print("train label size: {}".format(getsizeof(train_label)))
 
+print("--- %s seconds ---" % (time.time() - start_time))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# import os
-# import numpy as np
-# import tensorflow as tf
-
-# from tensorflow import keras
-# from tensorflow.python.keras.api._v2.keras import datasets
-
-# def initial_mnist_datset(buffer_size: int = 1000, batch_size: int = 8):
-#     (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
-#     train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-#     train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-#     train_labels = keras.utils.to_categorical(train_labels, 10)
-
-#     train_images = np.repeat(train_images, 3, axis = 3)
-    
-#     print(train_images.shape)
-#     # Batch and shuffle the data
-#     train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels)).shuffle(buffer_size = buffer_size).batch(batch_size)
-#     return train_dataset, np.shape(np.asarray(train_dataset))
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = '1'
-
-# print("----- initial using GPU -----")
-
-# # if use_gpu is TRUE, then get one and run the program on it
-# try:
-#     gpus = tf.config.list_physical_devices(device_type = 'GPU')
-    
-#     if gpus:
-#         tf.config.set_visible_devices(devices = gpus[0], device_type = 'GPU')
-# except:
-#     print("[No GPR] there is no availible gpu to use!!!")
-
-# print("----- start using GPU -----")
-
-# print("----- start preparing datasets ------")
-# datasets, _ = initial_mnist_datset()
-# print("----- finish preparing datasets ------")
-
-# for image, label in datasets:
-#     # print(image)
-#     # print(label)
-#     # print(image)
-#     # print(tf.image.grayscale_to_rgb(image))
-#     break
