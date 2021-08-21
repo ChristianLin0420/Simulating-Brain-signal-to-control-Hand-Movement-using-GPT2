@@ -1,5 +1,6 @@
 
 
+from _typeshed import NoneType
 from logging import error
 import os
 import time as tt
@@ -48,17 +49,22 @@ def dataset_np(last_dim: int = 1):
 
     return (train_images, train_labels)
 
-def load_dataset():
+def load_dataset(start_index: int = 0):
     start_time = tt.time()
 
     ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
 
     _, dirs, files = os.walk(ROOT_DIR).__next__()
+    dirs_len = len(dirs)
 
     train_data = np.asarray([])
     train_label = np.asarray([])
 
-    dirs = dirs[:5]
+
+    if start_index >= dirs_len or (start_index + 4) >= dirs_len:
+        return None
+
+    dirs = dirs[start_index:(start_index + 4)]
 
     for dir in dirs:
         path = ROOT_DIR + '/' + dir
@@ -122,7 +128,7 @@ def load_dataset():
     print(train_data.shape)
     print(train_label.shape)
 
-    data_count = 150 #int(train_data.shape[0] / 8)
+    data_count = int(train_data.shape[0] / 8)
     data_count = data_count * 8
 
     print("--- %s seconds ---" % (tt.time() - start_time))
@@ -235,6 +241,9 @@ def training(args, datasets, time, num_classes: int = 2):
 
         elif args.model == "gpt2cgan":
             
+            ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
+            _, dirs, _ = os.walk(ROOT_DIR).__next__()
+
             if not add_class_dim:
                 config.n_embd += num_classes
                 add_class_dim = True
@@ -254,23 +263,40 @@ def training(args, datasets, time, num_classes: int = 2):
                 loss_fn = loss_fn
             )
 
-            history = model.fit(
-                x = datasets[0],
-                y = datasets[1],
-                batch_size = batch_size,
-                epochs = int(args.epochs), 
-                verbose = 1, 
-                callbacks = [EarlyStoppingAtMinLoss()]#, RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
-            )
+            start_index = 0
+            data_count = 0
 
-            g_loss = history.history['g_loss']
-            d_loss = history.history['d_loss']
+            while start_index < len(dirs):
+                print("-" * 100)
+                print("start index is {}".format(start_index))
+                datasets = load_dataset(start_index = start_index)
+                
+                if datasets is not None:
+                    data_count += int(datasets[0].shape[0])
+                    start_index += 4
 
-            g_loss_collection.append(g_loss)
-            d_loss_collection.append(d_loss)
+                    history = model.fit(
+                        x = datasets[0],
+                        y = datasets[1],
+                        batch_size = batch_size,
+                        epochs = int(args.epochs), 
+                        verbose = 1, 
+                        callbacks = [EarlyStoppingAtMinLoss()]#, RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
+                    )
 
-            # save training loss figure
-            save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+                    g_loss = history.history['g_loss']
+                    d_loss = history.history['d_loss']
+
+                    g_loss_collection.append(g_loss)
+                    d_loss_collection.append(d_loss)
+
+                    # save training loss figure
+                    save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+                    
+                    datasets = None
+                    del datasets
+                else:
+                    break
 
             # save model
             save_model_config(config, str(args.model), time, current_round)
@@ -389,10 +415,10 @@ if __name__ == '__main__':
     # get datsets
     # datasets, shape = initial_mnist_datset()
     # datasets = dataset_np(int(args.num_last_dim))
-    datasets = load_dataset()
+    # datasets = load_dataset()
 
     if args.mode == "training":
-        training(args = args, datasets = datasets, time = time)
+        training(args = args, datasets = None, time = time)
     elif args.mode == "testing":
         pass
     elif args.mode == "find_vector":
