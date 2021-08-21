@@ -291,6 +291,8 @@ def training(args, datasets, time, num_classes: int = 2):
 
                     # save training loss figure
                     save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+                    save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
+                    save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
                     
                     datasets = None
                     del datasets
