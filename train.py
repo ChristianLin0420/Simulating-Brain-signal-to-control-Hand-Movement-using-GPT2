@@ -363,7 +363,7 @@ if __name__ == '__main__':
     parser.add_argument("--model", default = "gpt2cgan")
     parser.add_argument("--buffer_size", default = 1000)
     parser.add_argument("--batch_size", default = 8)
-    parser.add_argument("--epochs", default = 100)
+    parser.add_argument("--epochs", default = 50)
     parser.add_argument("--noise_len", default = 2044)
     parser.add_argument("--noise_hidden_dim", default = 64)
     parser.add_argument("--example_to_generate", default = 16)
