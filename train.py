@@ -1,6 +1,5 @@
 
 
-from _typeshed import NoneType
 from logging import error
 import os
 import time as tt
