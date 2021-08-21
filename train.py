@@ -406,6 +406,7 @@ if __name__ == '__main__':
             
             if gpus:
                 tf.config.set_visible_devices(devices = gpus[0], device_type = 'GPU')
+                tf.config.experimental.set_memory_growth(gpus[0], True)
         except:
             print("[No GPR] there is no availible gpu to use!!!")
 
