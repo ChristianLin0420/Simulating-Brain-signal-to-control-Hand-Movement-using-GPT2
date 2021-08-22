@@ -280,7 +280,7 @@ def training(args, datasets, time, num_classes: int = 2):
                         batch_size = batch_size,
                         epochs = int(args.epochs), 
                         verbose = 1, 
-                        callbacks = [EarlyStoppingAtMinLoss()]#, RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
+                        callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
                     )
 
                     g_loss = history.history['g_loss']

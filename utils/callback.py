@@ -3,7 +3,7 @@ from datetime import time
 import numpy as np
 import tensorflow as tf
 
-from .model_monitor import generate_and_save_images, save_result_as_gif
+from .model_monitor import generate_and_save_images, save_result_as_gif, save_distribution_record
 
 class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
     """Stop training when the loss is at its min, i.e. the loss stops decreasing.
@@ -63,16 +63,23 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         self.model_name = model_name
 
     def on_epoch_end(self, epoch, logs = None):
-        predictions = logs.get("predictions")
+        # predictions = logs.get("predictions")
+        distribution = logs.get("distribution")
 
-        generate_and_save_images(   predictions = predictions, 
-                                    time = self.time, 
-                                    n_round =  self.n_round, 
+        # generate_and_save_images(   predictions = predictions, 
+        #                             time = self.time, 
+        #                             n_round =  self.n_round, 
+        #                             epoch = epoch, 
+        #                             model_name = self.model_name    )
+
+
+        # save_result_as_gif( time = self.time, 
+        #                     model_name = self.model_name, 
+        #                     n_round = self.n_round  )
+
+        save_distribution_record(   data = distribution, 
                                     epoch = epoch, 
-                                    model_name = self.model_name    )
-
-
-        save_result_as_gif( time = self.time, 
-                            model_name = self.model_name, 
-                            n_round = self.n_round  )
+                                    time = self.time, 
+                                    model_name = self.model_name, 
+                                    n_round = self.n_round  )
                             

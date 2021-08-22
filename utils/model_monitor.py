@@ -4,15 +4,13 @@
 import os
 import glob
 import json
-# import cv2
-from posixpath import join
 import imageio
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 from logging import error
 
-from config.config_gpt2 import GPT2Config
 
 def show_generated_image(prediction):
     
@@ -147,3 +145,29 @@ def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
     # save image
     plt.savefig("results/training_loss/{}/{}/{}.png".format(model_name, time, line_name))  # should before show method
     plt.close()
+
+def save_distribution_record(data, epoch, time, model_name, n_round):
+
+    diractory = 'results/img_results/{}/{}/{}/distribution'.format(model_name, time, n_round)
+
+    real_data = data[0]
+    generated_data = data[1]
+
+    real_data = np.asarray(real_data).flatten()
+    generated_data = np.asarray(generated_data).flatten()
+
+    if not os.path.exists(diractory):
+        os.mkdir(diractory)
+
+    title = "{}_distribution".format(model_name)
+
+    plt.figure(figsize = (8, 5))
+    sns.kdeplot(real_data)
+    sns.kdeplot(generated_data)
+
+    plt.xlabel("generated values")
+    plt.title(title)
+
+    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}.png'.format(model_name, time, n_round, epoch))
+    plt.close()
+
