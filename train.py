@@ -265,7 +265,7 @@ def training(args, datasets, time, num_classes: int = 2):
             start_index = 0
             data_count = 0
 
-            while start_index < len(dirs):
+            while start_index == 0: #start_index < len(dirs):
                 print("-" * 100)
                 print("start index is {}".format(start_index))
                 datasets = load_dataset(start_index = start_index)
@@ -407,6 +407,7 @@ if __name__ == '__main__':
             if gpus:
                 tf.config.set_visible_devices(devices = gpus[0], device_type = 'GPU')
                 tf.config.experimental.set_memory_growth(gpus[0], True)
+                # tf.config.experimental.set_virtual_device_configuration(gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=23000)])
         except:
             print("[No GPR] there is no availible gpu to use!!!")
 

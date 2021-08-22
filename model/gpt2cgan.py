@@ -91,7 +91,8 @@ class gpt2cgan(tf.keras.Model):
         batch_size = real_images.shape[0]
         d_loss = 0
 
-        distribution = []
+        tmp_real = tf.constant(0)
+        tmp_fake = tf.constant(0)
 
         for _ in range(self.d_extra_steps):
             random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
@@ -114,8 +115,10 @@ class gpt2cgan(tf.keras.Model):
             # Add random noise to the labels - important trick!
             labels += 0.05 * tf.random.uniform(tf.shape(labels))
 
-            if len(distribution) == 0:
-                distribution.append(real_images, generated_images)
+            # print('0' * 100)
+            tmp_real = tf.reshape(real_images, shape = [-1])
+            tmp_fake = tf.reshape(generated_images, shape = [-1])
+            # print('1' * 100)
 
             # Train the disciminator
             with tf.GradientTape() as tape:
@@ -148,5 +151,6 @@ class gpt2cgan(tf.keras.Model):
 
         # generate image from given seed
         # predictions = self.generator(self.seed, training = False)
+        # print('2' * 100)
         
-        return {"d_loss": d_loss, "g_loss": g_loss, "distribution": distribution}#, "predictions": predictions}
+        return {"d_loss": d_loss, "g_loss": g_loss, "tmp_real": tmp_real, "tmp_fake": tmp_fake}#, "distribution": distribution}#, "predictions": predictions}

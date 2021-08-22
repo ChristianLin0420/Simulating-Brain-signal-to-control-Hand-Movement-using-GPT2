@@ -148,13 +148,18 @@ def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
 
 def save_distribution_record(data, epoch, time, model_name, n_round):
 
-    diractory = 'results/img_results/{}/{}/{}/distribution'.format(model_name, time, n_round)
+    diractory = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
 
     real_data = data[0]
     generated_data = data[1]
 
     real_data = np.asarray(real_data).flatten()
     generated_data = np.asarray(generated_data).flatten()
+
+    if not os.path.exists(diractory):
+        os.mkdir(diractory)
+
+    diractory = 'results/img_results/{}/{}/{}/distribuion'.format(model_name, time, n_round)
 
     if not os.path.exists(diractory):
         os.mkdir(diractory)
