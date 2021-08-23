@@ -278,7 +278,7 @@ def training(args, datasets, time, num_classes: int = 2):
                         x = datasets[0],
                         y = datasets[1],
                         batch_size = batch_size,
-                        epochs = int(args.epochs), 
+                        epochs = int(1), 
                         verbose = 1, 
                         callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
                     )
