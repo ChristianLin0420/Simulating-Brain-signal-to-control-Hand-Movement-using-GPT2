@@ -272,6 +272,7 @@ def training(args, datasets, time, num_classes: int = 2):
                 
                 if datasets is not None:
                     data_count += int(datasets[0].shape[0])
+                    start_index += 4
 
                     history = model.fit(
                         x = datasets[0],
@@ -293,20 +294,15 @@ def training(args, datasets, time, num_classes: int = 2):
                     save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
                     save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
 
-                    g_loss = None
-                    d_loss = None
-                    history = None
                     del g_loss
                     del d_loss
                     del history
                     
+                    datasets = None
                 else:
                     break
-                
-                datasets = None
-                del datasets
 
-                start_index += 4
+                del datasets
 
             # save model
             save_model_config(config, str(args.model), time, current_round)
@@ -415,8 +411,8 @@ if __name__ == '__main__':
             
             if gpus:
                 tf.config.set_visible_devices(devices = gpus[0], device_type = 'GPU')
-                # tf.config.experimental.set_memory_growth(gpus[0], True)
-                tf.config.experimental.set_virtual_device_configuration(gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=23000)])
+                tf.config.experimental.set_memory_growth(gpus[0], True)
+                # tf.config.experimental.set_virtual_device_configuration(gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=23000)])
         except:
             print("[No GPR] there is no availible gpu to use!!!")
 
