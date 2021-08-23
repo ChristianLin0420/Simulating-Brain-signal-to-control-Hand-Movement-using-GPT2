@@ -265,7 +265,7 @@ def training(args, datasets, time, num_classes: int = 2):
             start_index = 0
             data_count = 0
 
-            while start_index == 0: #start_index < len(dirs):
+            while start_index < len(dirs):
                 print("-" * 100)
                 print("start index is {}".format(start_index))
                 datasets = load_dataset(start_index = start_index)
@@ -289,15 +289,20 @@ def training(args, datasets, time, num_classes: int = 2):
                     g_loss_collection.append(g_loss)
                     d_loss_collection.append(d_loss)
 
+                    del g_loss
+                    del d_loss
+                    del history
+
                     # save training loss figure
                     save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
                     save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
                     save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
                     
                     datasets = None
-                    del datasets
                 else:
                     break
+
+                del datasets
 
             # save model
             save_model_config(config, str(args.model), time, current_round)

@@ -102,6 +102,8 @@ class gpt2cgan(tf.keras.Model):
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
 
+            del random_latent_vectors
+
             # Combine them with real images
             fake_image_and_labels = tf.concat([generated_images, image_one_hot_labels], -1)
             real_image_and_labels = tf.concat([real_images, image_one_hot_labels], -1)
@@ -148,9 +150,14 @@ class gpt2cgan(tf.keras.Model):
 
         grads = tape.gradient(g_loss, self.generator.trainable_weights)
         self.g_optimizer.apply_gradients(zip(grads, self.generator.trainable_weights))
+        
+        del random_latent_vectors
+
+        del one_hot_labels
+        del image_one_hot_labels
 
         # generate image from given seed
         # predictions = self.generator(self.seed, training = False)
         # print('2' * 100)
         
-        return {"d_loss": d_loss, "g_loss": g_loss, "tmp_real": tmp_real, "tmp_fake": tmp_fake}#, "distribution": distribution}#, "predictions": predictions}
+        return {"d_loss": d_loss, "g_loss": g_loss, "tmp_real": tmp_real, "tmp_fake": tmp_fake}
