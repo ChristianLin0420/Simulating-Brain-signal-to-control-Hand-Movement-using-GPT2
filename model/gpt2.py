@@ -1,7 +1,5 @@
 
-import numpy as np
 import tensorflow as tf
-from tensorflow.python.client.session import Session
 
 from utils.model_utils import (
     keras_serializable,
@@ -16,22 +14,8 @@ from utils.activation import (
     get_activation
 )
 
-from utils.output import (
-    TFBaseModelOutputWithPast
-) 
-
 from config.config_gpt2 import GPT2Config
 from utils.model_utils import TFPreTrainedModel
-
-
-# def stat_cuda(msg):
-#     print('--', msg)
-#     print('allocated: %dM, max allocated: %dM, cached: %dM, max cached: %dM' % (
-#         torch.cuda.memory_allocated() / 1024 / 1024,
-#         torch.cuda.max_memory_allocated() / 1024 / 1024,
-#         torch.cuda.memory_cached() / 1024 / 1024,
-#         torch.cuda.max_memory_cached() / 1024 / 1024
-#     ))
 
 ''' 
 ----- TFAttention -----
@@ -112,6 +96,13 @@ class TFAttention(tf.keras.layers.Layer):
         outputs = [tf.matmul(w, v)]
         if output_attentions:
             outputs.append(w)
+
+        b = None
+        w = None
+
+        del b
+        del w
+
         return outputs
 
     def merge_heads(self, x):
@@ -151,6 +142,15 @@ class TFAttention(tf.keras.layers.Layer):
         a = self.resid_dropout(a, training=training)
 
         outputs = [a, present] + attn_outputs[1:]
+
+        query, key, value = None, None, None
+        a = None
+
+        del query
+        del key
+        del value
+        del a
+
         return outputs  # a, present, (attentions)
 
 class TFMLP(tf.keras.layers.Layer):
@@ -166,6 +166,10 @@ class TFMLP(tf.keras.layers.Layer):
         h = self.act(self.c_fc(x))
         h2 = self.c_proj(h)
         h2 = self.dropout(h2, training=training)
+        
+        h = None
+        del h
+        
         return h2
 
 
@@ -192,6 +196,15 @@ class TFBlock(tf.keras.layers.Layer):
         x = x + m
 
         outputs = [x] + output_attn[1:]
+
+        output_attn = None
+        m = None
+        a = None
+
+        del output_attn
+        del m
+        del a
+
         return outputs  # x, present, (attentions)
 
 class TFImageTransformer(tf.keras.layers.Layer):
@@ -220,6 +233,9 @@ class TFImageTransformer(tf.keras.layers.Layer):
         # result = tf.math.maximum(result, -1.0)
         result = tf.math.maximum(result, 0.0)
         result = tf.math.minimum(result, 1.0)
+
+        x = None
+        del x
 
         return result
 
@@ -361,15 +377,12 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             raise NotImplementedError
         else:
             inputs["head_mask"] = [None] * self.num_hidden_layers
-            # head_mask = tf.constant([0] * self.num_hidden_layers)
 
         inputs["position_ids"] = tf.reshape(inputs["position_ids"], [shape_list(inputs["position_ids"])[-1]])
 
         if inputs["inputs_embeds"] is None:
             inputs["inputs_embeds"] = inputs["input_ids"]
-            # inputs["inputs_embeds"] = self.wte(inputs["input_ids"], mode="embedding")
 
-        # print(inputs["position_ids"])
         position_embeds = tf.gather(self.wpe, inputs["position_ids"])
 
         if inputs["token_type_ids"] is not None:
@@ -380,21 +393,12 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         else:
             token_type_embeds = tf.constant(0.0)
 
-        # print("inputs_embeds")
-        # print(inputs["inputs_embeds"])
-        # print(position_embeds)
-
         position_embeds = tf.cast(position_embeds, dtype=inputs["inputs_embeds"].dtype)
         token_type_embeds = tf.cast(token_type_embeds, dtype=inputs["inputs_embeds"].dtype)
-        # print("-" * 80)
-        # print(position_embeds)
-        # print(token_type_embeds)
-        # print(inputs["inputs_embeds"])
+
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
         hidden_states = self.drop(hidden_states, training=inputs["training"])
 
-        # output_shape = input_shape + [shape_list(hidden_states)[-1]]
-        # print("input_shape: {}".format(input_shape))
         output_shape = input_shape
 
         presents = () if inputs["use_cache"] else None
@@ -424,8 +428,6 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         hidden_states = self.ln_f(hidden_states)
         hidden_states = tf.reshape(hidden_states, output_shape)
-        # print("-" * 100)
-        # print("output_shape: {}".format(output_shape))
         
         # Add last hidden state
         if inputs["output_hidden_states"]:

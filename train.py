@@ -272,7 +272,6 @@ def training(args, datasets, time, num_classes: int = 2):
                 
                 if datasets is not None:
                     data_count += int(datasets[0].shape[0])
-                    start_index += 4
 
                     history = model.fit(
                         x = datasets[0],
@@ -294,15 +293,20 @@ def training(args, datasets, time, num_classes: int = 2):
                     save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
                     save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
 
+                    g_loss = None
+                    d_loss = None
+                    history = None
                     del g_loss
                     del d_loss
                     del history
                     
-                    datasets = None
                 else:
                     break
-
+                
+                datasets = None
                 del datasets
+
+                start_index += 4
 
             # save model
             save_model_config(config, str(args.model), time, current_round)
