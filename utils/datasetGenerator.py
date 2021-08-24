@@ -71,7 +71,7 @@ class DatasetGenerator(keras.utils.Sequence):
 
         if self.current_train_batch_count == -1 or self.current_start_index == 0 and self.current_subject_index < self.subjects_count:
             
-            print("============= Generating new train dataset =============")
+            print("============= Generating new train dataset for subject {} =============".format(self.current_subject_index))
 
             idx = self.current_subject_index
             
