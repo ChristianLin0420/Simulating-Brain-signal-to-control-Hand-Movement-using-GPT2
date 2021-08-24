@@ -156,7 +156,7 @@ def training(args, datasets, time, num_classes: int = 2):
                 loss_fn = loss_fn
             )
 
-            filenames, labels, steps = get_training_filenames_and_labels(subject_count = subject_count)
+            filenames, labels, steps = get_training_filenames_and_labels(batch_size = batch_size, subject_count = subject_count)
 
             print("=" * 100)
 

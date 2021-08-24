@@ -10,7 +10,7 @@ ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
 
 SUBGROUP_SIZE = 4
 
-def get_training_filenames_and_labels(subject_count: int = 10):
+def get_training_filenames_and_labels(batch_size: int = 8, subject_count: int = 10):
     _, dirs, files = os.walk(ROOT_DIR).__next__()
 
     train_data_filenames = []
@@ -38,8 +38,8 @@ def get_training_filenames_and_labels(subject_count: int = 10):
             open_data_count = np.load(eye_open_path, allow_pickle = True).shape[0]
             close_data_count = np.load(eye_close_path, allow_pickle = True).shape[0]
             data_count = min(open_data_count, close_data_count)
-            data_count = data_count / SUBGROUP_SIZE
-            data_count = data_count * SUBGROUP_SIZE
+            data_count = data_count / batch_size
+            data_count = data_count * batch_size
             steps += (data_count * 2)
 
             print("open_data_count: {}, close_data_count: {}, data_count: {}, steps: {}".format(open_data_count, close_data_count, data_count, steps))
@@ -95,16 +95,16 @@ class DatasetGenerator(keras.utils.Sequence):
                 right_shape = right_data.shape
 
                 epoch = min(left_shape[0], right_shape[0])
-                epoch = epoch / SUBGROUP_SIZE
-                epoch = epoch * SUBGROUP_SIZE
+                epoch = epoch / self.batch_size
+                epoch = epoch * self.batch_size
 
                 timestamp = left_shape[-1]
                 left_vertex_count = left_shape[1] / SUBGROUP_SIZE
                 right_vertex_count = right_shape[1] / SUBGROUP_SIZE
-                vertex_count = min(left_vertex_count, right_vertex_count)
+                vertex_count = min(left_vertex_count, right_vertex_count) * SUBGROUP_SIZE
 
-                left_data = left_data[:epoch, :vertex_count * SUBGROUP_SIZE, :timestamp]   
-                right_data = right_data[:epoch, :vertex_count * SUBGROUP_SIZE, :timestamp]
+                left_data = left_data[:epoch, :vertex_count, :timestamp]   
+                right_data = right_data[:epoch, :vertex_count, :timestamp]
                 concat_data = np.concatenate((left_data, right_data), axis = 1)
                 label = np.asarray([batch_y[idx]] * epoch)         
 
@@ -151,12 +151,12 @@ class DatasetGenerator(keras.utils.Sequence):
             del train_label
             del p
 
-            return (self.current_train_data[:SUBGROUP_SIZE], self.current_train_label[:SUBGROUP_SIZE])
+            return (self.current_train_data[:self.batch_size], self.current_train_label[:self.batch_size])
 
         elif self.current_start_index < self.current_train_batch_count and self.current_subject_index < self.subjects_count :
 
-            train_data = self.current_train_data[self.current_start_index * SUBGROUP_SIZE : (self.current_start_index + 1) * SUBGROUP_SIZE]
-            train_label = self.current_train_label[self.current_start_index * SUBGROUP_SIZE : (self.current_start_index + 1) * SUBGROUP_SIZE]
+            train_data = self.current_train_data[self.current_start_index * self.batch_size : (self.current_start_index + 1) * self.batch_size]
+            train_label = self.current_train_label[self.current_start_index * self.batch_size : (self.current_start_index + 1) * self.batch_size]
             
             self.current_start_index += 1
 
