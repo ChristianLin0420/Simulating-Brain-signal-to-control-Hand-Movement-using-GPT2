@@ -67,7 +67,11 @@ class DatasetGenerator(keras.utils.Sequence):
 
     def __getitem__(self, index):
 
+        print("current_train_batch_count: {}, current_start_index: {}, current_subject_index: {}".format(self.current_train_batch_count, self.current_start_index, self.current_subject_index))
+
         if self.current_train_batch_count == -1 or self.current_start_index == 0 and self.current_subject_index < self.subjects_count:
+            
+            print("============= Generating new train dataset =============")
 
             idx = self.current_subject_index
             
@@ -120,6 +124,12 @@ class DatasetGenerator(keras.utils.Sequence):
 
                     train_data = np.concatenate((train_data, tmp_train_data), axis = 0)
                     train_label = np.concatenate((train_label, tmp_train_label), axis = 0)
+
+                tmp_train_data = None
+                tmp_train_label = None
+
+                del tmp_train_data
+                del tmp_train_label
             
             p = np.random.permutation(train_data.shape[0])
             train_data = train_data[p]
@@ -132,6 +142,14 @@ class DatasetGenerator(keras.utils.Sequence):
             self.current_train_label = train_label.astype(np.float32)
 
             self.current_start_index = 1
+
+            train_data = None
+            train_label = None
+            p = None
+
+            del train_data
+            del train_label
+            del p
 
             return (self.current_train_data[:SUBGROUP_SIZE], self.current_train_label[:SUBGROUP_SIZE])
 

@@ -39,8 +39,10 @@ def training(args, datasets, time, num_classes: int = 2):
 
     batch_size = int(args.batch_size)
     round_num = int(args.num_round)
-    current_round = 1
     last_dim = int(args.num_last_dim)
+    subject_count = int(args.subject_count)
+
+    current_round = 1
     add_class_dim = False
 
     while round_num >= current_round:
@@ -154,15 +156,44 @@ def training(args, datasets, time, num_classes: int = 2):
                 loss_fn = loss_fn
             )
 
-            filenames, labels, steps = get_training_filenames_and_labels(subject_count = 2)
+            filenames, labels, steps = get_training_filenames_and_labels(subject_count = subject_count)
+
+            print("=" * 100)
 
             print("filenames: {}".format(len(filenames)))
             print("labels:    {}".format(len(labels)))
             print("steps:     {}".format(steps))
 
-            # print(filenames)
+            print(filenames)
+            print(labels)
 
-            # dataGenerator = DatasetGenerator()
+            dataGenerator = DatasetGenerator(filenames = filenames, labels = labels, batch_size = batch_size, subject_count = subject_count)
+
+            history = model.fit_generator(  generator = dataGenerator, 
+                                            steps_per_epoch = steps / batch_size, 
+                                            epochs = int(args.epochs), 
+                                            verbose = 1, callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
+                                        )
+
+            g_loss = history.history['g_loss']
+            d_loss = history.history['d_loss']
+
+            g_loss_collection.append(g_loss)
+            d_loss_collection.append(d_loss)
+
+            # save training loss figure
+            save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+            save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
+            save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
+
+            g_loss = None
+            d_loss = None
+            history = None
+
+            del g_loss
+            del d_loss
+            del history
+
 
             # start_index = 0
             # data_count = 0
@@ -185,24 +216,24 @@ def training(args, datasets, time, num_classes: int = 2):
             #             callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
             #         )
 
-            #         g_loss = history.history['g_loss']
-            #         d_loss = history.history['d_loss']
+                    # g_loss = history.history['g_loss']
+                    # d_loss = history.history['d_loss']
 
-            #         g_loss_collection.append(g_loss)
-            #         d_loss_collection.append(d_loss)
+                    # g_loss_collection.append(g_loss)
+                    # d_loss_collection.append(d_loss)
 
-            #         # save training loss figure
-            #         save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
-            #         save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
-            #         save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
+                    # # save training loss figure
+                    # save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+                    # save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
+                    # save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
 
-            #         g_loss = None
-            #         d_loss = None
-            #         history = None
+                    # g_loss = None
+                    # d_loss = None
+                    # history = None
 
-            #         del g_loss
-            #         del d_loss
-            #         del history
+                    # del g_loss
+                    # del d_loss
+                    # del history
                     
             #         datasets = None
             #     else:
@@ -282,6 +313,7 @@ if __name__ == '__main__':
     parser.add_argument("--num_head", default = 6)
     parser.add_argument("--num_last_dim", default = 1)
     parser.add_argument("--num_round", default = 3)
+    parser.add_argument("--subject_count", default = 2)
     parser.add_argument("--use_gpu", default = True)  
     parser.add_argument('--gpu_id', default = 0)
     parser.add_argument("--load_model", default = False)
@@ -301,24 +333,13 @@ if __name__ == '__main__':
     print("{0: <{width}}: {val}".format("num_head", width = width, val = args.num_head))
     print("{0: <{width}}: {val}".format("num_last_dim", width = width, val = args.num_last_dim))
     print("{0: <{width}}: {val}".format("num_round", width = width, val = args.num_round))
+    print("{0: <{width}}: {val}".format("subject_count", width = width, val = args.subject_count))
     print("{0: <{width}}: {val}".format("use_gpu", width = width, val = args.use_gpu))
     print("{0: <{width}}: {val}".format("gpu_id", width = width, val = args.gpu_id))
     print("{0: <{width}}: {val}".format("load_model", width = width, val = args.load_model))
     print("{0: <{width}}: {val}".format("model_path", width = width, val = args.model_path))
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
-
-    # logging.basicConfig(level=logging.DEBUG,
-    #                     format='%(asctime)s %(levelname)s %(message)s',
-    #                     datefmt='%a, %d %b %Y %H:%M:%S',
-    #                     filename='domain-result.log',
-    #                     filemode='w')
-
-    # console = logging.StreamHandler()
-    # console.setLevel(logging.DEBUG)
-    # # add the handler to the root logger
-    # logging.getLogger().addHandler(console)
-
 
     # if use_gpu is TRUE, then get one and run the program on it
     if args.use_gpu:
@@ -337,15 +358,8 @@ if __name__ == '__main__':
     now = datetime.now()
     time = now.strftime("%d_%m_%Y_%H_%M_%S")
 
-    # get datsets
-    # datasets, shape = initial_mnist_datset()
-    # datasets = dataset_np(int(args.num_last_dim))
-    # datasets = load_dataset()
-
     if args.mode == "training":
         training(args = args, datasets = None, time = time)
-    elif args.mode == "testing":
-        pass
     elif args.mode == "find_vector":
         if args.model_path == None:
             error("Should provide model path to load")
