@@ -151,8 +151,11 @@ class gpt2cgan(tf.keras.Model):
         grads = tape.gradient(g_loss, self.generator.trainable_weights)
         self.g_optimizer.apply_gradients(zip(grads, self.generator.trainable_weights))
         
-        del random_latent_vectors
+        random_latent_vectors = None
+        one_hot_labels = None
+        image_one_hot_labels = None
 
+        del random_latent_vectors
         del one_hot_labels
         del image_one_hot_labels
 
@@ -160,4 +163,4 @@ class gpt2cgan(tf.keras.Model):
         # predictions = self.generator(self.seed, training = False)
         # print('2' * 100)
         
-        return {"d_loss": d_loss, "g_loss": g_loss, "tmp_real": tmp_real, "tmp_fake": tmp_fake}
+        return {"d_loss": d_loss, "g_loss": g_loss, "real": tmp_real, "fake": tmp_fake}
