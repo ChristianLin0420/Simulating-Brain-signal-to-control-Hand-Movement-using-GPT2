@@ -217,7 +217,7 @@ class TFImageTransformer(tf.keras.layers.Layer):
         self.nx = nx
         self.initializer_range = initializer_range
 
-        self.out_height = 2044
+        self.out_height = 1020
         self.out_width = 500
         self.last_dim = last_dim
 
@@ -235,11 +235,11 @@ class TFImageTransformer(tf.keras.layers.Layer):
 
         # size = int(sl ** 0.5)
         # result = tf.reshape(x, [bz, size, size, last_dim])
-        result = tf.reshape(x, [bz, 2044, last_dim, 1])
+        result = tf.reshape(x, [bz, self.out_height, self.out_width, 1])
 
         # result = tf.math.maximum(result, -1.0)
-        result = tf.math.maximum(result, 0.0)
-        result = tf.math.minimum(result, 1.0)
+        # result = tf.math.maximum(result, 0.0)
+        # result = tf.math.minimum(result, 1.0)
 
         x = None
         del x

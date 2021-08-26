@@ -7,13 +7,12 @@ import argparse
 from matplotlib import pyplot as plt
 import numpy as np
 import tensorflow as tf
-import logging
 
 from datetime import datetime
 from tensorflow import keras
  
 from folder import check_folders
-from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels
+from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, load_dataset
 from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages
 from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image
 
@@ -37,6 +36,7 @@ def training(args, datasets, time, num_classes: int = 2):
     g_loss_collection = []
     d_loss_collection = []
 
+    epochs = int(args.epochs)
     batch_size = int(args.batch_size)
     round_num = int(args.num_round)
     last_dim = int(args.num_last_dim)
@@ -46,6 +46,10 @@ def training(args, datasets, time, num_classes: int = 2):
     add_class_dim = False
 
     while round_num >= current_round:
+
+        print("\n--------------------------------------------------------------")
+        print("-------------------------- Round {} --------------------------".format(current_round))
+        print("--------------------------------------------------------------\n")
 
         d_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
         g_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
@@ -156,90 +160,48 @@ def training(args, datasets, time, num_classes: int = 2):
                 loss_fn = loss_fn
             )
 
-            filenames, labels, steps = get_training_filenames_and_labels(batch_size = batch_size, subject_count = subject_count)
-
-            print("=" * 100)
-
-            print("filenames: {}".format(len(filenames)))
-            print("labels:    {}".format(len(labels)))
-            print("steps:     {}".format(steps))
-
-            print(filenames)
-            print(labels)
-
+            filenames, labels = get_training_filenames_and_labels(batch_size = batch_size, subject_count = subject_count)
             dataGenerator = DatasetGenerator(filenames = filenames, labels = labels, batch_size = batch_size, subject_count = subject_count)
 
-            history = model.fit_generator(  generator = dataGenerator, 
-                                            steps_per_epoch = steps / batch_size, 
-                                            epochs = int(args.epochs), 
-                                            verbose = 1, callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
-                                        )
+            train_x = np.asarray([])
+            train_y = np.asarray([])
 
-            g_loss = history.history['g_loss']
-            d_loss = history.history['d_loss']
+            for idx in range(subject_count):
 
-            g_loss_collection.append(g_loss)
-            d_loss_collection.append(d_loss)
-
-            # save training loss figure
-            save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
-            save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
-            save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
-
-            g_loss = None
-            d_loss = None
-            history = None
-
-            del g_loss
-            del d_loss
-            del history
-
-
-            # start_index = 0
-            # data_count = 0
-
-            # while start_index < 1: # < len(dirs):
-            #     print("-" * 100)
-            #     print("start index is {}".format(start_index))
-            #     datasets = load_dataset(start_index = start_index)
+                print("\n================================================= Start Iteration {} =================================================\n".format(idx))
                 
-            #     if datasets is not None:
-            #         data_count += int(datasets[0].shape[0])
-            #         start_index += 4
+                (train_x, train_y) = dataGenerator.getItem()
 
-            #         history = model.fit(
-            #             x = datasets[0],
-            #             y = datasets[1],
-            #             batch_size = batch_size,
-            #             epochs = int(args.epochs), 
-            #             verbose = 1, 
-            #             callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
-            #         )
+                print("train_x shape: {}".format(train_x.shape))
+                print("train_y shape: {}".format(train_y.shape))
 
-                    # g_loss = history.history['g_loss']
-                    # d_loss = history.history['d_loss']
+                history = model.fit(
+                            x = train_x,
+                            y = train_y,
+                            batch_size = batch_size,
+                            epochs = epochs, 
+                            verbose = 1, 
+                            callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
+                        )
 
-                    # g_loss_collection.append(g_loss)
-                    # d_loss_collection.append(d_loss)
+                g_loss = history.history['g_loss']
+                d_loss = history.history['d_loss']
 
-                    # # save training loss figure
-                    # save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
-                    # save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
-                    # save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
+                g_loss_collection.append(g_loss)
+                d_loss_collection.append(d_loss)
 
-                    # g_loss = None
-                    # d_loss = None
-                    # history = None
+                # save training loss figure
+                save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+                save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
+                save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
 
-                    # del g_loss
-                    # del d_loss
-                    # del history
-                    
-            #         datasets = None
-            #     else:
-            #         break
+                g_loss = None
+                d_loss = None
+                history = None
 
-            #     del datasets
+                del g_loss
+                del d_loss
+                del history
 
             # save model
             save_model_config(config, str(args.model), time, current_round)
@@ -306,14 +268,14 @@ if __name__ == '__main__':
     parser.add_argument("--buffer_size", default = 1000)
     parser.add_argument("--batch_size", default = 8)
     parser.add_argument("--epochs", default = 50)
-    parser.add_argument("--noise_len", default = 2044)
-    parser.add_argument("--noise_hidden_dim", default = 500)
+    parser.add_argument("--noise_len", default = 1020) 
+    parser.add_argument("--noise_hidden_dim", default = 16)
     parser.add_argument("--example_to_generate", default = 16)
     parser.add_argument("--num_layer", default = 2)
-    parser.add_argument("--num_head", default = 6)
-    parser.add_argument("--num_last_dim", default = 1)
+    parser.add_argument("--num_head", default = 3)
+    parser.add_argument("--num_last_dim", default = 500)
     parser.add_argument("--num_round", default = 3)
-    parser.add_argument("--subject_count", default = 2)
+    parser.add_argument("--subject_count", default = 1)
     parser.add_argument("--use_gpu", default = True)  
     parser.add_argument('--gpu_id', default = 0)
     parser.add_argument("--load_model", default = False)
@@ -345,7 +307,6 @@ if __name__ == '__main__':
     if args.use_gpu:
         try:
             gpus = tf.config.list_physical_devices(device_type = 'GPU')
-            print(gpus)
             
             if gpus:
                 tf.config.set_visible_devices(devices = gpus[0], device_type = 'GPU')

@@ -172,8 +172,8 @@ def save_distribution_record(data, epoch, time, model_name, n_round):
 
     plt.xlabel("generated values")
     plt.title(title)
-    plt.ylim(0, 100)
-    plt.xlim(0, 1.5)
+    plt.ylim(0, 40)
+    plt.xlim(0, 1.0)
 
     plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}.png'.format(model_name, time, n_round, epoch))
     plt.close()

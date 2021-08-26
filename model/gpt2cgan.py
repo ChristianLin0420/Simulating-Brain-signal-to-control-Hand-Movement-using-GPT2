@@ -75,6 +75,9 @@ class gpt2cgan(tf.keras.Model):
         image_size_w = real_images.shape[2]
         num_classes = real_labels.shape[-1]
 
+        # print("-------- train data shape : {} --------".format(real_images.shape))
+        # print("-------- train label shape: {} --------".format(real_labels))
+
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
         one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
@@ -88,20 +91,21 @@ class gpt2cgan(tf.keras.Model):
         )
         
         # Sample random points in the latent space
-        batch_size = real_images.shape[0]
+        batch_size = 8 #real_images.shape[0]
         d_loss = 0
 
         tmp_real = tf.constant(0)
         tmp_fake = tf.constant(0)
 
         for _ in range(self.d_extra_steps):
-            random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
 
+            random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
             random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
 
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
 
+            random_latent_vectors = None
             del random_latent_vectors
 
             # Combine them with real images
@@ -117,10 +121,8 @@ class gpt2cgan(tf.keras.Model):
             # Add random noise to the labels - important trick!
             labels += 0.05 * tf.random.uniform(tf.shape(labels))
 
-            # print('0' * 100)
             tmp_real = tf.reshape(real_images, shape = [-1])
             tmp_fake = tf.reshape(generated_images, shape = [-1])
-            # print('1' * 100)
 
             # Train the disciminator
             with tf.GradientTape() as tape:
@@ -140,8 +142,7 @@ class gpt2cgan(tf.keras.Model):
         # Assemble labels that say "all real images"
         misleading_labels = tf.zeros((batch_size, 1))
 
-        # Train the generator (note that we should *not* update the weights
-        # of the discriminator)!
+        # Train the generator (note that we should *not* update the weights of the discriminator)!
         with tf.GradientTape() as tape:
             fake_images = self.generator(random_latent_vectors)
             fake_image_and_labels = tf.concat([fake_images, image_one_hot_labels], -1)
@@ -161,6 +162,5 @@ class gpt2cgan(tf.keras.Model):
 
         # generate image from given seed
         # predictions = self.generator(self.seed, training = False)
-        # print('2' * 100)
         
         return {"d_loss": d_loss, "g_loss": g_loss, "real": tmp_real, "fake": tmp_fake}

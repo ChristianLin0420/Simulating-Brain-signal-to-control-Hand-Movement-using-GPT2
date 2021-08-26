@@ -3,6 +3,7 @@ import os
 from matplotlib.pyplot import axis
 import numpy as np
 import tensorflow as tf
+import time as tt
 
 from tensorflow import keras
 
@@ -17,7 +18,6 @@ def get_training_filenames_and_labels(batch_size: int = 8, subject_count: int = 
     train_data_label = []
 
     dirs = dirs[:subject_count]
-    steps = 0
 
     for dir in dirs:
         path = ROOT_DIR + '/' + dir
@@ -35,56 +35,44 @@ def get_training_filenames_and_labels(batch_size: int = 8, subject_count: int = 
             train_data_label.append(1)
             train_data_label.append(0)
 
-            open_data_count = np.load(eye_open_path, allow_pickle = True).shape[0]
-            close_data_count = np.load(eye_close_path, allow_pickle = True).shape[0]
-            data_count = min(open_data_count, close_data_count)
-            data_count = data_count / batch_size
-            data_count = data_count * batch_size
-            steps += (data_count * 2)
+            # open_data_count = np.load(eye_open_path, allow_pickle = True)
+            # close_data_count = np.load(eye_close_path, allow_pickle = True)
+            # open_data_count = np.asarray(open_data_count["left"]).shape[0]
+            # close_data_count = np.asarray(close_data_count["left"]).shape[0]
+            # data_count = min(open_data_count, close_data_count)
+            # data_count = data_count / batch_size
+            # data_count = data_count * batch_size
 
-            print("open_data_count: {}, close_data_count: {}, data_count: {}, steps: {}".format(open_data_count, close_data_count, data_count, steps))
+            # print("open_data_count: {}, close_data_count: {}, data_count: {}".format(open_data_count, close_data_count, data_count))
 
-    return train_data_filenames, train_data_label, steps
+    return train_data_filenames, train_data_label
 
-class DatasetGenerator(keras.utils.Sequence):
+class DatasetGenerator():
 
     def __init__(self, filenames, labels, batch_size, subject_count) :
         self.image_filenames = filenames
         self.labels = labels
 
-        self.current_train_data = np.asarray([])
-        self.current_train_label = np.asarray([])
-
         self.batch_size = batch_size
         self.subjects_count = subject_count
 
         self.current_subject_index = 0
-        self.current_start_index = 0
-        self.current_train_batch_count = -1
-        
-    def __len__(self) :
-        return (np.ceil(len(self.image_filenames) / float(self.batch_size))).astype(np.int)
 
-    def __getitem__(self, index):
+    def getItem(self):
 
-        print("current_train_batch_count: {}, current_start_index: {}, current_subject_index: {}".format(self.current_train_batch_count, self.current_start_index, self.current_subject_index))
-
-        if self.current_train_batch_count == -1 or self.current_start_index == 0 and self.current_subject_index < self.subjects_count:
+        if self.current_subject_index < self.subjects_count:
             
             print("============= Generating new train dataset for subject {} =============".format(self.current_subject_index))
 
             idx = self.current_subject_index
             
-            batch_x = self.image_filenames[idx * self.batch_size : (idx + 1) * self.batch_size]
-            batch_y = self.labels[idx * self.batch_size : (idx + 1) * self.batch_size]
+            batch_x = self.image_filenames[idx * 2 : idx * 2 + 1]
+            batch_y = self.labels[idx * 2 : idx * 2 + 1]
             
             train_data = np.asarray([])
             train_label = np.asarray([])
 
             for idx, path in enumerate(batch_x):
-                
-                tmp_train_data = np.asarray([])
-                tmp_train_label = np.asarray([])
 
                 data = np.load(path, allow_pickle = True)
 
@@ -95,41 +83,24 @@ class DatasetGenerator(keras.utils.Sequence):
                 right_shape = right_data.shape
 
                 epoch = min(left_shape[0], right_shape[0])
-                epoch = epoch / self.batch_size
-                epoch = epoch * self.batch_size
+                epoch = int(epoch / self.batch_size)
+                epoch = int(epoch * self.batch_size)
 
-                timestamp = left_shape[-1]
+                timestamp = 500 #int(left_shape[-1])
                 left_vertex_count = left_shape[1] / SUBGROUP_SIZE
                 right_vertex_count = right_shape[1] / SUBGROUP_SIZE
-                vertex_count = min(left_vertex_count, right_vertex_count) * SUBGROUP_SIZE
+                vertex_count = int(min(left_vertex_count, right_vertex_count) * SUBGROUP_SIZE)
 
                 left_data = left_data[:epoch, :vertex_count, :timestamp]   
                 right_data = right_data[:epoch, :vertex_count, :timestamp]
                 concat_data = np.concatenate((left_data, right_data), axis = 1)
-                label = np.asarray([batch_y[idx]] * epoch)         
+                train_label = np.asarray([batch_y[idx]] * epoch)         
 
-                for i in range(left_vertex_count):
-                    if len(tmp_train_data) == 0 and len(tmp_train_label) == 0:
-                        tmp_train_data = concat_data[:epoch, SUBGROUP_SIZE * i, :timestamp]
-                        tmp_train_label = label
+                for i in range(int(vertex_count / SUBGROUP_SIZE)):
+                    if len(train_data) == 0:
+                        train_data = concat_data[:epoch, SUBGROUP_SIZE * i:SUBGROUP_SIZE * (i + 1), :timestamp]
                     else:
-                        tmp_train_data = np.concatenate((tmp_train_data, concat_data[:epoch, SUBGROUP_SIZE * i, :timestamp]), axis = 1)
-                        tmp_train_label = np.concatenate((tmp_train_label, label), axis = 0)
-
-                if len(train_data) == 0 and len(train_label) == 0:
-                    train_data = tmp_train_data
-                    train_label = tmp_train_label
-                else:
-                    assert train_data.shape[0] == train_label.shape[0]
-
-                    train_data = np.concatenate((train_data, tmp_train_data), axis = 0)
-                    train_label = np.concatenate((train_label, tmp_train_label), axis = 0)
-
-                tmp_train_data = None
-                tmp_train_label = None
-
-                del tmp_train_data
-                del tmp_train_label
+                        train_data = np.concatenate((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:SUBGROUP_SIZE * (i + 1), :timestamp]), axis = 1)
             
             p = np.random.permutation(train_data.shape[0])
             train_data = train_data[p]
@@ -138,31 +109,13 @@ class DatasetGenerator(keras.utils.Sequence):
             train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
             train_label = keras.utils.to_categorical(train_label, 2)
 
-            self.current_train_data = train_data.astype(np.float32)
-            self.current_train_label = train_label.astype(np.float32)
+            train_data = train_data.astype(np.float32)
+            train_label = train_label.astype(np.float32)
 
-            self.current_start_index = 1
+            self.current_subject_index += 1
 
-            train_data = None
-            train_label = None
             p = None
-
-            del train_data
-            del train_label
             del p
-
-            return (self.current_train_data[:self.batch_size], self.current_train_label[:self.batch_size])
-
-        elif self.current_start_index < self.current_train_batch_count and self.current_subject_index < self.subjects_count :
-
-            train_data = self.current_train_data[self.current_start_index * self.batch_size : (self.current_start_index + 1) * self.batch_size]
-            train_label = self.current_train_label[self.current_start_index * self.batch_size : (self.current_start_index + 1) * self.batch_size]
-            
-            self.current_start_index += 1
-
-            if self.current_start_index == self.current_train_batch_count:
-                self.current_start_index = 0
-                self.current_subject_index += 1
 
             return (train_data, train_label)
         else:
