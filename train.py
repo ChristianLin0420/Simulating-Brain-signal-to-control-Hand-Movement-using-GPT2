@@ -170,7 +170,13 @@ def training(args, datasets, time, num_classes: int = 2):
 
                 print("\n================================================= Start Iteration {} =================================================\n".format(idx))
                 
-                (train_x, train_y) = dataGenerator.getItem()
+                get_data = False
+
+                while not get_data:
+                    (train_x, train_y) = dataGenerator.getItem()
+
+                    if train_x != -1 and train_y != -1:
+                        break
 
                 print("train_x shape: {}".format(train_x.shape))
                 print("train_y shape: {}".format(train_y.shape))
