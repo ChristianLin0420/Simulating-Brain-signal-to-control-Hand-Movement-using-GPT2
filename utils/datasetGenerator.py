@@ -109,6 +109,7 @@ class DatasetGenerator():
             print("train_data shape: {}".format(train_data.ndim))
 
             if train_data.ndim != 3:
+                self.current_subject_index += 1
                 return (-1, -1, False)
 
             train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])

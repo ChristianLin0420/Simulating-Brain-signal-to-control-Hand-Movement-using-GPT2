@@ -171,15 +171,14 @@ def training(args, datasets, time, num_classes: int = 2):
                 print("\n================================================= Start Iteration {} =================================================\n".format(idx))
                 
                 get_data = False
-                (train_x, train_y, valid) = dataGenerator.getItem()
+                (train_x, train_y, get_data) = dataGenerator.getItem()
 
-                if not valid:
-                    while not get_data:
-                        (train_x, train_y, valid) = dataGenerator.getItem()
+                while not get_data:
+                    (train_x, train_y, valid) = dataGenerator.getItem()
 
-                        if valid:
-                            get_data = True
-                            break
+                    if valid:
+                        get_data = True
+                        break
 
                 print("train_x shape: {}".format(train_x.shape))
                 print("train_y shape: {}".format(train_y.shape))
