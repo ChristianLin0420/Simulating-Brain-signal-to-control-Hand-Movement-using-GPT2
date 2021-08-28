@@ -106,6 +106,8 @@ class DatasetGenerator():
             train_data = train_data[p]
             train_label = train_label[p]
 
+            print("train_data shape: {}".format(train_data.shape))
+
             train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
             train_label = keras.utils.to_categorical(train_label, 2)
 
