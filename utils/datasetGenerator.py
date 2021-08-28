@@ -106,7 +106,7 @@ class DatasetGenerator():
             train_data = train_data[p]
             train_label = train_label[p]
 
-            print("train_data shape: {}".format(train_data.shape))
+            print("train_data shape: {}".format(train_data.ndim))
 
             if train_data.ndim != 3:
                 return -1, -1
