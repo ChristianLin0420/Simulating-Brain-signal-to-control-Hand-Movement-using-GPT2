@@ -173,9 +173,9 @@ def training(args, datasets, time, num_classes: int = 2):
                 get_data = False
 
                 while not get_data:
-                    (train_x, train_y) = dataGenerator.getItem()
+                    (train_x, train_y, valid) = dataGenerator.getItem()
 
-                    if train_x != -1 and train_y != -1:
+                    if not valid:
                         break
 
                 print("train_x shape: {}".format(train_x.shape))

@@ -109,7 +109,7 @@ class DatasetGenerator():
             print("train_data shape: {}".format(train_data.ndim))
 
             if train_data.ndim != 3:
-                return -1, -1
+                return (-1, -1, False)
 
             train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
             train_label = keras.utils.to_categorical(train_label, 2)
@@ -122,9 +122,9 @@ class DatasetGenerator():
             p = None
             del p
 
-            return (train_data, train_label)
+            return (train_data, train_label, True)
         else:
-            return (None, None)
+            return (None, None, False)
 
 
 
