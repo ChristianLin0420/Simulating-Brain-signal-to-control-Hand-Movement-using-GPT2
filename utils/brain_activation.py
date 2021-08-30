@@ -85,8 +85,7 @@ def generate_eeg(real_data, activation_l, activation_r, transformation_matrix, e
 
     if not os.path.exists(directory1):
         os.mkdir(directory1)
-    
-    os.mkdir(directory2)
+        os.mkdir(directory2)
 
     real = np.asarray(real_data)
     left = np.asarray(activation_l)
