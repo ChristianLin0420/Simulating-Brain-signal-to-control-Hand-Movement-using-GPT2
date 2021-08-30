@@ -217,7 +217,7 @@ class TFImageTransformer(tf.keras.layers.Layer):
         self.nx = nx
         self.initializer_range = initializer_range
 
-        self.out_height = 1020
+        self.out_height = 521
         self.out_width = 500
         self.last_dim = last_dim
 

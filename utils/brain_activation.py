@@ -1,6 +1,7 @@
 
 import os
 import mne
+import json
 import numpy as np
 
 LEFT_VERTEX_SIZE = 1022
@@ -9,10 +10,13 @@ SUBGROUP_SIZE = 4
 
 def boolean_brain():
 
-    path = ''
+    path = '/home/jupyter-ivanljh123/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/boolean.json'
 
-    
-    pass
+    # Read JSON file
+    with open(path) as data_file:
+        data_loaded = json.load(data_file)
+
+    return (data_loaded["left"], data_loaded["right"])
 
 def restore_brain_activation(data):
 

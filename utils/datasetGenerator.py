@@ -87,20 +87,19 @@ class DatasetGenerator():
                 epoch = int(epoch * self.batch_size)
 
                 timestamp = 500 #int(left_shape[-1])
-                left_vertex_count = left_shape[1] / SUBGROUP_SIZE
-                right_vertex_count = right_shape[1] / SUBGROUP_SIZE
-                vertex_count = int(min(left_vertex_count, right_vertex_count) * SUBGROUP_SIZE)
+                left_vertex_count = int(left_shape[1] / SUBGROUP_SIZE)
+                right_vertex_count = int(right_shape[1] / SUBGROUP_SIZE)
 
-                left_data = left_data[:epoch, :vertex_count, :timestamp]   
-                right_data = right_data[:epoch, :vertex_count, :timestamp]
+                left_data = left_data[:epoch, :left_vertex_count * SUBGROUP_SIZE, :timestamp]   
+                right_data = right_data[:epoch, :right_vertex_count * SUBGROUP_SIZE, :timestamp]
                 concat_data = np.concatenate((left_data, right_data), axis = 1)
                 train_label = np.asarray([batch_y[idx]] * epoch)         
 
-                for i in range(int(vertex_count / SUBGROUP_SIZE)):
+                for i in range(int(concat_data.shape[1] / SUBGROUP_SIZE)):
                     if len(train_data) == 0:
-                        train_data = concat_data[:epoch, SUBGROUP_SIZE * i:SUBGROUP_SIZE * (i + 1), :timestamp]
+                        train_data = concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]
                     else:
-                        train_data = np.concatenate((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:SUBGROUP_SIZE * (i + 1), :timestamp]), axis = 1)
+                        train_data = np.concatenate((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]), axis = 1)
             
             p = np.random.permutation(train_data.shape[0])
             train_data = train_data[p]
