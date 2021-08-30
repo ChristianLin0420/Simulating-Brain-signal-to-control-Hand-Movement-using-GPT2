@@ -227,15 +227,16 @@ class TFImageTransformer(tf.keras.layers.Layer):
         )
 
     def call(self, inputs):
+        # print("-" * 100)
+        # print(shape_list(inputs))
         bz, sl = shape_list(inputs)[:2]
 
-        x = tf.reshape(inputs, [-1, self.nx])
-        x = tf.matmul(x, self.transformer)
-        last_dim = shape_list(self.transformer)[-1]
+        # x = tf.reshape(inputs, [-1, self.nx])
+        # x = tf.matmul(x, self.transformer)
 
         # size = int(sl ** 0.5)
         # result = tf.reshape(x, [bz, size, size, last_dim])
-        result = tf.reshape(x, [bz, self.out_height, self.out_width, 1])
+        result = tf.reshape(inputs, [bz, self.out_height, self.out_width, 1])
 
         # result = tf.math.maximum(result, -1.0)
         # result = tf.math.maximum(result, 0.0)

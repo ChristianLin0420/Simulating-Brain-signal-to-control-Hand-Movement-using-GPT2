@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 from logging import error
 
+from .brain_activation import restore_brain_activation, generate_eeg 
 
 def show_generated_image(prediction):
     

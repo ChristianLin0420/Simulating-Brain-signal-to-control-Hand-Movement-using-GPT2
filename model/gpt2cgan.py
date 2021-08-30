@@ -1,10 +1,12 @@
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops.gen_math_ops import real
 
 from .gpt2 import TFGPT2MainLayer
 from .discriminator import Discriminator
 
+SUBGROUP_SIZE = 4
 
 class gpt2cgan(tf.keras.Model):
 
@@ -67,13 +69,52 @@ class gpt2cgan(tf.keras.Model):
         gp = tf.reduce_mean((norm - 1.0) ** 2)
         return gp
 
+    def generate_original_full_brain_activation(self, original_images):
+
+        train_data = tf.constant([])
+
+        left_data = original_images[:, :1022, :]
+        right_data = original_images[:, 1022:, :]
+
+        left_shape = left_data.shape
+        right_shape = right_data.shape
+
+        epoch = 8
+        timestamp = 500
+
+        left_vertex_count = int(left_shape[1] / SUBGROUP_SIZE)
+        right_vertex_count = int(right_shape[1] / SUBGROUP_SIZE)
+
+        left_data = left_data[:epoch, :left_vertex_count * SUBGROUP_SIZE, :timestamp]   
+        right_data = right_data[:epoch, :right_vertex_count * SUBGROUP_SIZE, :timestamp]
+
+        concat_data = tf.concat([left_data, right_data], axis = 1)
+
+        start = False
+
+        for i in range(int(concat_data.shape[1] / SUBGROUP_SIZE)):
+            if not start:
+                train_data = concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]
+                start = True
+            else:
+                train_data = tf.concat((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]), axis = 1)
+
+        # print("----- train_data shape is {} -----".format(train_data.shape))
+
+        return train_data
+
+
     def train_step(self, data):
 
-        real_images, real_labels = data
+        real, real_labels = data
 
+        # image_size_h = real.shape[1]
+        # image_size_w = real.shape[2]
+        num_classes = real_labels.shape[-1]
+
+        real_images = self.generate_original_full_brain_activation(real)
         image_size_h = real_images.shape[1]
         image_size_w = real_images.shape[2]
-        num_classes = real_labels.shape[-1]
 
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
@@ -118,8 +159,8 @@ class gpt2cgan(tf.keras.Model):
             # Add random noise to the labels - important trick!
             labels += 0.05 * tf.random.uniform(tf.shape(labels))
 
-            tmp_real = tf.reshape(real_images, shape = [-1])
-            tmp_fake = tf.reshape(generated_images, shape = [-1])
+            tmp_real = tf.reshape(real[0], shape = [-1])
+            tmp_fake = tf.reshape(generated_images[0], shape = [-1])
 
             # Train the disciminator
             with tf.GradientTape() as tape:

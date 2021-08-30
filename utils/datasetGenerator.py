@@ -62,8 +62,6 @@ class DatasetGenerator():
 
         if self.current_subject_index < self.subjects_count:
             
-            print("============= Generating new train dataset for subject {} =============".format(self.current_subject_index))
-
             idx = self.current_subject_index
             
             batch_x = self.image_filenames[idx * 2 : idx * 2 + 1]
@@ -86,26 +84,28 @@ class DatasetGenerator():
                 epoch = int(epoch / self.batch_size)
                 epoch = int(epoch * self.batch_size)
 
-                timestamp = 500 #int(left_shape[-1])
-                left_vertex_count = int(left_shape[1] / SUBGROUP_SIZE)
-                right_vertex_count = int(right_shape[1] / SUBGROUP_SIZE)
+                timestamp = 500 
+                # left_vertex_count = int(left_shape[1] / SUBGROUP_SIZE)
+                # right_vertex_count = int(right_shape[1] / SUBGROUP_SIZE)
 
-                left_data = left_data[:epoch, :left_vertex_count * SUBGROUP_SIZE, :timestamp]   
-                right_data = right_data[:epoch, :right_vertex_count * SUBGROUP_SIZE, :timestamp]
-                concat_data = np.concatenate((left_data, right_data), axis = 1)
+                # left_data = left_data[:epoch, :left_vertex_count * SUBGROUP_SIZE, :timestamp]   
+                # right_data = right_data[:epoch, :right_vertex_count * SUBGROUP_SIZE, :timestamp]
+                left_data = left_data[:epoch, :, :timestamp]   
+                right_data = right_data[:epoch, :, :timestamp]
+                train_data = np.concatenate((left_data, right_data), axis = 1)
                 train_label = np.asarray([batch_y[idx]] * epoch)         
 
-                for i in range(int(concat_data.shape[1] / SUBGROUP_SIZE)):
-                    if len(train_data) == 0:
-                        train_data = concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]
-                    else:
-                        train_data = np.concatenate((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]), axis = 1)
+                # for i in range(int(concat_data.shape[1] / SUBGROUP_SIZE)):
+                #     if len(train_data) == 0:
+                #         train_data = concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]
+                #     else:
+                #         train_data = np.concatenate((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]), axis = 1)
             
             p = np.random.permutation(train_data.shape[0])
             train_data = train_data[p]
             train_label = train_label[p]
 
-            print("train_data shape: {}".format(train_data.ndim))
+            # print("train_data shape: {}".format(train_data.ndim))
 
             if train_data.ndim != 3:
                 self.current_subject_index += 1

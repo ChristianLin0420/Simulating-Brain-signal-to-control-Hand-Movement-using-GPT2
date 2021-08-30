@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 from .model_monitor import generate_and_save_images, save_result_as_gif, save_distribution_record
+from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, generate_eeg
 
 class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
     """Stop training when the loss is at its min, i.e. the loss stops decreasing.
@@ -64,6 +65,8 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         self.time = time
         self.n_round = n_round
         self.model_name = model_name
+        (self.boolean_l, self.boolean_r) = boolean_brain()
+        self.tranformation_matrix = transformation_matrix()
 
     def on_epoch_end(self, epoch, logs = None):
 
@@ -73,6 +76,12 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
 
         tmp_real = np.asarray(tmp_real)
         tmp_fake = np.asarray(tmp_fake)
+        
+        # print("tmp_real shape: {}".format(tmp_real.shape))
+        # print("tmp_fake shape: {}".format(tmp_fake.shape))
+
+        tmp_real = np.reshape(tmp_real, [2089, 500])
+        tmp_fake = np.reshape(tmp_fake, [521, 500])
         
         # generate_and_save_images(   predictions = predictions, 
         #                             time = self.time, 
@@ -85,17 +94,26 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         #                     model_name = self.model_name, 
         #                     n_round = self.n_round  )
 
-        distribution = [tmp_real, tmp_fake]
-        save_distribution_record(   data = distribution, 
-                                    epoch = epoch, 
-                                    time = self.time, 
-                                    model_name = self.model_name, 
-                                    n_round = self.n_round  )
+        # distribution = [tmp_real, tmp_fake]
+        # save_distribution_record(   data = distribution, 
+        #                             epoch = epoch, 
+        #                             time = self.time, 
+        #                             model_name = self.model_name, 
+        #                             n_round = self.n_round  )
 
+        (left_brain_activation, right_brain_activation) = restore_brain_activation(tmp_fake, self.boolean_l, self.boolean_r)
+        (left_real_activation, right_real_activation) = restore_brain_activation(tmp_real, self.boolean_l, self.boolean_r)
+        real = np.concatenate([left_real_activation, right_real_activation], axis = 0)
+        generate_eeg(real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
+    
         tmp_real = None
         tmp_fake = None
-        distribution = None
+        left_brain_activation = None
+        right_brain_activation = None
+        # distribution = None
 
         del tmp_real
         del tmp_fake
-        del distribution
+        del left_brain_activation
+        del right_brain_activation
+        # del distribution
