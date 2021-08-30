@@ -109,7 +109,7 @@ def generate_eeg(real_data, activation_l, activation_r, transformation_matrix, e
         ax[0].plot(real_converted_matrix[idx])
         ax[1].plot(fake_converted_matrix[idx])
 
-    plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{}.png".format(model_name, time, n_round, n_round))  # should before show method
+    plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{}.png".format(model_name, time, n_round, epoch))  # should before show method
     plt.close()
 
     left = None

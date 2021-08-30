@@ -94,12 +94,12 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         #                     model_name = self.model_name, 
         #                     n_round = self.n_round  )
 
-        # distribution = [tmp_real, tmp_fake]
-        # save_distribution_record(   data = distribution, 
-        #                             epoch = epoch, 
-        #                             time = self.time, 
-        #                             model_name = self.model_name, 
-        #                             n_round = self.n_round  )
+        distribution = [tmp_real, tmp_fake]
+        save_distribution_record(   data = distribution, 
+                                    epoch = epoch, 
+                                    time = self.time, 
+                                    model_name = self.model_name, 
+                                    n_round = self.n_round  )
 
         (left_brain_activation, right_brain_activation) = restore_brain_activation(tmp_fake, self.boolean_l, self.boolean_r)
         (left_real_activation, right_real_activation) = restore_brain_activation(tmp_real, self.boolean_l, self.boolean_r)
@@ -110,10 +110,10 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         tmp_fake = None
         left_brain_activation = None
         right_brain_activation = None
-        # distribution = None
+        distribution = None
 
         del tmp_real
         del tmp_fake
         del left_brain_activation
         del right_brain_activation
-        # del distribution
+        del distribution
