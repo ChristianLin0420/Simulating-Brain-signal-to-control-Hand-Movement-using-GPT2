@@ -5,7 +5,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-SUBGROUP_SIZE = 4
+SUBGROUP_SIZE = 1
 
 def boolean_brain():
 
@@ -44,7 +44,7 @@ def restore_brain_activation(activation, boolean_l, boolean_r):
     zero = [0] * 500
 
     count = 0
-    factor = 4 if len(activation) < 1000 else 1
+    factor = SUBGROUP_SIZE if len(activation) < 1000 else 1
 
     # print("factor: {}".format(factor))
 
@@ -121,3 +121,13 @@ def generate_eeg(real_data, activation_l, activation_r, transformation_matrix, e
     del left
     del right
     del vertex
+
+def generate_mne_plot(epoch, time, model_name, n_round):
+    directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
+    directory2 = 'results/img_results/{}/{}/{}/MNE'.format(model_name, time, n_round)
+
+    if not os.path.exists(directory1):
+        os.mkdir(directory1)
+    
+    if not os.path.exists(directory2):
+        os.mkdir(directory2)

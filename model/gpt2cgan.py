@@ -6,7 +6,7 @@ from tensorflow.python.ops.gen_math_ops import real
 from .gpt2 import TFGPT2MainLayer
 from .discriminator import Discriminator
 
-SUBGROUP_SIZE = 4
+SUBGROUP_SIZE = 1
 
 class gpt2cgan(tf.keras.Model):
 

@@ -81,7 +81,7 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         # print("tmp_fake shape: {}".format(tmp_fake.shape))
 
         tmp_real = np.reshape(tmp_real, [2089, 500])
-        tmp_fake = np.reshape(tmp_fake, [521, 500])
+        tmp_fake = np.reshape(tmp_fake, [2089, 500])
         
         # generate_and_save_images(   predictions = predictions, 
         #                             time = self.time, 

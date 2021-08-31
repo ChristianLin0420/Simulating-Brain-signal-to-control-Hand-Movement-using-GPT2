@@ -217,7 +217,7 @@ class TFImageTransformer(tf.keras.layers.Layer):
         self.nx = nx
         self.initializer_range = initializer_range
 
-        self.out_height = 521
+        self.out_height = 1044 #521
         self.out_width = 500
         self.last_dim = last_dim
 
@@ -454,7 +454,9 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
         # hidden_states = self.activation_layer(hidden_states)
-        hidden_states = self.transformer(hidden_states)
+        # hidden_states = self.transformer(hidden_states)
+        bz, _ = shape_list(hidden_states)[:2]
+        hidden_states = tf.reshape(hidden_states, [bz, 2089, 500, 1])
         
         return hidden_states
 
