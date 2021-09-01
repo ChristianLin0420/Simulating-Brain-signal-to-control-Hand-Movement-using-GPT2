@@ -143,7 +143,7 @@ def generate_single_channel_eeg_signal(real_data, activation_l, activation_r, tr
     fake_converted_matrix = np.dot(t_matrix, vertex)
 
     # start drawing result
-    fig, ax = plt.subplots(5, 12, figsize=(48, 20), sharex=True)
+    fig, ax = plt.subplots(10, 6, figsize=(48, 20), sharex=True)
 
     channel_name = ["Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5", "FC1", "FC2", "FC6", "C3", 
                     "Cz", "C4", "T8", "CP5", "CP1", "CP2", "CP6", "AFz", "P7", "P3", "Pz", "P4",
@@ -152,8 +152,8 @@ def generate_single_channel_eeg_signal(real_data, activation_l, activation_r, tr
                     "CP4", "TP8", "P5", "P1", "P2", "P6", "PO7", "PO3", "POz", "PO4", "PO8"]
 
     for idx in range(real_converted_matrix.shape[0]):
-        row = int(idx / 5)
-        col = int(idx % 5)
+        row = int(idx / 6)
+        col = int(idx % 6)
         ax[row, col].set_title(channel_name[idx])
         ax[row, col].plot(real_converted_matrix[idx], label = 'real signal')
         ax[row, col].plot(fake_converted_matrix[idx], label = 'generated signal')
