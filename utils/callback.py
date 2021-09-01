@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 from .model_monitor import generate_and_save_images, save_result_as_gif, save_distribution_record
-from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, generate_eeg
+from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, generate_eeg, generate_single_channel_eeg_signal
 
 class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
     """Stop training when the loss is at its min, i.e. the loss stops decreasing.
@@ -104,8 +104,9 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         (left_brain_activation, right_brain_activation) = restore_brain_activation(tmp_fake, self.boolean_l, self.boolean_r)
         (left_real_activation, right_real_activation) = restore_brain_activation(tmp_real, self.boolean_l, self.boolean_r)
         real = np.concatenate([left_real_activation, right_real_activation], axis = 0)
-        generate_eeg(real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
-    
+        # generate_eeg(real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
+        generate_single_channel_eeg_signal(real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
+        
         tmp_real = None
         tmp_fake = None
         left_brain_activation = None
