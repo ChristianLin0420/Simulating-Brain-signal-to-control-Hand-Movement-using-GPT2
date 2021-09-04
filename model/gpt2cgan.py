@@ -107,16 +107,15 @@ class gpt2cgan(tf.keras.Model):
     def train_step(self, data):
 
         real, real_labels = data
-
-        # image_size_h = real.shape[1]
-        # image_size_w = real.shape[2]
+        
         num_classes = real_labels.shape[-1]
 
         real_images = self.generate_original_full_brain_activation(real)
         image_size_h = real_images.shape[1]
         image_size_w = real_images.shape[2]
 
-        event = 'Eye_Open' if real_labels[0][0] == 0 else 'Eye_Close'
+        # event = 'Eye_Open' if real_labels[0][0] == 0 else 'Eye_Close'
+        # event = "Brain activation"
 
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
@@ -203,4 +202,4 @@ class gpt2cgan(tf.keras.Model):
         # generate image from given seed
         # predictions = self.generator(self.seed, training = False)
         
-        return {"d_loss": d_loss, "g_loss": g_loss, "real": tmp_real, "fake": tmp_fake, "event": event}
+        return {"d_loss": d_loss, "g_loss": g_loss, "real": tmp_real, "fake": tmp_fake}#, "event": event}
