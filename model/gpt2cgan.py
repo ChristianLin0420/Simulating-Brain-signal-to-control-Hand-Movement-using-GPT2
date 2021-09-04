@@ -116,6 +116,8 @@ class gpt2cgan(tf.keras.Model):
         image_size_h = real_images.shape[1]
         image_size_w = real_images.shape[2]
 
+        event = 'Eye_Open' if real_labels[0][0] == 0 else 'Eye_Close'
+
         # one hot information
         one_hot_labels = tf.expand_dims(real_labels, axis = 1)
         one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
@@ -201,4 +203,4 @@ class gpt2cgan(tf.keras.Model):
         # generate image from given seed
         # predictions = self.generator(self.seed, training = False)
         
-        return {"d_loss": d_loss, "g_loss": g_loss, "real": tmp_real, "fake": tmp_fake}
+        return {"d_loss": d_loss, "g_loss": g_loss, "real": tmp_real, "fake": tmp_fake, "event": event}

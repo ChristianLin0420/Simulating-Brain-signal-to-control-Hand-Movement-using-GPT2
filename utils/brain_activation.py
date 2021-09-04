@@ -2,6 +2,7 @@
 import os
 import mne
 import json
+import os.path as op
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -77,6 +78,47 @@ def restore_brain_activation(activation, boolean_l, boolean_r):
     # print("right_brain_activation shape is {}".format(right_brain_activation.shape))
 
     return (left_brain_activation, right_brain_activation)
+
+def fetch_brain_template():
+
+    data_path = "/home/jupyter-ivanljh123/rsc/EEG_Preprocessed"
+
+    input_fname = op.join(data_path, 'sub-010286_EC.set')
+        
+    # Load preprocessed data
+    raw = mne.io.read_raw_eeglab(input_fname, preload=True, verbose=False)
+
+    # Set montage
+    # Read and set the EEG electrode locations
+    montage = mne.channels.make_standard_montage('standard_1005')
+    raw.set_montage(montage)
+
+    # Set common average reference
+    raw.set_eeg_reference('average', projection=True, verbose=False)
+
+    # Construct epochs
+    events, _ = mne.events_from_annotations(raw, verbose=False)
+    raw.info["events"] = events
+
+    event_id = {"eyes close": 2}
+
+    tmin, tmax = 0., 2.  # in s
+    baseline = None
+
+    epochs = mne.Epochs(raw, 
+                        events=events,
+                        event_id=event_id, 
+                        tmin=tmin,
+                        tmax=tmax, 
+                        baseline=baseline, 
+                        verbose=False ) 
+
+    # plot evoked response for face A
+    evoked = epochs.average().pick('eeg')
+
+    del raw
+
+    return evoked
 
 def generate_eeg(real_data, activation_l, activation_r, transformation_matrix, epoch, time, model_name, n_round):
     
@@ -169,7 +211,7 @@ def generate_single_channel_eeg_signal(real_data, activation_l, activation_r, tr
     del right
     del vertex
 
-def generate_mne_plot(epoch, time, model_name, n_round):
+def generate_mne_plot(event, brain_template, real_data, activation_l, activation_r, transformation_matrix, epoch, time, model_name, n_round):
     directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
     directory2 = 'results/img_results/{}/{}/{}/MNE'.format(model_name, time, n_round)
 
@@ -178,3 +220,25 @@ def generate_mne_plot(epoch, time, model_name, n_round):
     
     if not os.path.exists(directory2):
         os.mkdir(directory2)
+
+    real = np.asarray(real_data)
+    left = np.asarray(activation_l)
+    right = np.asarray(activation_r)
+    vertex = np.concatenate([left, right], axis = 0)
+    t_matrix = np.asarray(transformation_matrix)
+
+    real_converted_matrix = np.dot(t_matrix, real)
+    fake_converted_matrix = np.dot(t_matrix, vertex)
+
+    # plot brain activation
+    brain_template.data = real_converted_matrix
+
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = event, show = False)
+    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}_original.png".format(model_name, time, n_round, epoch))
+    plt.close(ax)
+
+    brain_template.data = fake_converted_matrix
+
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = event, show = False)
+    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}_generated.png".format(model_name, time, n_round, epoch))
+    plt.close(ax)
