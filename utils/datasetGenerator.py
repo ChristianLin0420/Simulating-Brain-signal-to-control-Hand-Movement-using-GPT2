@@ -85,27 +85,14 @@ class DatasetGenerator():
                 epoch = int(epoch * self.batch_size)
 
                 timestamp = 500 
-                # left_vertex_count = int(left_shape[1] / SUBGROUP_SIZE)
-                # right_vertex_count = int(right_shape[1] / SUBGROUP_SIZE)
-
-                # left_data = left_data[:epoch, :left_vertex_count * SUBGROUP_SIZE, :timestamp]   
-                # right_data = right_data[:epoch, :right_vertex_count * SUBGROUP_SIZE, :timestamp]
                 left_data = left_data[:epoch, :, :timestamp]   
                 right_data = right_data[:epoch, :, :timestamp]
                 train_data = np.concatenate((left_data, right_data), axis = 1)
-                train_label = np.asarray([batch_y[idx]] * epoch)         
-
-                # for i in range(int(concat_data.shape[1] / SUBGROUP_SIZE)):
-                #     if len(train_data) == 0:
-                #         train_data = concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]
-                #     else:
-                #         train_data = np.concatenate((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]), axis = 1)
+                train_label = np.asarray([batch_y[idx]] * epoch)   
             
             p = np.random.permutation(train_data.shape[0])
             train_data = train_data[p]
             train_label = train_label[p]
-
-            # print("train_data shape: {}".format(train_data.ndim))
 
             if train_data.ndim != 3:
                 self.current_subject_index += 1
@@ -126,6 +113,56 @@ class DatasetGenerator():
         else:
             return (None, None, False)
 
+    def get_event(self):
+
+        if self.current_subject_index < self.subjects_count:
+            
+            idx = self.current_subject_index
+            
+            batch_x = self.image_filenames[:]
+            batch_y = self.labels[:]
+            
+            train_data = np.asarray([])
+            train_label = np.asarray([])
+
+            eye_close_data = np.asarray([])
+            eye_open_data = np.asarray([])
+
+            eye_close_exist = False
+            eye_open_exist = False
+
+            for idx, path in enumerate(batch_x):
+
+                data = np.load(path, allow_pickle = True)
+
+                left_data = data["left"]
+                right_data = data["right"]
+
+                left_shape = left_data.shape
+                right_shape = right_data.shape
+
+                epoch = min(left_shape[0], right_shape[0])
+                epoch = int(epoch / self.batch_size)
+                epoch = int(epoch * self.batch_size)
+
+                timestamp = 500 
+                left_data = left_data[:epoch, :, :timestamp]   
+                right_data = right_data[:epoch, :, :timestamp]
+                train_data = np.concatenate((left_data, right_data), axis = 1)
+                train_label = np.asarray([batch_y[idx]] * epoch)   
+
+                if eye_close_exist == False and batch_y[idx] == 0:
+                    eye_close_data = train_data[0, :, :]
+                    eye_close_exist = True
+                if eye_open_exist == False and batch_y[idx] == 1:
+                    eye_open_data = train_data[0, :, :]
+                    eye_open_exist = True
+                if eye_open_exist and eye_close_exist:
+                    break
+
+            return (eye_close_data, eye_open_data)
+        else:
+            return (None, None)
 
 
 #### testing dataset ####

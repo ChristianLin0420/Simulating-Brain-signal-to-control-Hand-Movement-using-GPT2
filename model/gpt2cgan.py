@@ -22,9 +22,9 @@ class gpt2cgan(tf.keras.Model):
         self.d_extra_steps = d_extra_steps
 
         # add one hot vector for every seed
-        self.seed = tf.random.normal([16, noise_len, noise_dim])
-        l = tf.constant([x % 10 for x in range(16)])
-        one_hot = tf.one_hot(l, depth = 10)
+        self.seed = tf.random.normal([2, noise_len, noise_dim])
+        l = tf.constant([x % 2 for x in range(2)])
+        one_hot = tf.one_hot(l, depth = 2)
         one_hot = tf.expand_dims(one_hot, axis = 1)
         one_hot = tf.repeat(one_hot, repeats = noise_len, axis = 1)
         self.seed = tf.concat([self.seed, one_hot], axis = 2)
@@ -98,8 +98,6 @@ class gpt2cgan(tf.keras.Model):
                 start = True
             else:
                 train_data = tf.concat((train_data, concat_data[:epoch, SUBGROUP_SIZE * i:(SUBGROUP_SIZE * i) + 1, :timestamp]), axis = 1)
-
-        # print("----- train_data shape is {} -----".format(train_data.shape))
 
         return train_data
 
@@ -200,6 +198,6 @@ class gpt2cgan(tf.keras.Model):
         del image_one_hot_labels
 
         # generate image from given seed
-        # predictions = self.generator(self.seed, training = False)
+        predictions = self.generator(self.seed, training = False)
         
-        return {"d_loss": d_loss, "g_loss": g_loss, "real": tmp_real, "fake": tmp_fake}#, "event": event}
+        return {"d_loss": d_loss, "g_loss": g_loss, "generated": predictions}#"real": tmp_real, "fake": predictions}#, "event": event}

@@ -151,31 +151,62 @@ def save_distribution_record(data, epoch, time, model_name, n_round):
 
     diractory = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
 
-    real_data = data[0]
-    generated_data = data[1]
+    real_close_data = data[0]
+    real_open_data = data[1]
+    generated_close_data = data[2]
+    generated_open_data = data[3]
 
-    real_data = np.asarray(real_data).flatten()
-    generated_data = np.asarray(generated_data).flatten()
+    real_close_data = np.asarray(real_close_data).flatten()
+    real_open_data = np.asarray(real_open_data).flatten()
+    generated_close_data = np.asarray(generated_close_data).flatten()
+    generated_open_data = np.asarray(generated_close_data).flatten()
 
     if not os.path.exists(diractory):
         os.mkdir(diractory)
 
-    diractory = 'results/img_results/{}/{}/{}/distribuion'.format(model_name, time, n_round)
+    directory = 'results/img_results/{}/{}/{}/distribuion'.format(model_name, time, n_round)
+    directory1 = 'results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}'.format(model_name, time, n_round, epoch)
 
-    if not os.path.exists(diractory):
-        os.mkdir(diractory)
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
-    title = "{}_distribution".format(model_name)
+    if not os.path.exists(directory1):
+        os.mkdir(directory1)
+
+    title = "{}-Eye Close Distribution".format(model_name)
 
     plt.figure(figsize = (8, 5))
-    sns.kdeplot(real_data)
-    sns.kdeplot(generated_data)
+    sns.kdeplot(real_close_data)
+    sns.kdeplot(generated_close_data)
 
     plt.xlabel("generated values")
     plt.title(title)
     plt.ylim(0, 40)
     plt.xlim(0, 1.0)
 
-    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}.png'.format(model_name, time, n_round, epoch))
+    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}/Eye_Close.png'.format(model_name, time, n_round, epoch))
     plt.close()
 
+    title = "{}-Eye Open Distribution".format(model_name)
+
+    plt.figure(figsize = (8, 5))
+    sns.kdeplot(real_open_data)
+    sns.kdeplot(generated_open_data)
+
+    plt.xlabel("generated values")
+    plt.title(title)
+    plt.ylim(0, 40)
+    plt.xlim(0, 1.0)
+
+    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}/Eye_Open.png'.format(model_name, time, n_round, epoch))
+    plt.close()
+
+    real_close_data = None
+    real_open_data = None
+    generated_close_data = None
+    generated_open_data = None
+
+    del real_close_data
+    del real_open_data
+    del generated_close_data
+    del generated_open_data

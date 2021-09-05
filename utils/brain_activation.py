@@ -164,10 +164,11 @@ def generate_eeg(real_data, activation_l, activation_r, transformation_matrix, e
     del right
     del vertex
 
-def generate_single_channel_eeg_signal(real_data, activation_l, activation_r, transformation_matrix, epoch, time, model_name, n_round):
+def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_activation_l, close_activation_r, open_activation_l, open_activation_r, transformation_matrix, epoch, time, model_name, n_round):
     
     directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
     directory2 = 'results/img_results/{}/{}/{}/EEG'.format(model_name, time, n_round)
+    directory3 = 'results/img_results/{}/{}/{}/EEG/iteration_{:04d}'.format(model_name, time, n_round, epoch)
 
     if not os.path.exists(directory1):
         os.mkdir(directory1)
@@ -175,17 +176,8 @@ def generate_single_channel_eeg_signal(real_data, activation_l, activation_r, tr
     if not os.path.exists(directory2):
         os.mkdir(directory2)
 
-    real = np.asarray(real_data)
-    left = np.asarray(activation_l)
-    right = np.asarray(activation_r)
-    vertex = np.concatenate([left, right], axis = 0)
-    t_matrix = np.asarray(transformation_matrix)
-
-    real_converted_matrix = np.dot(t_matrix, real)
-    fake_converted_matrix = np.dot(t_matrix, vertex)
-
-    # start drawing result
-    fig, ax = plt.subplots(10, 6, figsize=(48, 30), sharex=True)
+    if not os.path.exists(directory3):
+        os.mkdir(directory3)
 
     channel_name = ["Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5", "FC1", "FC2", "FC6", "C3", 
                     "Cz", "C4", "T8", "CP5", "CP1", "CP2", "CP6", "AFz", "P7", "P3", "Pz", "P4",
@@ -193,27 +185,81 @@ def generate_single_channel_eeg_signal(real_data, activation_l, activation_r, tr
                     "F2", "F6", "FT7", "FC3", "FC4", "FT8", "C1", "C2", "C6", "TP7", "CP3", "CPz",
                     "CP4", "TP8", "P5", "P1", "P2", "P6", "PO7", "PO3", "POz", "PO4", "PO8"]
 
-    for idx in range(real_converted_matrix.shape[0]):
+    real_close_data = np.asarray(real_close_data)
+    left = np.asarray(close_activation_l)
+    right = np.asarray(close_activation_r)
+    close_vertex = np.concatenate([left, right], axis = 0)
+    t_matrix = np.asarray(transformation_matrix)
+
+    real_close_converted_matrix = np.dot(t_matrix, real_close_data)
+    generated_close_converted_matrix = np.dot(t_matrix, close_vertex)
+
+    # start drawing result
+    fig, ax = plt.subplots(10, 6, figsize=(48, 30), sharex=True)
+
+    for idx in range(real_close_converted_matrix.shape[0]):
         row = int(idx / 6)
         col = int(idx % 6)
         ax[row, col].set_title(channel_name[idx])
-        ax[row, col].plot(real_converted_matrix[idx], label = 'real signal')
-        ax[row, col].plot(fake_converted_matrix[idx], label = 'generated signal')
+        ax[row, col].plot(real_close_converted_matrix[idx], label = 'real signal')
+        ax[row, col].plot(generated_close_converted_matrix[idx], label = 'generated signal')
 
-    plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}.png".format(model_name, time, n_round, epoch)) 
+    plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Close.png".format(model_name, time, n_round, epoch)) 
     plt.close()
 
+    real_open_data = np.asarray(real_open_data)
+    left = np.asarray(open_activation_l)
+    right = np.asarray(open_activation_r)
+    open_vertex = np.concatenate([left, right], axis = 0)
+    t_matrix = np.asarray(transformation_matrix)
+
+    real_open_converted_matrix = np.dot(t_matrix, real_open_data)
+    generated_open_converted_matrix = np.dot(t_matrix, open_vertex)
+
+    # start drawing result
+    fig, ax = plt.subplots(10, 6, figsize=(48, 30), sharex=True)
+
+    for idx in range(real_open_converted_matrix.shape[0]):
+        row = int(idx / 6)
+        col = int(idx % 6)
+        ax[row, col].set_title(channel_name[idx])
+        ax[row, col].plot(real_open_converted_matrix[idx], label = 'real signal')
+        ax[row, col].plot(generated_open_converted_matrix[idx], label = 'generated signal')
+
+    plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Open.png".format(model_name, time, n_round, epoch)) 
+    plt.close()
+
+    real_close_data = None
+    real_close_converted_matrix = None
+    generated_close_converted_matrix = None
+    real_open_data = None
+    real_open_converted_matrix = None
+    generated_open_converted_matrix = None
     left = None
     right = None
-    vertex = None
+    close_vertex = None
+    open_vertex = None
+    t_matrix = None
 
+    del real_close_data
+    del real_close_converted_matrix
+    del generated_close_converted_matrix
+    del real_open_data
+    del real_open_converted_matrix
+    del generated_open_converted_matrix
     del left
     del right
-    del vertex
+    del close_vertex
+    del open_vertex
+    del t_matrix
 
-def generate_mne_plot(event, brain_template, real_data, activation_l, activation_r, transformation_matrix, epoch, time, model_name, n_round):
+def generate_mne_plot(brain_template, real_close_data, real_open_data, close_activation_l, close_activation_r, open_activation_l, open_activation_r, transformation_matrix, epoch, time, model_name, n_round):
+
     directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
     directory2 = 'results/img_results/{}/{}/{}/MNE'.format(model_name, time, n_round)
+    directory3 = 'results/img_results/{}/{}/{}/MNE/iteration_{:04d}'.format(model_name, time, n_round, epoch)
+    directory4 = 'results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Close'.format(model_name, time, n_round, epoch)
+    directory5 = 'results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Open'.format(model_name, time, n_round, epoch)
 
     if not os.path.exists(directory1):
         os.mkdir(directory1)
@@ -221,24 +267,80 @@ def generate_mne_plot(event, brain_template, real_data, activation_l, activation
     if not os.path.exists(directory2):
         os.mkdir(directory2)
 
-    real = np.asarray(real_data)
-    left = np.asarray(activation_l)
-    right = np.asarray(activation_r)
-    vertex = np.concatenate([left, right], axis = 0)
+    if not os.path.exists(directory3):
+        os.mkdir(directory3)
+
+    if not os.path.exists(directory4):
+        os.mkdir(directory4)
+
+    if not os.path.exists(directory5):
+        os.mkdir(directory5)
+
+    real_close_data = np.asarray(real_close_data)
+    left = np.asarray(close_activation_l)
+    right = np.asarray(close_activation_r)
+    close_vertex = np.concatenate([left, right], axis = 0)
     t_matrix = np.asarray(transformation_matrix)
 
-    real_converted_matrix = np.dot(t_matrix, real)
-    fake_converted_matrix = np.dot(t_matrix, vertex)
+    real_close_converted_matrix = np.dot(t_matrix, real_close_data)
+    generated_close_converted_matrix = np.dot(t_matrix, close_vertex)
 
     # plot brain activation
-    brain_template.data = real_converted_matrix
+    brain_template.data = real_close_converted_matrix
 
-    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = event, show = False)
-    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}_original.png".format(model_name, time, n_round, epoch))
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Close Brain Activation', show = False)
+    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Close/Original.png".format(model_name, time, n_round, epoch))
     plt.close(ax)
 
-    brain_template.data = fake_converted_matrix
+    brain_template.data = generated_close_converted_matrix
 
-    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = event, show = False)
-    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}_generated.png".format(model_name, time, n_round, epoch))
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Eye Close Brain Activation', show = False)
+    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Close/Generated.png".format(model_name, time, n_round, epoch))
     plt.close(ax)
+
+
+    real_open_data = np.asarray(real_open_data)
+    left = np.asarray(open_activation_l)
+    right = np.asarray(open_activation_r)
+    open_vertex = np.concatenate([left, right], axis = 0)
+    t_matrix = np.asarray(transformation_matrix)
+
+    real_open_converted_matrix = np.dot(t_matrix, real_open_data)
+    generated_open_converted_matrix = np.dot(t_matrix, open_vertex)
+
+    # plot brain activation
+    brain_template.data = real_open_converted_matrix
+
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Open Brain Activation', show = False)
+    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Open/Original.png".format(model_name, time, n_round, epoch))
+    plt.close(ax)
+
+    brain_template.data = generated_open_converted_matrix
+
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Eye Open Brain Activation', show = False)
+    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Open/Generated.png".format(model_name, time, n_round, epoch))
+    plt.close(ax)
+
+    real_close_data = None
+    real_close_converted_matrix = None
+    generated_close_converted_matrix = None
+    real_open_data = None
+    real_open_converted_matrix = None
+    generated_open_converted_matrix = None
+    left = None
+    right = None
+    close_vertex = None
+    open_vertex = None
+    t_matrix = None
+
+    del real_close_data
+    del real_close_converted_matrix
+    del generated_close_converted_matrix
+    del real_open_data
+    del real_open_converted_matrix
+    del generated_open_converted_matrix
+    del left
+    del right
+    del close_vertex
+    del open_vertex
+    del t_matrix

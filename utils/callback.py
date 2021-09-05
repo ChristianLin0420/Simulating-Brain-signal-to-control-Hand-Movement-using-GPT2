@@ -60,29 +60,33 @@ class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
 
 class RecordGeneratedImages(tf.keras.callbacks.Callback):
 
-    def __init__(self, time, n_round, model_name):
+    def __init__(self, time, n_round, model_name, close_data, open_data):
         super(RecordGeneratedImages, self).__init__()
         self.time = time
         self.n_round = n_round
         self.model_name = model_name
+
+        self.close_data = np.asarray(close_data)
+        self.open_data = np.asarray(open_data)
+        self.close_data = np.reshape(self.close_data, [2089, 500])
+        self.open_data = np.reshape(self.open_data, [2089, 500])
+
         (self.boolean_l, self.boolean_r) = boolean_brain()
         self.tranformation_matrix = transformation_matrix()
         self.brain_template = fetch_brain_template()
 
     def on_epoch_end(self, epoch, logs = None):
 
-        # predictions = logs.get("predictions")
-        tmp_real = logs.get("real")
-        tmp_fake = logs.get("fake")
+        tmp_fake = logs.get("generated")
 
-        tmp_real = np.asarray(tmp_real)
-        tmp_fake = np.asarray(tmp_fake)
+        eye_close_event = tmp_fake[0]
+        eye_open_event = tmp_fake[1]
         
         # print("tmp_real shape: {}".format(tmp_real.shape))
         # print("tmp_fake shape: {}".format(tmp_fake.shape))
 
-        tmp_real = np.reshape(tmp_real, [2089, 500])
-        tmp_fake = np.reshape(tmp_fake, [2089, 500])
+        eye_close_event = np.reshape(eye_close_event, [2089, 500])
+        eye_open_event = np.reshape(eye_open_event, [2089, 500])
         
         # generate_and_save_images(   predictions = predictions, 
         #                             time = self.time, 
@@ -95,28 +99,40 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         #                     model_name = self.model_name, 
         #                     n_round = self.n_round  )
 
-        distribution = [tmp_real, tmp_fake]
+        distribution = [self.close_data, self.open_data, eye_close_event, eye_open_event]
         save_distribution_record(   data = distribution, 
                                     epoch = epoch, 
                                     time = self.time, 
                                     model_name = self.model_name, 
                                     n_round = self.n_round  )
 
-        (left_brain_activation, right_brain_activation) = restore_brain_activation(tmp_fake, self.boolean_l, self.boolean_r)
-        (left_real_activation, right_real_activation) = restore_brain_activation(tmp_real, self.boolean_l, self.boolean_r)
-        real = np.concatenate([left_real_activation, right_real_activation], axis = 0)
-        # generate_eeg(real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
-        generate_single_channel_eeg_signal(real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
-        generate_mne_plot("Brain activation", self.brain_template, real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
+        (left_brain_eye_close_activation, right_brain_eye_close_activation) = restore_brain_activation(eye_close_event, self.boolean_l, self.boolean_r)
+        (left_real_eye_close_activation, right_real_eye_close_activation) = restore_brain_activation(self.close_data, self.boolean_l, self.boolean_r)
+        real_close = np.concatenate([left_real_eye_close_activation, right_real_eye_close_activation], axis = 0)
 
-        tmp_real = None
+        (left_brain_eye_open_activation, right_brain_eye_open_activation) = restore_brain_activation(eye_open_event, self.boolean_l, self.boolean_r)
+        (left_real_eye_open_activation, right_real_eye_open_activation) = restore_brain_activation(self.open_data, self.boolean_l, self.boolean_r)
+        real_open = np.concatenate([left_real_eye_open_activation, right_real_eye_open_activation], axis = 0)
+
+
+        # generate_eeg(real, left_brain_activation, right_brain_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
+        generate_single_channel_eeg_signal(real_close, real_open, left_brain_eye_close_activation, right_brain_eye_close_activation, left_brain_eye_open_activation, right_brain_eye_open_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
+        generate_mne_plot(self.brain_template, real_close, real_open, left_brain_eye_close_activation, right_brain_eye_close_activation, left_brain_eye_open_activation, right_brain_eye_open_activation, self.tranformation_matrix, epoch, self.time, self.model_name, self.n_round)
+
         tmp_fake = None
-        left_brain_activation = None
-        right_brain_activation = None
+        eye_close_event = None
+        eye_open_event = None
+        left_brain_eye_close_activation = None
+        right_brain_eye_close_activation = None
+        left_brain_eye_open_activation = None
+        right_brain_eye_open_activation = None
         distribution = None
 
-        del tmp_real
         del tmp_fake
-        del left_brain_activation
-        del right_brain_activation
+        del eye_close_event
+        del eye_open_event
+        del left_brain_eye_close_activation
+        del right_brain_eye_close_activation
+        del left_brain_eye_open_activation
+        del right_brain_eye_open_activation
         del distribution

@@ -166,6 +166,11 @@ def training(args, datasets, time, num_classes: int = 2):
             train_x = np.asarray([])
             train_y = np.asarray([])
 
+            eye_close_data = np.asarray([])
+            eye_open_data = np.asarray([])
+
+            (eye_close_data, eye_open_data) = dataGenerator.get_event()
+
             for idx in range(subject_count):
 
                 print("\n================================================= Start Iteration {} =================================================\n".format(idx))
@@ -189,7 +194,7 @@ def training(args, datasets, time, num_classes: int = 2):
                             batch_size = batch_size,
                             epochs = epochs, 
                             verbose = 1, 
-                            callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model)]#, tensorboard_callback]
+                            callbacks = [RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data)]#, tensorboard_callback]
                         )
 
                 g_loss = history.history['g_loss']
