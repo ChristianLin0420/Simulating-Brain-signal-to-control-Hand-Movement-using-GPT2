@@ -23,6 +23,10 @@ class gpt2cgan(tf.keras.Model):
 
         # add one hot vector for every seed
         self.seed = tf.random.normal([2, noise_len, noise_dim])
+
+        # tmp = [0] * 100 + [1] * 100
+        # l = tf.constant(tmp)
+
         l = tf.constant([x % 2 for x in range(2)])
         one_hot = tf.one_hot(l, depth = 2)
         one_hot = tf.expand_dims(one_hot, axis = 1)
@@ -131,9 +135,6 @@ class gpt2cgan(tf.keras.Model):
         batch_size = 8 #real_images.shape[0]
         d_loss = 0
 
-        tmp_real = tf.constant(0)
-        tmp_fake = tf.constant(0)
-
         for _ in range(self.d_extra_steps):
 
             random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
@@ -158,16 +159,14 @@ class gpt2cgan(tf.keras.Model):
             # Add random noise to the labels - important trick!
             labels += 0.05 * tf.random.uniform(tf.shape(labels))
 
-            tmp_real = tf.reshape(real[0], shape = [-1])
-            tmp_fake = tf.reshape(generated_images[0], shape = [-1])
-
             # Train the disciminator
             with tf.GradientTape() as tape:
                 predictions = self.discriminator(combined_images)
                 # Calculate the gradient penalty
                 gp = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
                 # Add the gradient penalty to the original discriminator loss
-                d_loss = self.loss_fn(labels, predictions) + gp * self.gp_weight
+                # d_loss = self.loss_fn(labels, predictions) + gp * self.gp_weight
+                d_loss = tf.reduce_mean(fake_image_and_labels) - tf.reduce_mean(real_image_and_labels) + gp * self.gp_weight
 
             grads = tape.gradient(d_loss, self.discriminator.trainable_weights)
             self.d_optimizer.apply_gradients(zip(grads, self.discriminator.trainable_weights))
@@ -184,7 +183,8 @@ class gpt2cgan(tf.keras.Model):
             fake_images = self.generator(random_latent_vectors)
             fake_image_and_labels = tf.concat([fake_images, image_one_hot_labels], -1)
             predictions = self.discriminator(fake_image_and_labels)
-            g_loss = self.loss_fn(misleading_labels, predictions)
+            # g_loss = self.loss_fn(misleading_labels, predictions)
+            g_loss = -1.0 * tf.reduce_mean(fake_image_and_labels)
 
         grads = tape.gradient(g_loss, self.generator.trainable_weights)
         self.g_optimizer.apply_gradients(zip(grads, self.generator.trainable_weights))
@@ -200,4 +200,4 @@ class gpt2cgan(tf.keras.Model):
         # generate image from given seed
         predictions = self.generator(self.seed, training = False)
         
-        return {"d_loss": d_loss, "g_loss": g_loss, "generated": predictions}#"real": tmp_real, "fake": predictions}#, "event": event}
+        return {"d_loss": d_loss, "g_loss": g_loss, "generated": predictions}
