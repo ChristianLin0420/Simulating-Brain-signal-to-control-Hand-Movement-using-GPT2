@@ -143,3 +143,5 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
             del left_brain_eye_open_activation
             del right_brain_eye_open_activation
             del distribution
+
+        del generated
