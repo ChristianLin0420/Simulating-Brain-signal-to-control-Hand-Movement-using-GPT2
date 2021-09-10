@@ -300,7 +300,7 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     brain_template.data = real_close_converted_matrix
 
     ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Close Brain Activation in iteration {}'.format(epoch), show = False)
-    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Close/Original_{:04d}.png".format(model_name, time, n_round, epoch, event_idx))
+    ax.savefig("results/img_results/{}/{}/{}/MNE/Eye_Close_Original.png".format(model_name, time, n_round))
     plt.close(ax)
 
     brain_template.data = generated_close_converted_matrix
@@ -323,7 +323,7 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     brain_template.data = real_open_converted_matrix
 
     ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Open Brain Activation in iteration {}'.format(epoch), show = False)
-    ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Open/Original_{:04d}.png".format(model_name, time, n_round, epoch, event_idx))
+    ax.savefig("results/img_results/{}/{}/{}/MNE/Eye_Open_Original.png".format(model_name, time, n_round))
     plt.close(ax)
 
     brain_template.data = generated_open_converted_matrix
