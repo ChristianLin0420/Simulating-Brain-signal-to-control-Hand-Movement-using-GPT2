@@ -21,10 +21,12 @@ class gpt2cgan(tf.keras.Model):
         self.gp_weight = 10.0
         self.d_extra_steps = d_extra_steps
 
-        # add one hot vector for every seed
-        self.seed = tf.random.normal([100, noise_len, noise_dim])
+        generated_count = 16
 
-        tmp = [0] * 50 + [1] * 50
+        # add one hot vector for every seed
+        self.seed = tf.random.normal([generated_count, noise_len, noise_dim])
+
+        tmp = [0] * (generated_count / 2) + [1] * (generated_count / 2)
         l = tf.constant(tmp)
 
         # l = tf.constant([x % 2 for x in range(2)])

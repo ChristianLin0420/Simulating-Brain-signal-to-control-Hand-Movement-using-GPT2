@@ -79,10 +79,12 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
 
         tmp_fake = logs.get("generated")
 
-        for idx in range(50):
+        event_count = 8
+
+        for idx in range(event_count):
 
             close_event_idx = idx
-            open_event_idx = idx + 50
+            open_event_idx = idx + event_count
 
             eye_close_event = tmp_fake[close_event_idx]
             eye_open_event = tmp_fake[open_event_idx]
