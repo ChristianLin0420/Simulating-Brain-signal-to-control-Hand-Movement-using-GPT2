@@ -77,16 +77,16 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs = None):
 
-        tmp_fake = logs.get("generated")
+        generated = logs.get("generated")
 
         event_count = 8
 
         for idx in range(event_count):
 
+            tmp_fake = generated
+
             close_event_idx = idx
             open_event_idx = idx + event_count
-
-            print(len(tmp_fake))
 
             eye_close_event = tmp_fake[close_event_idx]
             eye_open_event = tmp_fake[open_event_idx]
