@@ -6,6 +6,8 @@ import os.path as op
 import numpy as np
 import matplotlib.pyplot as plt
 
+from numpy.fft import fft
+
 SUBGROUP_SIZE = 1
 
 def boolean_brain():
@@ -229,6 +231,15 @@ def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_ac
     plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Open.png".format(model_name, time, n_round, epoch)) 
     plt.close()
 
+    # apply sftf
+    for idx in range(real_close_converted_matrix.shape[0]):
+        if channel_name[idx] in ["C3", "C4", "Cz"]:
+            generate_power_spectrum(False, channel_name[idx], real_close_converted_matrix[idx], generated_close_converted_matrix[idx], epoch, time, model_name, n_round)
+
+    for idx in range(real_open_converted_matrix.shape[0]):
+        if channel_name[idx] in ["C3", "C4", "Cz"]:
+            generate_power_spectrum(True, channel_name[idx], real_open_converted_matrix[idx], generated_open_converted_matrix[idx], epoch, time, model_name, n_round)
+
     real_close_data = None
     real_close_converted_matrix = None
     generated_close_converted_matrix = None
@@ -288,13 +299,13 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     # plot brain activation
     brain_template.data = real_close_converted_matrix
 
-    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Close Brain Activation', show = False)
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Close Brain Activation in iteration {}'.format(epoch), show = False)
     ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Close/Original.png".format(model_name, time, n_round, epoch))
     plt.close(ax)
 
     brain_template.data = generated_close_converted_matrix
 
-    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Eye Close Brain Activation', show = False)
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Eye Close Brain Activation in iteration {}'.format(epoch), show = False)
     ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Close/Generated.png".format(model_name, time, n_round, epoch))
     plt.close(ax)
 
@@ -311,13 +322,13 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     # plot brain activation
     brain_template.data = real_open_converted_matrix
 
-    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Open Brain Activation', show = False)
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Eye Open Brain Activation in iteration {}'.format(epoch), show = False)
     ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Open/Original.png".format(model_name, time, n_round, epoch))
     plt.close(ax)
 
     brain_template.data = generated_open_converted_matrix
 
-    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Eye Open Brain Activation', show = False)
+    ax = brain_template.plot_topomap(times=np.linspace(0.0, 0.2, 20), ch_type='eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Eye Open Brain Activation in iteration {}'.format(epoch), show = False)
     ax.savefig("results/img_results/{}/{}/{}/MNE/iteration_{:04d}/Eye_Open/Generated.png".format(model_name, time, n_round, epoch))
     plt.close(ax)
 
@@ -344,3 +355,55 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     del close_vertex
     del open_vertex
     del t_matrix
+
+def generate_power_spectrum(eye_open, channel, original_signal, generated_signal, epoch, time, model_name, n_round):
+
+    directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
+    directory2 = 'results/img_results/{}/{}/{}/Spectrum'.format(model_name, time, n_round)
+    directory3 = 'results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}'.format(model_name, time, n_round, epoch)
+    directory4 = 'results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/Eye_Close'.format(model_name, time, n_round, epoch)
+    directory5 = 'results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/Eye_Open'.format(model_name, time, n_round, epoch)
+
+    if not os.path.exists(directory1):
+        os.mkdir(directory1)
+    
+    if not os.path.exists(directory2):
+        os.mkdir(directory2)
+
+    if not os.path.exists(directory3):
+        os.mkdir(directory3)
+
+    if not os.path.exists(directory4):
+        os.mkdir(directory4)
+
+    if not os.path.exists(directory5):
+        os.mkdir(directory5)
+
+    # plot original signal
+    N = original_signal.shape[0]
+    dt = 0.004
+    T = 2.0
+
+    xf_original = fft(original_signal - np.mean(original_signal))
+    xf_generated = fft(generated_signal - np.mean(generated_signal))
+    Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
+    Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
+    Sxx_generated = 2 * dt ** 2 / T * (xf_generated * xf_generated.conj())      # Compute spectrum
+    Sxx_generated = Sxx_generated[:int(N / 2)]                                  # Ignore negative frequencies
+
+    # start drawing result
+    fig, ax = plt.subplots(2, 1, figsize=(16, 10), sharex=True)
+
+    ax[0].plot(Sxx_original.real)
+    ax[0].set_title('Power Spectrum for channel {} from original signal in epoch {}'.format(channel, epoch))
+    ax[1].plot(Sxx_generated.real)
+    ax[1].set_title('Power Spectrum for channel {} from generated signal in epoch {}'.format(channel, epoch))
+
+    if not eye_open:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/Eye_Close/{}.png".format(model_name, time, n_round, epoch, channel))    # should before show method
+    else:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/Eye_Open/{}.png".format(model_name, time, n_round, epoch, channel))     # should before show method
+    
+    plt.close()
+
+    
