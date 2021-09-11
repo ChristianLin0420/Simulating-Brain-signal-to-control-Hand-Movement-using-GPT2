@@ -235,11 +235,11 @@ def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_ac
 
     # apply sftf
     for idx in range(real_close_converted_matrix.shape[0]):
-        if channel_name[idx] in ["C3", "C4", "Cz"]:
+        if channel_name[idx] in target_channel:
             generate_power_spectrum(False, channel_name[idx], real_close_converted_matrix[idx], generated_close_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
 
     for idx in range(real_open_converted_matrix.shape[0]):
-        if channel_name[idx] in ["C3", "C4", "Cz"]:
+        if channel_name[idx] in target_channel:
             generate_power_spectrum(True, channel_name[idx], real_open_converted_matrix[idx], generated_open_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
 
     real_close_data = None
