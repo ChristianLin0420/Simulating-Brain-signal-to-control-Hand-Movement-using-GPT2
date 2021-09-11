@@ -231,6 +231,8 @@ def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_ac
     plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Open_{:04d}.png".format(model_name, time, n_round, epoch, event_idx)) 
     plt.close()
 
+    target_channel = ["C3", "C4", "Cz", "O1", "O2", "Oz"]
+
     # apply sftf
     for idx in range(real_close_converted_matrix.shape[0]):
         if channel_name[idx] in ["C3", "C4", "Cz"]:
