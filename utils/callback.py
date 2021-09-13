@@ -94,7 +94,7 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
                 self.real_close = np.concatenate([self.real_close, tmp], axis = 0)
 
         for idx in range(open_len):
-            (left_real_eye_open_activation, right_real_eye_open_activation) = restore_brain_activation(self.open_data, self.boolean_l, self.boolean_r)
+            (left_real_eye_open_activation, right_real_eye_open_activation) = restore_brain_activation(self.open_data[idx], self.boolean_l, self.boolean_r)
             tmp = np.concatenate([left_real_eye_open_activation, right_real_eye_open_activation], axis = 0)
 
             tmp = np.expand_dims(tmp, axis = 0)
@@ -140,13 +140,13 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
         right_brain_eye_open_activation = np.asarray([])
 
         for idx in range(8):
-            (l_close_tmp, r_close_tmp) = restore_brain_activation(eye_close_event, self.boolean_l, self.boolean_r)
+            (l_close_tmp, r_close_tmp) = restore_brain_activation(eye_close_event[idx], self.boolean_l, self.boolean_r)
             l_close_tmp = np.expand_dims(l_close_tmp, axis = 0)
             r_close_tmp = np.expand_dims(r_close_tmp, axis = 0)
             # (left_real_eye_close_activation, right_real_eye_close_activation) = restore_brain_activation(self.close_data, self.boolean_l, self.boolean_r)
             # real_close = np.concatenate([left_real_eye_close_activation, right_real_eye_close_activation], axis = 0)
 
-            (l_open_tmp, r_open_tmp) = restore_brain_activation(eye_open_event, self.boolean_l, self.boolean_r)
+            (l_open_tmp, r_open_tmp) = restore_brain_activation(eye_open_event[idx], self.boolean_l, self.boolean_r)
             l_open_tmp = np.expand_dims(l_open_tmp, axis = 0)
             r_open_tmp = np.expand_dims(r_open_tmp, axis = 0)
             # (left_real_eye_open_activation, right_real_eye_open_activation) = restore_brain_activation(self.open_data, self.boolean_l, self.boolean_r)

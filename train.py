@@ -171,34 +171,27 @@ def training(args, datasets, time, num_classes: int = 2):
             eye_open_data = np.asarray([])
 
             (eye_close_data, eye_open_data) = dataGenerator.get_event()
+            (raw_x, raw_y) = dataGenerator.get_raw()
+
+            print("raw_x shape: {}".format(raw_x.shape))
+            print("raw_y shape: {}".format(raw_y.shape))
 
             for idx in range(subject_count):
 
-                print("\n================================================= Start Iteration {} =================================================\n".format(idx))
+                print("\n================================================= Subject {} =================================================\n".format(idx))
                 
-                p_get_data = False
-                r_get_data = False
-                (train_x, train_y, p_get_data) = dataGenerator.getItem()
-                (raw_x, raw_y, r_get_data) = dataGenerator.get_raw()
+                get_data = False
+                (train_x, train_y, get_data) = dataGenerator.getItem()
 
-                while not p_get_data:
+                while not get_data:
                     (train_x, train_y, valid) = dataGenerator.getItem()
 
                     if valid:
-                        p_get_data = True
-                        break
-
-                while not r_get_data:
-                    (raw_x, raw_y, valid) = dataGenerator.get_raw()
-
-                    if valid:
-                        r_get_data = True
+                        get_data = True
                         break
 
                 print("train_x shape: {}".format(train_x.shape))
                 print("train_y shape: {}".format(train_y.shape))
-                print("raw_x shape: {}".format(raw_x.shape))
-                print("raw_y shape: {}".format(raw_y.shape))
 
                 history = model.fit(
                             x = train_x,
@@ -206,7 +199,7 @@ def training(args, datasets, time, num_classes: int = 2):
                             batch_size = batch_size,
                             epochs = epochs, 
                             verbose = 1, 
-                            callbacks = [RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data)]#, tensorboard_callback]
+                            callbacks = [RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data, raw_x, raw_y)]#, tensorboard_callback]
                         )
 
                 g_loss = history.history['g_loss']

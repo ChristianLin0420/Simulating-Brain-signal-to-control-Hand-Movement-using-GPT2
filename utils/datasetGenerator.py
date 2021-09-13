@@ -139,50 +139,6 @@ class DatasetGenerator():
             idx = self.current_subject_index
             
             batch_x = self.image_filenames[:]
-            batch_y = self.raw_labels[:]
-            
-            train_data = np.asarray([])
-            train_label = np.asarray([])
-
-            eye_close_data = np.asarray([])
-            eye_open_data = np.asarray([])
-
-            eye_close_exist = False
-            eye_open_exist = False
-
-            for idx, path in enumerate(batch_x):
-
-                data = np.load(path, allow_pickle = True)
-
-                raw_data = data["raw"]
-                raw_shape = raw_data.shape
-
-                epoch = raw_shape[0]
-
-                timestamp = 500 
-                train_data = raw_data[:epoch, :, :timestamp]   
-                train_label = np.asarray([batch_y[idx]] * epoch)   
-
-                if eye_close_exist == False and batch_y[idx] == 0:
-                    eye_close_data = train_data[:, :, :]
-                    eye_close_exist = True
-                if eye_open_exist == False and batch_y[idx] == 1:
-                    eye_open_data = train_data[:, :, :]
-                    eye_open_exist = True
-                if eye_open_exist and eye_close_exist:
-                    break
-
-            return (eye_close_data, eye_open_data)
-        else:
-            return (None, None)
-
-    def get_raw(self):
-
-        if self.raw_current_subject_index < self.subjects_count:
-            
-            idx = self.raw_current_subject_index
-            
-            batch_x = self.raw_filenames[:]
             batch_y = self.labels[:]
             
             train_data = np.asarray([])
@@ -226,6 +182,52 @@ class DatasetGenerator():
             return (eye_close_data, eye_open_data)
         else:
             return (None, None)
+
+
+    def get_raw(self):
+
+        if self.raw_current_subject_index < self.subjects_count:
+            
+            idx = self.raw_current_subject_index
+            
+            batch_x = self.raw_filenames[:]
+            batch_y = self.raw_labels[:]
+            
+            train_data = np.asarray([])
+            train_label = np.asarray([])
+
+            eye_close_data = np.asarray([])
+            eye_open_data = np.asarray([])
+
+            eye_close_exist = False
+            eye_open_exist = False
+
+            for idx, path in enumerate(batch_x):
+
+                data = np.load(path, allow_pickle = True)
+
+                raw_data = data["raw"]
+                raw_shape = raw_data.shape
+
+                epoch = raw_shape[0]
+
+                timestamp = 500 
+                train_data = raw_data[:epoch, :, :timestamp]   
+                train_label = np.asarray([batch_y[idx]] * epoch)   
+
+                if eye_close_exist == False and batch_y[idx] == 0:
+                    eye_close_data = train_data[:, :, :]
+                    eye_close_exist = True
+                if eye_open_exist == False and batch_y[idx] == 1:
+                    eye_open_data = train_data[:, :, :]
+                    eye_open_exist = True
+                if eye_open_exist and eye_close_exist:
+                    break
+
+            return (eye_close_data, eye_open_data)
+        else:
+            return (None, None)
+
 
 
 

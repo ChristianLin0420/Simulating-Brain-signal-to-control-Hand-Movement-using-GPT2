@@ -184,13 +184,13 @@ def generate_single_channel_eeg_signal(raw_close_data, raw_open_data, real_close
                     "F2", "F6", "FT7", "FC3", "FC4", "FT8", "C1", "C2", "C6", "TP7", "CP3", "CPz",
                     "CP4", "TP8", "P5", "P1", "P2", "P6", "PO7", "PO3", "POz", "PO4", "PO8"]
 
-    real_close_data = np.asarray(real_close_data[0])
+    real_close_data_tmp = np.asarray(real_close_data[0])
     left = np.asarray(close_activation_l[0])
     right = np.asarray(close_activation_r[0])
     close_vertex = np.concatenate([left, right], axis = 0)
     t_matrix = np.asarray(transformation_matrix)
 
-    real_close_converted_matrix = np.dot(t_matrix, real_close_data)
+    real_close_converted_matrix = np.dot(t_matrix, real_close_data_tmp)
     generated_close_converted_matrix = np.dot(t_matrix, close_vertex)
 
     # start drawing result
@@ -206,13 +206,13 @@ def generate_single_channel_eeg_signal(raw_close_data, raw_open_data, real_close
     plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Close_{:04d}.png".format(model_name, time, n_round, epoch, event_idx)) 
     plt.close()
 
-    real_open_data = np.asarray(real_open_data[0])
+    real_open_data_tmp = np.asarray(real_open_data[0])
     left = np.asarray(open_activation_l[0])
     right = np.asarray(open_activation_r[0])
     open_vertex = np.concatenate([left, right], axis = 0)
     t_matrix = np.asarray(transformation_matrix)
 
-    real_open_converted_matrix = np.dot(t_matrix, real_open_data)
+    real_open_converted_matrix = np.dot(t_matrix, real_open_data_tmp)
     generated_open_converted_matrix = np.dot(t_matrix, open_vertex)
 
     # start drawing result
@@ -292,9 +292,9 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     if not os.path.exists(directory5):
         os.mkdir(directory5)
 
-    real_close_data = np.asarray(real_close_data)
-    left = np.asarray(close_activation_l)
-    right = np.asarray(close_activation_r)
+    real_close_data = np.asarray(real_close_data[0])
+    left = np.asarray(close_activation_l[0])
+    right = np.asarray(close_activation_r[0])
     close_vertex = np.concatenate([left, right], axis = 0)
     t_matrix = np.asarray(transformation_matrix)
 
@@ -315,9 +315,9 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     plt.close(ax)
 
 
-    real_open_data = np.asarray(real_open_data)
-    left = np.asarray(open_activation_l)
-    right = np.asarray(open_activation_r)
+    real_open_data = np.asarray(real_open_data[0])
+    left = np.asarray(open_activation_l[0])
+    right = np.asarray(open_activation_r[0])
     open_vertex = np.concatenate([left, right], axis = 0)
     t_matrix = np.asarray(transformation_matrix)
 
@@ -382,7 +382,7 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
     T = 2.0
 
     fNQ = 1 / dt / 2                            # Determine Nyquist frequency
-    faxis = np.arrange(0, fNQ, 0.5)              # Construct frequency axis
+    faxis = np.arange(0, fNQ, 0.5)              # Construct frequency axis
 
     t_matrix = np.asarray(transformation_matrix)
 
@@ -402,6 +402,8 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
             raw_average = np.add(raw_average, Sxx_original)
 
     raw_average = np.true_divide(raw_average, float(len(raw_data)))
+
+    # print(process_data.shape)
 
     for idx in range(len(process_data)):
 
@@ -437,10 +439,10 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         else:
             generated_average = np.concatenate([generated_average, Sxx_original], axis = 0)
 
-    print("*" * 100)
-    print("raw average shape: {}".format(raw_average.shape))
-    print("process average shape: {}".format(process_average.shape))
-    print("generated average shape: {}".format(generated_average.shape))
+    # print("*" * 100)
+    # print("raw average shape: {}".format(raw_average.shape))
+    # print("process average shape: {}".format(process_average.shape))
+    # print("generated average shape: {}".format(generated_average.shape))
 
     fig, ax = plt.subplots(3, 1, figsize=(16, 15), sharex=True)
 
