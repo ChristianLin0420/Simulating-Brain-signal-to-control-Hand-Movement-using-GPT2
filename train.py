@@ -12,7 +12,7 @@ from datetime import datetime
 from tensorflow import keras
  
 from folder import check_folders
-from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, load_dataset
+from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, get_training_raw_signals
 from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages
 from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image
 
@@ -161,7 +161,8 @@ def training(args, datasets, time, num_classes: int = 2):
             )
 
             filenames, labels = get_training_filenames_and_labels(batch_size = batch_size, subject_count = subject_count)
-            dataGenerator = DatasetGenerator(filenames = filenames, labels = labels, batch_size = batch_size, subject_count = subject_count)
+            raw_filenames, raw_labels = get_training_raw_signals(subject_count = subject_count)
+            dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, batch_size = batch_size, subject_count = subject_count)
 
             train_x = np.asarray([])
             train_y = np.asarray([])
@@ -175,18 +176,29 @@ def training(args, datasets, time, num_classes: int = 2):
 
                 print("\n================================================= Start Iteration {} =================================================\n".format(idx))
                 
-                get_data = False
-                (train_x, train_y, get_data) = dataGenerator.getItem()
+                p_get_data = False
+                r_get_data = False
+                (train_x, train_y, p_get_data) = dataGenerator.getItem()
+                (raw_x, raw_y, r_get_data) = dataGenerator.get_raw()
 
-                while not get_data:
+                while not p_get_data:
                     (train_x, train_y, valid) = dataGenerator.getItem()
 
                     if valid:
-                        get_data = True
+                        p_get_data = True
+                        break
+
+                while not r_get_data:
+                    (raw_x, raw_y, valid) = dataGenerator.get_raw()
+
+                    if valid:
+                        r_get_data = True
                         break
 
                 print("train_x shape: {}".format(train_x.shape))
                 print("train_y shape: {}".format(train_y.shape))
+                print("raw_x shape: {}".format(raw_x.shape))
+                print("raw_y shape: {}".format(raw_y.shape))
 
                 history = model.fit(
                             x = train_x,

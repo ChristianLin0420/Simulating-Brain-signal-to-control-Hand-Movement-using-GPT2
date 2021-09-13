@@ -38,9 +38,6 @@ def restore_brain_activation(activation, boolean_l, boolean_r):
         l = activation[:1022].tolist()
         r = activation[1022:].tolist()
 
-    # print("l length is {}".format(len(l)))
-    # print("r length is {}".format(len(r)))
-
     left_brain_activation = []
     right_brain_activation = []
 
@@ -166,7 +163,7 @@ def generate_eeg(real_data, activation_l, activation_r, transformation_matrix, e
     del right
     del vertex
 
-def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_activation_l, close_activation_r, open_activation_l, open_activation_r, transformation_matrix, epoch, time, model_name, n_round, event_idx):
+def generate_single_channel_eeg_signal(raw_close_data, raw_open_data, real_close_data, real_open_data, close_activation_l, close_activation_r, open_activation_l, open_activation_r, transformation_matrix, epoch, time, model_name, n_round, event_idx):
     
     directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
     directory2 = 'results/img_results/{}/{}/{}/EEG'.format(model_name, time, n_round)
@@ -187,9 +184,9 @@ def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_ac
                     "F2", "F6", "FT7", "FC3", "FC4", "FT8", "C1", "C2", "C6", "TP7", "CP3", "CPz",
                     "CP4", "TP8", "P5", "P1", "P2", "P6", "PO7", "PO3", "POz", "PO4", "PO8"]
 
-    real_close_data = np.asarray(real_close_data)
-    left = np.asarray(close_activation_l)
-    right = np.asarray(close_activation_r)
+    real_close_data = np.asarray(real_close_data[0])
+    left = np.asarray(close_activation_l[0])
+    right = np.asarray(close_activation_r[0])
     close_vertex = np.concatenate([left, right], axis = 0)
     t_matrix = np.asarray(transformation_matrix)
 
@@ -209,9 +206,9 @@ def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_ac
     plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Close_{:04d}.png".format(model_name, time, n_round, epoch, event_idx)) 
     plt.close()
 
-    real_open_data = np.asarray(real_open_data)
-    left = np.asarray(open_activation_l)
-    right = np.asarray(open_activation_r)
+    real_open_data = np.asarray(real_open_data[0])
+    left = np.asarray(open_activation_l[0])
+    right = np.asarray(open_activation_r[0])
     open_vertex = np.concatenate([left, right], axis = 0)
     t_matrix = np.asarray(transformation_matrix)
 
@@ -231,16 +228,22 @@ def generate_single_channel_eeg_signal(real_close_data, real_open_data, close_ac
     plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Open_{:04d}.png".format(model_name, time, n_round, epoch, event_idx)) 
     plt.close()
 
-    target_channel = ["C3", "C4", "Cz", "O1", "O2", "Oz"]
+    target_channel = ["Oz"] #["C3", "C4", "Cz", "O1", "O2", "Oz"]
 
     # apply sftf
-    for idx in range(real_close_converted_matrix.shape[0]):
-        if channel_name[idx] in target_channel:
-            generate_power_spectrum(False, channel_name[idx], real_close_converted_matrix[idx], generated_close_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
+    # for idx in range(real_close_converted_matrix.shape[0]):
+    #     if channel_name[idx] in target_channel:
+    #         generate_power_spectrum(False, channel_name[idx], real_close_converted_matrix[idx], generated_close_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
 
-    for idx in range(real_open_converted_matrix.shape[0]):
+    # for idx in range(real_open_converted_matrix.shape[0]):
+    #     if channel_name[idx] in target_channel:
+    #         generate_power_spectrum(True, channel_name[idx], real_open_converted_matrix[idx], generated_open_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
+
+    for idx in range(len(channel_name)):
         if channel_name[idx] in target_channel:
-            generate_power_spectrum(True, channel_name[idx], real_open_converted_matrix[idx], generated_open_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
+            generate_stft(False, raw_close_data, real_close_data, close_activation_l, close_activation_r, transformation_matrix, epoch, time, model_name, n_round, channel_name[idx], idx)
+            generate_stft(True, raw_open_data, real_open_data, open_activation_l, open_activation_r, transformation_matrix, epoch, time, model_name, n_round, channel_name[idx], idx)
+
 
     real_close_data = None
     real_close_converted_matrix = None
@@ -358,6 +361,108 @@ def generate_mne_plot(brain_template, real_close_data, real_open_data, close_act
     del open_vertex
     del t_matrix
 
+def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, transformation_matrix, epoch, time, model_name, n_round, channel, channel_idx):
+    
+    directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
+    directory2 = 'results/img_results/{}/{}/{}/Spectrum'.format(model_name, time, n_round)
+    directory3 = 'results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}'.format(model_name, time, n_round, epoch)
+
+    if not os.path.exists(directory1):
+        os.mkdir(directory1)
+    
+    if not os.path.exists(directory2):
+        os.mkdir(directory2)
+
+    if not os.path.exists(directory3):
+        os.mkdir(directory3)
+
+    # plot original signal
+    N = 500
+    dt = 0.004
+    T = 2.0
+
+    fNQ = 1 / dt / 2                            # Determine Nyquist frequency
+    faxis = np.arrange(0, fNQ, 0.5)              # Construct frequency axis
+
+    t_matrix = np.asarray(transformation_matrix)
+
+    raw_average = np.asarray([])
+    process_average = np.asarray([])
+    generated_average = np.asarray([])
+
+    for idx in range(len(raw_data)):
+        signal = np.asarray(raw_data[idx, channel_idx, :]).flatten()
+        xf_original = fft(signal - np.mean(signal))
+        Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
+        Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
+
+        if len(raw_average) == 0:
+            raw_average = Sxx_original
+        else:
+            raw_average = np.add(raw_average, Sxx_original)
+
+    raw_average = np.true_divide(raw_average, float(len(raw_data)))
+
+    for idx in range(len(process_data)):
+
+        real_open_converted_matrix = np.dot(t_matrix, process_data[idx])
+
+        signal = np.asarray(real_open_converted_matrix[channel_idx]).flatten()
+        xf_original = fft(signal - np.mean(signal))
+        Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
+        Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
+
+        if len(process_average) == 0:
+            process_average = Sxx_original
+        else:
+            process_average = np.add(process_average, Sxx_original)
+
+    process_average = np.true_divide(process_average, float(len(raw_data)))
+
+    for idx in range(len(activation_l)):
+        left = np.asarray(activation_l[idx])
+        right = np.asarray(activation_r[idx])
+
+        close_vertex = np.concatenate([left, right], axis = 0)
+        generated_converted_matrix = np.dot(t_matrix, close_vertex)
+
+        signal = np.asarray(generated_converted_matrix[channel_idx]).flatten()
+        xf_original = fft(signal - np.mean(signal))
+        Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
+        Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
+        Sxx_original = np.expand_dims(Sxx_original, axis = 0)
+
+        if len(generated_average) == 0:
+            generated_average = Sxx_original
+        else:
+            generated_average = np.concatenate([generated_average, Sxx_original], axis = 0)
+
+    print("*" * 100)
+    print("raw average shape: {}".format(raw_average.shape))
+    print("process average shape: {}".format(process_average.shape))
+    print("generated average shape: {}".format(generated_average.shape))
+
+    fig, ax = plt.subplots(3, 1, figsize=(16, 15), sharex=True)
+
+    ax[0].plot(faxis, raw_average.real)
+    ax[0].set_title('Power Spectrum for channel {} from raw signal in epoch {}'.format(channel, epoch))
+    ax[1].plot(faxis, process_average.real)
+    ax[1].set_title('Power Spectrum for channel {} from filtered signal in epoch {}'.format(channel, epoch))
+
+    for idx in range(generated_average.shape[0]):
+        ax[2].plot(faxis, generated_average[idx])
+
+    ax[2].set_title('Power Spectrum for channel {} from generated signal in epoch {}'.format(channel, epoch))
+
+    if not eye_open:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/Eye_Close_{}.png".format(model_name, time, n_round, epoch, channel))    # should before show method
+    else:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/Eye_Open_{}.png".format(model_name, time, n_round, epoch, channel))     # should before show method
+    
+    plt.close()
+
+    
+
 def generate_power_spectrum(eye_open, channel, original_signal, generated_signal, epoch, time, model_name, n_round, event_idx):
 
     directory1 = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
@@ -393,13 +498,20 @@ def generate_power_spectrum(eye_open, channel, original_signal, generated_signal
     Sxx_generated = 2 * dt ** 2 / T * (xf_generated * xf_generated.conj())      # Compute spectrum
     Sxx_generated = Sxx_generated[:int(N / 2)]                                  # Ignore negative frequencies
 
-    # start drawing result
-    fig, ax = plt.subplots(2, 1, figsize=(16, 10), sharex=True)
+    fNQ = 1 / dt / 2                            # Determine Nyquist frequency
+    faxis = np.arrange(0, fNQ, 0.5)              # Construct frequency axis
 
-    ax[0].plot(Sxx_original.real)
-    ax[0].set_title('Power Spectrum for channel {} from original signal in epoch {}'.format(channel, epoch))
-    ax[1].plot(Sxx_generated.real)
-    ax[1].set_title('Power Spectrum for channel {} from generated signal in epoch {}'.format(channel, epoch))
+    # start drawing result
+    # fig, ax = plt.subplots(2, 1, figsize=(16, 10), sharex=True)
+    fig, ax = plt.subplots(1, 1, figsize=(16, 6), sharex=True)
+
+    # ax[0].plot(faxis, Sxx_original.real)
+    # ax[0].set_title('Power Spectrum for channel {} from original signal in epoch {}'.format(channel, epoch))
+    # ax[1].plot(faxis, Sxx_generated.real)
+    # ax[1].set_title('Power Spectrum for channel {} from generated signal in epoch {}'.format(channel, epoch))
+
+    ax[0].plot(faxis, Sxx_generated.real)
+    ax[0].set_title('Power Spectrum for channel {} from generated signal in epoch {}'.format(channel, epoch))
 
     if not eye_open:
         plt.savefig("results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/Eye_Close_{:04d}/{}.png".format(model_name, time, n_round, epoch, event_idx, channel))    # should before show method

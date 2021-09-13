@@ -147,7 +147,7 @@ def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
     plt.savefig("results/training_loss/{}/{}/{}.png".format(model_name, time, line_name))  # should before show method
     plt.close()
 
-def save_distribution_record(data, epoch, time, model_name, n_round, event_idx):
+def save_distribution_record(data, epoch, time, model_name, n_round):
 
     diractory = 'results/img_results/{}/{}/{}'.format(model_name, time, n_round)
 
@@ -184,7 +184,7 @@ def save_distribution_record(data, epoch, time, model_name, n_round, event_idx):
     plt.ylim(0, 40)
     plt.xlim(0, 1.0)
 
-    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}/Eye_Close_{:04d}.png'.format(model_name, time, n_round, epoch, event_idx))
+    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}/Eye_Close.png'.format(model_name, time, n_round, epoch))
     plt.close()
 
     title = "{}-Eye Open Distribution".format(model_name)
@@ -198,7 +198,7 @@ def save_distribution_record(data, epoch, time, model_name, n_round, event_idx):
     plt.ylim(0, 40)
     plt.xlim(0, 1.0)
 
-    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}/Eye_Open_{:04d}.png'.format(model_name, time, n_round, epoch, event_idx))
+    plt.savefig('results/img_results/{}/{}/{}/distribuion/image_at_epoch_{:04d}/Eye_Open.png'.format(model_name, time, n_round, epoch))
     plt.close()
 
     real_close_data = None

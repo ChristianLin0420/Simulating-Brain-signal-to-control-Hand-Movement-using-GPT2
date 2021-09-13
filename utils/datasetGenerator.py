@@ -35,28 +35,47 @@ def get_training_filenames_and_labels(batch_size: int = 8, subject_count: int = 
             train_data_label.append(1)
             train_data_label.append(0)
 
-            # open_data_count = np.load(eye_open_path, allow_pickle = True)
-            # close_data_count = np.load(eye_close_path, allow_pickle = True)
-            # open_data_count = np.asarray(open_data_count["left"]).shape[0]
-            # close_data_count = np.asarray(close_data_count["left"]).shape[0]
-            # data_count = min(open_data_count, close_data_count)
-            # data_count = data_count / batch_size
-            # data_count = data_count * batch_size
+    return train_data_filenames, train_data_label
 
-            # print("open_data_count: {}, close_data_count: {}, data_count: {}".format(open_data_count, close_data_count, data_count))
+def get_training_raw_signals(subject_count: int = 10):
+    _, dirs, files = os.walk('/home/jupyter-ivanljh123/rsc/Source Raw').__next__()
+
+    train_data_filenames = []
+    train_data_label = []
+
+    dirs = dirs[:subject_count]
+
+    for dir in dirs:
+        path = '/home/jupyter-ivanljh123/rsc/Source Raw' + '/' + dir
+        _, dirs, files = os.walk(path).__next__()
+
+        if len(files) == 2:
+            eye_open_filename = files[0]
+            eye_close_filename = files[1]
+
+            eye_open_path = path + '/' + eye_open_filename
+            eye_close_path = path + '/' + eye_close_filename
+
+            train_data_filenames.append(eye_open_path)
+            train_data_filenames.append(eye_close_path)
+            train_data_label.append(1)
+            train_data_label.append(0)
 
     return train_data_filenames, train_data_label
 
 class DatasetGenerator():
 
-    def __init__(self, filenames, labels, batch_size, subject_count) :
+    def __init__(self, filenames, raw_filenames, labels, raw_labels, batch_size, subject_count) :
         self.image_filenames = filenames
+        self.raw_filenames = raw_filenames
         self.labels = labels
+        self.raw_labels = raw_labels
 
         self.batch_size = batch_size
         self.subjects_count = subject_count
 
         self.current_subject_index = 0
+        self.raw_current_subject_index = 0
 
     def getItem(self):
 
@@ -120,6 +139,50 @@ class DatasetGenerator():
             idx = self.current_subject_index
             
             batch_x = self.image_filenames[:]
+            batch_y = self.raw_labels[:]
+            
+            train_data = np.asarray([])
+            train_label = np.asarray([])
+
+            eye_close_data = np.asarray([])
+            eye_open_data = np.asarray([])
+
+            eye_close_exist = False
+            eye_open_exist = False
+
+            for idx, path in enumerate(batch_x):
+
+                data = np.load(path, allow_pickle = True)
+
+                raw_data = data["raw"]
+                raw_shape = raw_data.shape
+
+                epoch = raw_shape[0]
+
+                timestamp = 500 
+                train_data = raw_data[:epoch, :, :timestamp]   
+                train_label = np.asarray([batch_y[idx]] * epoch)   
+
+                if eye_close_exist == False and batch_y[idx] == 0:
+                    eye_close_data = train_data[:, :, :]
+                    eye_close_exist = True
+                if eye_open_exist == False and batch_y[idx] == 1:
+                    eye_open_data = train_data[:, :, :]
+                    eye_open_exist = True
+                if eye_open_exist and eye_close_exist:
+                    break
+
+            return (eye_close_data, eye_open_data)
+        else:
+            return (None, None)
+
+    def get_raw(self):
+
+        if self.raw_current_subject_index < self.subjects_count:
+            
+            idx = self.raw_current_subject_index
+            
+            batch_x = self.raw_filenames[:]
             batch_y = self.labels[:]
             
             train_data = np.asarray([])
@@ -152,10 +215,10 @@ class DatasetGenerator():
                 train_label = np.asarray([batch_y[idx]] * epoch)   
 
                 if eye_close_exist == False and batch_y[idx] == 0:
-                    eye_close_data = train_data[0, :, :]
+                    eye_close_data = train_data[:, :, :]
                     eye_close_exist = True
                 if eye_open_exist == False and batch_y[idx] == 1:
-                    eye_open_data = train_data[0, :, :]
+                    eye_open_data = train_data[:, :, :]
                     eye_open_exist = True
                 if eye_open_exist and eye_close_exist:
                     break
@@ -163,6 +226,7 @@ class DatasetGenerator():
             return (eye_close_data, eye_open_data)
         else:
             return (None, None)
+
 
 
 #### testing dataset ####
@@ -192,8 +256,6 @@ def dataset_np(last_dim: int = 1):
 
 def load_dataset(start_index: int = 0):
     start_time = tt.time()
-
-    ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
 
     _, dirs, files = os.walk(ROOT_DIR).__next__()
     dirs_len = len(dirs)
