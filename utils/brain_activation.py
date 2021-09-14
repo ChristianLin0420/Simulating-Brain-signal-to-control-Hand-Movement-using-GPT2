@@ -468,7 +468,7 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
     # draw the all raw and process
     if epoch == 0:
         
-        plt.figure(figsize=(5,16))
+        plt.figure(figsize=(16,5))
         for signal in raw_collection:
             plt.plot(faxis, signal, linewidth = 1)
         
@@ -476,7 +476,7 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         plt.savefig("results/img_results/{}/{}/{}/Spectrum/RawSignals.png".format(model_name, time, n_round))
         plt.close()
 
-        plt.figure(figsize=(5,16))
+        plt.figure(figsize=(16,5))
         for signal in process_collection:
             plt.plot(faxis, signal, linewidth = 1)
         
