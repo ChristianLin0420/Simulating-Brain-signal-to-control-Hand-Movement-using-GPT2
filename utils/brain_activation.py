@@ -386,6 +386,9 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
 
     t_matrix = np.asarray(transformation_matrix)
 
+    raw_collection = []
+    process_collection = []
+
     raw_average = np.asarray([])
     process_average = np.asarray([])
     generated_average = np.asarray([])
@@ -394,7 +397,10 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         signal = np.asarray(raw_data[idx, channel_idx, :]).flatten()
         xf_original = fft(signal - np.mean(signal))
         Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
-        Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
+        Sxx_original = Sxx_original[:int(N / 2)]      
+        
+        if epoch == 0:
+            raw_collection.append(Sxx_original)                              # Ignore negative frequencies
 
         if len(raw_average) == 0:
             raw_average = Sxx_original
@@ -402,8 +408,6 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
             raw_average = np.add(raw_average, Sxx_original)
 
     raw_average = np.true_divide(raw_average, float(len(raw_data)))
-
-    # print(process_data.shape)
 
     for idx in range(len(process_data)):
 
@@ -413,6 +417,9 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         xf_original = fft(signal - np.mean(signal))
         Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
         Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
+
+        if epoch == 0:
+            process_collection.append(Sxx_original)
 
         if len(process_average) == 0:
             process_average = Sxx_original
@@ -439,11 +446,6 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         else:
             generated_average = np.concatenate([generated_average, Sxx_original], axis = 0)
 
-    # print("*" * 100)
-    # print("raw average shape: {}".format(raw_average.shape))
-    # print("process average shape: {}".format(process_average.shape))
-    # print("generated average shape: {}".format(generated_average.shape))
-
     fig, ax = plt.subplots(3, 1, figsize=(16, 15), sharex=True)
 
     ax[0].plot(faxis, raw_average.real)
@@ -463,6 +465,22 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
     
     plt.close()
 
+    # draw the all raw and process
+    if epoch == 0:
+        
+        for signal in raw_collection:
+            plt.plot(faxis, signal, linewidth = 1)
+        
+        plt.title("Raw signals")
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/RawSignals.png".format(model_name, time, n_round))
+        plt.close()
+
+        for signal in process_collection:
+            plt.plot(faxis, signal, linewidth = 1)
+        
+        plt.title("Process signals")
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/ProcessSignals.png".format(model_name, time, n_round))
+        plt.close()
     
 
 def generate_power_spectrum(eye_open, channel, original_signal, generated_signal, epoch, time, model_name, n_round, event_idx):
