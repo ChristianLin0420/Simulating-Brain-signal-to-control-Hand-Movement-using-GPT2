@@ -399,8 +399,7 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
         Sxx_original = Sxx_original[:int(N / 2)]      
         
-        if epoch == 0:
-            raw_collection.append(Sxx_original)                              # Ignore negative frequencies
+        raw_collection.append(Sxx_original)                                         # Ignore negative frequencies
 
         if len(raw_average) == 0:
             raw_average = Sxx_original
@@ -418,8 +417,7 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
         Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
 
-        if epoch == 0:
-            process_collection.append(Sxx_original)
+        process_collection.append(Sxx_original)
 
         if len(process_average) == 0:
             process_average = Sxx_original
@@ -465,24 +463,30 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
     
     plt.close()
 
-    # draw the all raw and process
-    if epoch == 0:
-        
-        plt.figure(figsize=(16,5))
-        for signal in raw_collection:
-            plt.plot(faxis, signal, linewidth = 1)
-        
-        plt.title("Raw signals")
-        plt.savefig("results/img_results/{}/{}/{}/Spectrum/RawSignals.png".format(model_name, time, n_round))
-        plt.close()
+    # draw the all raw and process        
+    plt.figure(figsize=(20,10))
+    for signal in raw_collection:
+        plt.plot(faxis, signal, linewidth = 1)
+    
+    plt.title("Raw signals")
 
-        plt.figure(figsize=(16,5))
-        for signal in process_collection:
-            plt.plot(faxis, signal, linewidth = 1)
-        
-        plt.title("Process signals")
-        plt.savefig("results/img_results/{}/{}/{}/Spectrum/ProcessSignals.png".format(model_name, time, n_round))
-        plt.close()
+    if eye_open:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/OpenRawSignals.png".format(model_name, time, n_round))
+    else:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/CloseRawSignals.png".format(model_name, time, n_round))
+    plt.close()
+
+    plt.figure(figsize=(20,10))
+    for signal in process_collection:
+        plt.plot(faxis, signal, linewidth = 1)
+    
+    plt.title("Process signals")
+    
+    if eye_open:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/EyeOpen_ProcessSignals.png".format(model_name, time, n_round, epoch))
+    else:
+        plt.savefig("results/img_results/{}/{}/{}/Spectrum/iteration_{:04d}/EyeClose_ProcessSignals.png".format(model_name, time, n_round, epoch))
+    plt.close()
     
 
 def generate_power_spectrum(eye_open, channel, original_signal, generated_signal, epoch, time, model_name, n_round, event_idx):
