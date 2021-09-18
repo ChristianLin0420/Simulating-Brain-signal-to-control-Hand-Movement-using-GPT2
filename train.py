@@ -325,6 +325,11 @@ def training(args, datasets, time, num_classes: int = 2):
 
             new_model = gpt2xcnn(generator = model)
 
+            new_model.compile(
+                optimizer = optimizer,
+                loss_fn = loss_fn
+            )
+
             new_history = new_model.fit(
                             x = random_vectors, 
                             y = labels, 
@@ -332,10 +337,6 @@ def training(args, datasets, time, num_classes: int = 2):
                             epochs = epochs, 
                             verbose = 1 )
             
-            new_model.compile(
-                optimizer = optimizer,
-                loss_fn = loss_fn
-            )
 
             loss = new_history.history['loss']
             acc  = new_history.history['accuracy']
@@ -445,6 +446,8 @@ if __name__ == '__main__':
     print("{0: <{width}}: {val}".format("model_path", width = width, val = args.model_path))
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
+
+    np.seterr(all="ignore")
 
     # if use_gpu is TRUE, then get one and run the program on it
     if args.use_gpu:

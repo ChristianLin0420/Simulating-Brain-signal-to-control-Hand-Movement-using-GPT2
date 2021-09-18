@@ -76,18 +76,18 @@ class gpt2xcnn(tf.keras.Model):
                 log_spec = np.log(current_data[channel].T)
                 height = log_spec.shape[0]
                 width = log_spec.shape[1]
-                x_axis = np.linspace(0, 2, num=width)
+                x_axis = np.linspace(0, 2, num = width)
                 y_axis = range(height)
                 plot.pcolormesh(x_axis, y_axis, log_spec)
                 plot.axis('off')
-                fig.tight_layout(pad=0)
+                fig.tight_layout(pad = 0)
                 fig.canvas.draw()
 
                 img = np.frombuffer(fig.canvas.tostring_rgb(), dtype = np.uint8)
                 img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
 
                 plt.close(fig)
-                img = np.array(img, dtype=np.float32) / 255
+                img = np.array(img, dtype = np.float32) / 255
 
                 # convert rgb to gray scale
                 img = np.dot(img[...,:3], rgb_weights)
