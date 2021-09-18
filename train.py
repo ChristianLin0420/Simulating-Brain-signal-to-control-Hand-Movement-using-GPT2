@@ -57,6 +57,7 @@ def training(args, datasets, time, num_classes: int = 2):
 
         d_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
         g_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
+        optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
         loss_fn = keras.losses.BinaryCrossentropy(from_logits = True)
 
         check_folders(time = time, model_name = args.model)
@@ -330,6 +331,11 @@ def training(args, datasets, time, num_classes: int = 2):
                             batch_size = 64, 
                             epochs = epochs, 
                             verbose = 1 )
+            
+            model.compile(
+                optimizer = optimizer,
+                loss_fn = loss_fn
+            )
 
             loss = new_history.history['loss']
             acc  = new_history.history['accuracy']

@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from .gpt2cgan import gpt2cgan
 from .classifier import get_pretrained_classfier
 
-
 class gpt2xcnn(tf.keras.Model):
 
     def __init__(self, config = None, generator = None, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
@@ -115,4 +114,10 @@ class gpt2xcnn(tf.keras.Model):
         grads = tape.gradients(loss, self.gptGenerator.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.gptGenerator.trainable_weights))
 
-        return {"loss": loss}
+        match = 0
+
+        for x, y in zip(labels, y_pred):
+            if x == y:
+                match += 1
+
+        return {"loss": loss, "accuracy": float(match) / float(batch)}
