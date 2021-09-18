@@ -20,6 +20,7 @@ class gpt2xcnn(tf.keras.Model):
         self.classifier = get_pretrained_classfier()
 
     def compile(self, optimizer, loss_fn):
+        super(gpt2xcnn, self).compile()
         self.optimizer = optimizer
         self.loss_fn = loss_fn
 

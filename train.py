@@ -323,7 +323,7 @@ def training(args, datasets, time, num_classes: int = 2):
 
             random_vectors, labels = generate_random_vaectors()
 
-            new_model = gpt2xcnn(generator = model)
+            new_model = gpt2xcnn(generator = model.generator)
 
             new_model.compile(
                 optimizer = optimizer,
