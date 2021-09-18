@@ -347,6 +347,8 @@ def training(args, datasets, time, num_classes: int = 2):
             # save model
             new_model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round) + "_with_classifier", save_format = 'tf')
 
+            del loss
+            del acc
 
         else:
             print("[Error] Should specify one training model!!!")
