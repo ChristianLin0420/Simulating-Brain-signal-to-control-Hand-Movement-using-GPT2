@@ -332,7 +332,7 @@ def training(args, datasets, time, num_classes: int = 2):
                             epochs = epochs, 
                             verbose = 1 )
             
-            model.compile(
+            new_model.compile(
                 optimizer = optimizer,
                 loss_fn = loss_fn
             )
