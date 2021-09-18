@@ -424,7 +424,7 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         else:
             process_average = np.add(process_average, Sxx_original)
 
-    process_average = np.true_divide(process_average, float(len(raw_data)))
+    process_average = np.true_divide(process_average, float(len(process_data)))
 
     for idx in range(len(activation_l)):
         left = np.asarray(activation_l[idx])

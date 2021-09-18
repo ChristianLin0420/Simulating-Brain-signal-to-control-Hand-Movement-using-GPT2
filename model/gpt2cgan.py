@@ -1,12 +1,20 @@
 
+# import random
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.ops.gen_math_ops import real
+# from tensorflow.python.ops.gen_math_ops import real
 
 from .gpt2 import TFGPT2MainLayer
 from .discriminator import Discriminator
 
+from utils.brain_activation import boolean_brain, restore_brain_activation, transformation_matrix
+
 SUBGROUP_SIZE = 1
+CHANNEL_NAME  = [   "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5", "FC1", "FC2", "FC6", "C3", 
+                    "Cz", "C4", "T8", "CP5", "CP1", "CP2", "CP6", "AFz", "P7", "P3", "Pz", "P4",
+                    "P8", "PO9", "O1", "Oz", "O2", "PO10", "AF7", "AF3", "AF4", "AF8", "F5", "F1",
+                    "F2", "F6", "FT7", "FC3", "FC4", "FT8", "C1", "C2", "C6", "TP7", "CP3", "CPz",
+                    "CP4", "TP8", "P5", "P1", "P2", "P6", "PO7", "PO3", "POz", "PO4", "PO8" ]
 
 class gpt2cgan(tf.keras.Model):
 
@@ -38,6 +46,9 @@ class gpt2cgan(tf.keras.Model):
         self.last_dim = last_dim
 
         self.config = config
+
+        self.t_matrix = np.asarray(transformation_matrix())
+        (self.boolean_l, self.boolean_r) = boolean_brain()
 
     def compile(self, d_optimizer, g_optimizer, loss_fn):
         super(gpt2cgan, self).compile()
@@ -204,3 +215,37 @@ class gpt2cgan(tf.keras.Model):
         predictions = self.generator(self.seed, training = False)
         
         return {"d_loss": d_loss, "g_loss": g_loss, "generated": predictions}
+
+    def call(self, inputs):
+        
+        predictions = np.asarray(self.generator(inputs, training = True))
+
+        batch = predictions.shape[0]
+
+        filtered_activations = np.asarray([])
+
+        for idx in range(batch):
+            (l_act, r_act) = restore_brain_activation(predictions[idx], self.boolean_l, self.boolean_r)
+            act = np.concatenate([l_act, r_act], axis = 0)
+            eeg_signal = np.dot(self.t_matrix, act)
+            eeg_signal = np.expand_dims(eeg_signal, axis = 0)
+
+            motor_signal = np.asarray([])
+
+            for name, i in enumerate(eeg_signal):
+                if name in CHANNEL_NAME:
+                    sig = np.expand_dims(eeg_signal[i], axis = 0)
+
+                    if len(motor_signal) == 0:
+                        motor_signal = sig
+                    else:
+                        motor_signal = np.concatenate([motor_signal, sig], axis = 0)
+
+            if len(filtered_activations) == 0:
+                filtered_activations = motor_signal
+            else:
+                filtered_activations = np.concatenate([filtered_activations, motor_signal], axis = 0)
+
+        print("filtered activation shape: {}".format(filtered_activations.shape))
+            
+        return filtered_activations

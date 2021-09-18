@@ -1,5 +1,6 @@
 
 import os
+import random
 from matplotlib.pyplot import axis
 import numpy as np
 import tensorflow as tf
@@ -62,6 +63,22 @@ def get_training_raw_signals(subject_count: int = 10):
             train_data_label.append(0)
 
     return train_data_filenames, train_data_label
+
+def generate_random_vaectors(num: int = 8000, length: int = 2089, emb: int = 500, one_hot_vector_size: int = 4):
+
+    random_vectors = np.random.normal(size = (num, length, (emb - one_hot_vector_size)))
+
+    tmp = [0] * int(num / 2) + [1] * int(num / 2)
+    random.shuffle(tmp)
+    l = np.asarray(tmp)
+
+    # l = tf.constant([x % 2 for x in range(2)])
+    one_hot = np.eye(one_hot_vector_size)[l]
+    one_hot = np.expand_dims(one_hot, axis = 1)
+    one_hot = np.repeat(one_hot, repeats = length, axis = 1)
+    random_vectors = np.concatenate([random_vectors, one_hot], axis = 2)
+
+    return (random_vectors, l)
 
 class DatasetGenerator():
 

@@ -12,13 +12,14 @@ from datetime import datetime
 from tensorflow import keras
  
 from folder import check_folders
-from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, get_training_raw_signals
+from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, get_training_raw_signals, generate_random_vaectors
 from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages
 from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image
 
 from model.gpt2gan import gpt2gan
 from model.gpt2wgan import gpt2wgan
 from model.gpt2cgan import gpt2cgan
+from model.gpt2xCNN import gpt2xcnn
 from model.model_utils import load_model
 from config.config_gpt2 import GPT2Config, save_model_config
 
@@ -35,6 +36,9 @@ def training(args, datasets, time, num_classes: int = 2):
 
     g_loss_collection = []
     d_loss_collection = []
+
+    loss_collection = []
+    acc_collection = []
 
     epochs = int(args.epochs)
     batch_size = int(args.batch_size)
@@ -225,6 +229,118 @@ def training(args, datasets, time, num_classes: int = 2):
             save_model_config(config, str(args.model), time, current_round)
             model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
 
+        elif args.model == "gpt2xcnn":
+            ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
+            _, dirs, _ = os.walk(ROOT_DIR).__next__()
+
+            if not add_class_dim:
+                config.n_embd += num_classes
+                add_class_dim = True
+
+            model = gpt2cgan(
+                config = config,
+                noise_len = int(args.noise_len),
+                noise_dim = int(args.noise_hidden_dim), 
+                last_dim = last_dim
+            )
+
+            print(model.config)
+
+            model.compile(
+                d_optimizer = d_optimizer,
+                g_optimizer = g_optimizer,
+                loss_fn = loss_fn
+            )
+
+            filenames, labels = get_training_filenames_and_labels(batch_size = batch_size, subject_count = subject_count)
+            raw_filenames, raw_labels = get_training_raw_signals(subject_count = subject_count)
+            dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, batch_size = batch_size, subject_count = subject_count)
+
+            train_x = np.asarray([])
+            train_y = np.asarray([])
+
+            eye_close_data = np.asarray([])
+            eye_open_data = np.asarray([])
+
+            (eye_close_data, eye_open_data) = dataGenerator.get_event()
+            (raw_x, raw_y) = dataGenerator.get_raw()
+
+            print("raw_x shape: {}".format(raw_x.shape))
+            print("raw_y shape: {}".format(raw_y.shape))
+
+            for idx in range(subject_count):
+
+                print("\n================================================= Subject {} =================================================\n".format(idx))
+                
+                get_data = False
+                (train_x, train_y, get_data) = dataGenerator.getItem()
+
+                while not get_data:
+                    (train_x, train_y, valid) = dataGenerator.getItem()
+
+                    if valid:
+                        get_data = True
+                        break
+
+                print("train_x shape: {}".format(train_x.shape))
+                print("train_y shape: {}".format(train_y.shape))
+
+                history = model.fit(
+                            x = train_x,
+                            y = train_y,
+                            batch_size = batch_size,
+                            epochs = epochs, 
+                            verbose = 1, 
+                            callbacks = [RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data, raw_x, raw_y)]#, tensorboard_callback]
+                        )
+
+                g_loss = history.history['g_loss']
+                d_loss = history.history['d_loss']
+
+                g_loss_collection.append(g_loss)
+                d_loss_collection.append(d_loss)
+
+                # save training loss figure
+                save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+                save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
+                save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
+
+                g_loss = None
+                d_loss = None
+                history = None
+
+                del g_loss
+                del d_loss
+                del history
+
+            # save model
+            save_model_config(config, str(args.model), time, current_round)
+            model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
+
+
+            # using trained model with classifier
+
+            random_vectors, labels = generate_random_vaectors()
+
+            new_model = gpt2xcnn(generator = model)
+
+            new_history = new_model.fit(
+                            x = random_vectors, 
+                            y = labels, 
+                            batch_size = 64, 
+                            epochs = epochs, 
+                            verbose = 1 )
+
+            loss = new_history.history['loss']
+            acc  = new_history.history['accuracy']
+
+            loss_collection.append(loss)
+            acc_collection.append(acc)
+
+            # save model
+            new_model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round) + "_with_classifier", save_format = 'tf')
+
+
         else:
             print("[Error] Should specify one training model!!!")
             break
@@ -245,6 +361,9 @@ def training(args, datasets, time, num_classes: int = 2):
     elif args.model == "gpt2cgan":
         save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
         save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
+    elif args.model == "gpt2xcnn":
+        save_loss_range_record(np.arange(len(loss_collection)), loss_collection, time, args.model, "loss")
+        save_loss_range_record(np.arange(len(loss_collection)), acc_collection, time, args.model, "accuracy")
         
 
 def find_random_vector(model_path, model, noise_len: int = 784, noise_dim: int = 32):

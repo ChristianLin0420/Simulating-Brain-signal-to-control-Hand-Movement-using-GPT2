@@ -7,9 +7,14 @@ import numpy as np
 from sys import getsizeof
 from tensorflow import keras
 
+from utils.datasetGenerator import generate_random_vaectors
+
 tmp = np.asarray([1] * 10)
 print(tmp * 10)
 
+(s, l) = generate_random_vaectors()
+print(s)
+print(l)
 
 # start_time = time.time()
 
