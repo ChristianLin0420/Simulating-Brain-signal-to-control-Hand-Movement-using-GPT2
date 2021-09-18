@@ -11,6 +11,8 @@ class gpt2xcnn(tf.keras.Model):
 
     def __init__(self, config = None, generator = None, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
 
+        super(gpt2xcnn, self).__init__()
+
         if generator is None:
             self.gptGenerator = gpt2cgan(config, noise_len = noise_len, noise_dim = noise_dim, d_extra_steps = d_extra_steps, last_dim = last_dim)
         else:
