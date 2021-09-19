@@ -39,7 +39,7 @@ class gpt2xcnn(tf.keras.Model):
         for idx in range(generate_round):
             sigs = self.gptGenerator(seeds[idx * generate_count:(idx + 1) * generate_count])
 
-            if len(signals) == 0:
+            if signals.shape[0] == 0:
                 signals = sigs
             else:
                 signals = tf.concat([signals, sigs], axis = 0)
