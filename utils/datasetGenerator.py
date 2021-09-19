@@ -11,6 +11,7 @@ from tensorflow import keras
 ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
 
 SUBGROUP_SIZE = 4
+TEMP = 8
 
 def get_training_filenames_and_labels(batch_size: int = 8, subject_count: int = 10):
     _, dirs, files = os.walk(ROOT_DIR).__next__()
@@ -155,8 +156,8 @@ class DatasetGenerator():
             
             idx = self.current_subject_index
             
-            batch_x = self.image_filenames[:10]
-            batch_y = self.labels[:10]
+            batch_x = self.image_filenames[:TEMP]
+            batch_y = self.labels[:TEMP]
             
             train_data = np.asarray([])
             train_label = np.asarray([])
@@ -207,8 +208,8 @@ class DatasetGenerator():
             
             idx = self.raw_current_subject_index
             
-            batch_x = self.raw_filenames[:10]
-            batch_y = self.raw_labels[:10]
+            batch_x = self.raw_filenames[:TEMP]
+            batch_y = self.raw_labels[:TEMP]
             
             train_data = np.asarray([])
             train_label = np.asarray([])

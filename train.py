@@ -292,7 +292,7 @@ def training(args, datasets, time, num_classes: int = 2):
                             batch_size = batch_size,
                             epochs = epochs, 
                             verbose = 1, 
-                            callbacks = [RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data, raw_x, raw_y)]#, tensorboard_callback]
+                            callbacks = []#[RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data, raw_x, raw_y)]#, tensorboard_callback]
                         )
 
                 g_loss = history.history['g_loss']
