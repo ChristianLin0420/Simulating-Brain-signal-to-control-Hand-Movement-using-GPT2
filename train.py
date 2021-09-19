@@ -323,6 +323,9 @@ def training(args, datasets, time, num_classes: int = 2):
 
             random_vectors, labels = generate_random_vaectors()
 
+            print("random_vectors shape: {}".format(random_vectors.shape))
+            print("labels shape: {}".format(labels.shape))
+
             new_model = gpt2xcnn(generator = model.generator)
 
             new_model.compile(
@@ -449,7 +452,8 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 
-    np.seterr(all="ignore")
+    tf.config.experimental_run_functions_eagerly(True)
+    tf.data.experimental.enable_debug_mode()
 
     # if use_gpu is TRUE, then get one and run the program on it
     if args.use_gpu:

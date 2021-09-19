@@ -129,6 +129,9 @@ class gpt2cgan(tf.keras.Model):
         image_size_h = real_images.shape[1]
         image_size_w = real_images.shape[2]
 
+        # print(real_images.shape)
+        # print(real_labels.shape)
+
         # event = 'Eye_Open' if real_labels[0][0] == 0 else 'Eye_Close'
         # event = "Brain activation"
 

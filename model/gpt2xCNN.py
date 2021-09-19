@@ -29,8 +29,9 @@ class gpt2xcnn(tf.keras.Model):
         seeds, labels = data
         # seeds = np.asarray(seeds)
         # labels = np.asarray(labels)
-        print("gpt2xcnn input signals shape: {}".format(seeds.shape))
-        print("gpt2xcnn input labels shape: {}".format(labels.shape))
+
+        # print("gpt2xcnn input signals shape: {}".format(seeds.shape))
+        # print("gpt2xcnn input labels shape: {}".format(labels.shape))
 
         signals = tf.constant([])
         generate_count = 16
@@ -44,31 +45,43 @@ class gpt2xcnn(tf.keras.Model):
             else:
                 signals = tf.concat([signals, sigs], axis = 0)
         
-        print("signals shape: {}".format(signals.shape))
+        # print("signals shape: {}".format(signals.shape))
+
+        signals_shape = signals.shape
+        signals = tf.reshape(signals, shape = [signals_shape[0], signals_shape[1], signals_shape[2]])
 
         batch = signals.shape[0]
-        images = []
+        images = tf.constant([])
 
         for idx in range(batch):
             signal = signals[idx]
 
             Zxx = tf.signal.stft(signal, frame_length = 256, frame_step = 16)
             Zxx = tf.abs(Zxx)
-            Zxx = Zxx.numpy()
+            Zxx = tf.expand_dims(Zxx, axis = 0)
 
-            print("Zxx shape: {}".format(Zxx.shape))
+            if images.shape[0] == 0:
+                images = Zxx
+            else:
+                images = tf.concat([images, Zxx], axis = 0)
 
-            images.append(Zxx)
 
-        images = np.asarray(images)
-        print("images shape: {}".format(images))
+        # images = np.asarray(images)
+        # print("images shape: {}".format(images.shape))
+        # print("images tyoe : {}".format(type(images)))
+
+        images = images.numpy()
+        # images = np.add(images, 0)
+
+        # print("images shape: {}".format(images.shape))
+        # print("images type: {}".format(type(images)))
 
         rgb_weights = [0.2989, 0.5870, 0.1140]
         X = None
 
-        for idx in range(Zxx.shape[0]):
+        for idx in range(images.shape[0]):
             current_image = None
-            current_data = Zxx[idx][:, :, :40]
+            current_data = images[idx][:, :, :40]
 
             for channel in range(current_data.shape[0]):
                 fig = plt.figure(figsize = (16, 40), dpi = 1)
@@ -79,7 +92,7 @@ class gpt2xcnn(tf.keras.Model):
                 width = log_spec.shape[1]
                 x_axis = np.linspace(0, 2, num = width)
                 y_axis = range(height)
-                plot.pcolormesh(x_axis, y_axis, log_spec)
+                plot.pcolormesh(x_axis, y_axis, log_spec, shading = 'auto')
                 plot.axis('off')
                 fig.tight_layout(pad = 0)
                 fig.canvas.draw()
