@@ -27,12 +27,12 @@ class gpt2xcnn(tf.keras.Model):
     def train_step(self, data):
 
         seeds, labels = data
-        seeds = np.asarray(seeds)
-        labels = np.asarray(labels)
+        # seeds = np.asarray(seeds)
+        # labels = np.asarray(labels)
         print("gpt2xcnn input signals shape: {}".format(seeds.shape))
         print("gpt2xcnn input labels shape: {}".format(labels.shape))
 
-        signals = np.asarray([])
+        signals = tf.constant([])
         generate_count = 16
         generate_round = int(seeds.shape[0] / generate_count)
 
@@ -42,7 +42,7 @@ class gpt2xcnn(tf.keras.Model):
             if len(signals) == 0:
                 signals = sigs
             else:
-                signals = np.concatenate([signals, sigs], axis = 0)
+                signals = tf.concat([signals, sigs], axis = 0)
         
         print("signals shape: {}".format(signals.shape))
 

@@ -155,8 +155,8 @@ class DatasetGenerator():
             
             idx = self.current_subject_index
             
-            batch_x = self.image_filenames[:]
-            batch_y = self.labels[:]
+            batch_x = self.image_filenames[:10]
+            batch_y = self.labels[:10]
             
             train_data = np.asarray([])
             train_label = np.asarray([])
@@ -207,8 +207,8 @@ class DatasetGenerator():
             
             idx = self.raw_current_subject_index
             
-            batch_x = self.raw_filenames[:]
-            batch_y = self.raw_labels[:]
+            batch_x = self.raw_filenames[:10]
+            batch_y = self.raw_labels[:10]
             
             train_data = np.asarray([])
             train_label = np.asarray([])
