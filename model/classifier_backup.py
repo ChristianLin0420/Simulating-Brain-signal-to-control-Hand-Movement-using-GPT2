@@ -33,14 +33,44 @@ from keras import Sequential
 from keras.layers import Conv2D, MaxPool2D, GlobalAveragePooling2D, Dense, Flatten, Concatenate, BatchNormalization, Dropout, Input
 from keras.layers.merge import concatenate
 from tensorflow.keras.optimizers import Adam
-
+# Load the TensorBoard notebook extension
+# %load_ext tensorboard
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import StratifiedKFold
 import gc
 
+# %matplotlib inline
+#%matplotlib qt
+
 DIRECTORY_PATH = os.getcwd()
 
-def get_pretrained_classfier(shape = None):
+# def create_model():
+    
+#     model = tf.keras.models.Sequential([
+#         Conv2D(filters=4, kernel_size=(3, 3), strides=(1, 1), padding='same', activation="selu"),
+#         BatchNormalization(),
+#         MaxPool2D(pool_size=(2, 2), strides=(1, 1), padding="valid"),
+#         Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), padding='same', activation="selu"),
+#         BatchNormalization(),
+#         MaxPool2D(pool_size=(2, 2), strides=(1, 1), padding="valid"),
+#         Flatten(),
+#         Dense(50, activation="selu"),
+#         Dense(1, activation="sigmoid")
+#     ])
+
+#     optimizer = Adam(learning_rate=1e-5)
+#     model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=["accuracy"])
+    
+#     return model
+
+def get_pretrained_classfier(path = '/home/jupyter-ivanljh123/test/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/pretrained/09_0.92', shape = None):
+    #load pretrained model
+    # model = create_model()
+    # model.build(input_shape = shape)
+    # model = model.load_weights(path)
+    # model = tf.keras.models.load_model(path)
+    # model.trainable = False
+
 
     channels_mapping = {
         "EEG-Fz": "Fz",

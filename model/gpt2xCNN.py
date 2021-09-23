@@ -13,7 +13,7 @@ class gpt2xcnn(tf.keras.Model):
         super(gpt2xcnn, self).__init__()
 
         if generator is None:
-            self.gptGenerator = gpt2cgan(config, noise_len = noise_len, noise_dim = noise_dim, d_extra_steps = d_extra_steps, last_dim = last_dim)
+            self.gptGenerator = gpt2cgan(config, noise_len = noise_len, noise_dim = noise_dim, d_extra_steps = d_extra_steps, last_dim = last_dim).generator
         else:
             self.gptGenerator = generator
 
@@ -130,7 +130,7 @@ class gpt2xcnn(tf.keras.Model):
         # strategy.run(func)
 
         with tf.GradientTape() as tape:
-            y_pred = self.classifier.predict(X)
+            y_pred = self.classifier(X)
             # loss, acc = self.classifier.evaluate(X, labels, verbose = 1)
             loss = self.loss_fn(labels, y_pred)
         

@@ -61,7 +61,7 @@ def training(args, datasets, time, num_classes: int = 2):
         d_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
         g_optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
         optimizer = keras.optimizers.Adam(learning_rate = LEARNING_RATE)
-        loss_fn = keras.losses.BinaryCrossentropy(from_logits = True)
+        loss_fn = keras.losses.BinaryCrossentropy(from_logits = False)
 
         check_folders(time = time, model_name = args.model)
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = './logs/' + str(args.model) + '/' + str(time) + '/' + str(current_round), histogram_freq = 1)
