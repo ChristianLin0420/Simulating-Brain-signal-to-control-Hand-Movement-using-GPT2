@@ -22,6 +22,7 @@ from model.gpt2cgan import gpt2cgan
 from model.gpt2xCNN import gpt2xcnn
 from model.model_utils import load_model
 from config.config_gpt2 import GPT2Config, save_model_config
+from model.classifier import get_pretrained_classfier
 
 LEARNING_RATE = 0.0003
 
@@ -48,6 +49,8 @@ def training(args, datasets, time, num_classes: int = 2):
 
     current_round = 1
     add_class_dim = False
+
+    classifier = get_pretrained_classfier()
 
     while round_num >= current_round:
 
@@ -326,7 +329,7 @@ def training(args, datasets, time, num_classes: int = 2):
             print("random_vectors shape: {}".format(random_vectors.shape))
             print("labels shape: {}".format(labels.shape))
 
-            new_model = gpt2xcnn(generator = model.generator)
+            new_model = gpt2xcnn(generator = model.generator, classifier = classifier)
 
             new_model.compile(
                 optimizer = optimizer,
@@ -336,7 +339,7 @@ def training(args, datasets, time, num_classes: int = 2):
             new_history = new_model.fit(
                             x = random_vectors, 
                             y = labels, 
-                            batch_size = 64, 
+                            batch_size = 16, 
                             epochs = epochs, 
                             verbose = 1 )
             

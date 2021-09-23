@@ -8,7 +8,7 @@ from .classifier import get_pretrained_classfier
 
 class gpt2xcnn(tf.keras.Model):
 
-    def __init__(self, config = None, generator = None, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
+    def __init__(self, config = None, generator = None, classifier = None, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
 
         super(gpt2xcnn, self).__init__()
 
@@ -17,7 +17,7 @@ class gpt2xcnn(tf.keras.Model):
         else:
             self.gptGenerator = generator
 
-        self.classifier = get_pretrained_classfier()
+        self.classifier = classifier
 
     def compile(self, optimizer, loss_fn):
         super(gpt2xcnn, self).compile()
@@ -45,7 +45,7 @@ class gpt2xcnn(tf.keras.Model):
             else:
                 signals = tf.concat([signals, sigs], axis = 0)
         
-        # print("signals shape: {}".format(signals.shape))
+        print("signals shape: {}".format(signals.shape))
 
         signals_shape = signals.shape
         signals = tf.reshape(signals, shape = [signals_shape[0], signals_shape[1], signals_shape[2]])
@@ -73,8 +73,8 @@ class gpt2xcnn(tf.keras.Model):
         images = images.numpy()
         # images = np.add(images, 0)
 
-        # print("images shape: {}".format(images.shape))
-        # print("images type: {}".format(type(images)))
+        print("images shape: {}".format(images.shape))
+        print("images type: {}".format(type(images)))
 
         rgb_weights = [0.2989, 0.5870, 0.1140]
         X = None
@@ -82,6 +82,8 @@ class gpt2xcnn(tf.keras.Model):
         for idx in range(images.shape[0]):
             current_image = None
             current_data = images[idx][:, :, :40]
+
+            print("start processing number.{} to stft image".format(idx))
 
             for channel in range(current_data.shape[0]):
                 fig = plt.figure(figsize = (16, 40), dpi = 1)
@@ -121,8 +123,15 @@ class gpt2xcnn(tf.keras.Model):
 
         print("Input X shape: {}".format(X.shape))
 
+        # strategy = tf.distribute.MirroredStrategy(['GPU:0'])
+        # def func():
+        #     replica_context = tf.distribute.get_replica_context()
+        #     return replica_context.replica_id_in_sync_group
+        # strategy.run(func)
+
         with tf.GradientTape() as tape:
             y_pred = self.classifier.predict(X)
+            # loss, acc = self.classifier.evaluate(X, labels, verbose = 1)
             loss = self.loss_fn(labels, y_pred)
         
         grads = tape.gradients(loss, self.gptGenerator.trainable_weights)
@@ -135,3 +144,5 @@ class gpt2xcnn(tf.keras.Model):
                 match += 1
 
         return {"loss": loss, "accuracy": float(match) / float(batch)}
+
+        # return {"loss": loss, "accuracy": acc}
