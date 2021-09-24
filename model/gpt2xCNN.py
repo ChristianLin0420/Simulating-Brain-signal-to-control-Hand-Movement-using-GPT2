@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from .gpt2cgan import gpt2cgan
 from .classifier import get_pretrained_classfier
+from utils.brain_activation import boolean_brain, transformation_matrix, restore_brain_activation_tf
 
 class gpt2xcnn(tf.keras.Model):
 
@@ -18,6 +19,9 @@ class gpt2xcnn(tf.keras.Model):
             self.gptGenerator = generator
 
         self.classifier = classifier
+
+        (self.boolean_l, self.boolean_r) = boolean_brain()
+        self.transformation_matrix = tf.constant(transformation_matrix())
 
     def compile(self, optimizer, loss_fn):
         super(gpt2xcnn, self).compile()
@@ -51,6 +55,38 @@ class gpt2xcnn(tf.keras.Model):
 
         signals_shape = signals.shape
         signals = tf.reshape(signals, shape = [signals_shape[0], signals_shape[1], signals_shape[2]])
+
+        left_brain_activation = np.asarray([])
+        right_brain_activation = np.asarray([])
+
+        for idx in range(signals.shape[0]):
+            (l_tmp, r_tmp) = restore_brain_activation_tf(signals[idx], self.boolean_l, self.boolean_r)
+            l_tmp = tf.expand_dims(l_tmp, axis = 0) 
+            r_tmp = tf.expand_dims(r_tmp, axis = 0)
+
+            if len(left_brain_activation) == 0:
+                left_brain_activation = l_tmp
+            else:
+                left_brain_activation = tf.concat([left_brain_activation, l_tmp], axis = 0)
+
+            if len(right_brain_activation) == 0:
+                right_brain_activation = r_tmp
+            else:
+                right_brain_activation = tf.concat([right_brain_activation, r_tmp], axis = 0)
+
+        signals = tf.constant([])
+
+        for idx in range(left_brain_activation.shape[0]):
+            brain_activation = tf.concat([left_brain_activation[idx], right_brain_activation[idx]], axis = 0)
+            signal = tf.matmul(self.transformation_matrix, tf.transpose(brain_activation))
+            signal = tf.expand_dims(signal, axis = 0)
+
+            if len(signals) == 0:
+                signals = signal
+            else:
+                signals = tf.concat([signals, signal], axis = 0)
+
+        print("signals shape: {}".format(signals.shape))
 
         batch = signals.shape[0]
         images = tf.constant([])

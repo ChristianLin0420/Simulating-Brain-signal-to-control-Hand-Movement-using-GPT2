@@ -4,6 +4,7 @@ import mne
 import json
 import os.path as op
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt
 
 from numpy.fft import fft
@@ -28,6 +29,67 @@ def transformation_matrix():
         data_loaded = json.load(data_file)
 
     return data_loaded["transformation"]
+
+def restore_brain_activation_tf(activation, boolean_l, boolean_r):
+    
+    l = activation[:255]
+    r = activation[255:]
+
+    if len(activation) > 1000:
+        l = activation[:1022]
+        r = activation[1022:]
+
+    print("l shape: {}".format(l.shape))
+    print("r shape: {}".format(r.shape))
+
+    left_brain_activation = tf.constant([])
+    right_brain_activation = tf.constant([])
+
+    zero = [0] * 500
+    zero = tf.constant(zero)
+    zero = tf.expand_dims(zero, axis = 0)
+
+    count = 0
+    factor = SUBGROUP_SIZE if len(activation) < 1000 else 1
+
+    for idx in range(len(boolean_l)):
+        if boolean_l[idx]:
+            if count % factor == 0 and count < 1020:
+                tmp = l[int(count / factor)]
+                tmp = tf.expand_dims(tmp, axis = 0)
+
+                if len(left_brain_activation) == 0:
+                    left_brain_activation = tmp
+                else:
+                    left_brain_activation = tf.concat([left_brain_activation, tmp], axis = 0)
+            else:
+                left_brain_activation = tf.concat([left_brain_activation, zero], axis = 0)
+            count += 1
+        else:
+            left_brain_activation = tf.concat([left_brain_activation, zero], axis = 0)
+
+    count = 0
+
+    for idx in range(len(boolean_r)):
+        if boolean_l[idx]:
+            if count % factor == 0 and count < 1064:
+                tmp = l[int(count / factor)]
+                tmp = tf.expand_dims(tmp, axis = 0)
+
+                if len(left_brain_activation) == 0:
+                    right_brain_activation = tmp
+                else:
+                    right_brain_activation = tf.concat([right_brain_activation, tmp], axis = 0)
+            else:
+                right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
+            count += 1
+        else:
+            right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
+
+    print("left_brain_activation shape: {}".format(left_brain_activation.shape))
+    print("right_brain_activation shape: {}".format(right_brain_activation.shape))
+
+    return (left_brain_activation, right_brain_activation)
 
 def restore_brain_activation(activation, boolean_l, boolean_r):
 
