@@ -40,6 +40,8 @@ class gpt2xcnn(tf.keras.Model):
         for idx in range(generate_round):
             sigs = self.gptGenerator(seeds[idx * generate_count:(idx + 1) * generate_count])
 
+            print("idx: {}, shape of sigs: {}".format(idx, sigs.shape))
+
             if signals.shape[0] == 0:
                 signals = sigs
             else:
