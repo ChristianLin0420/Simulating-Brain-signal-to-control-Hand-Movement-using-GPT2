@@ -73,10 +73,10 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
     for idx in range(len(boolean_r)):
         if boolean_l[idx]:
             if count % factor == 0 and count < 1064:
-                tmp = l[int(count / factor)]
+                tmp = r[int(count / factor)]
                 tmp = tf.expand_dims(tmp, axis = 0)
 
-                if len(left_brain_activation) == 0:
+                if len(right_brain_activation) == 0:
                     right_brain_activation = tmp
                 else:
                     right_brain_activation = tf.concat([right_brain_activation, tmp], axis = 0)
