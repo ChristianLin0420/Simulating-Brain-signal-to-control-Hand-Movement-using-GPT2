@@ -167,7 +167,7 @@ class gpt2xcnn(tf.keras.Model):
             # loss, acc = self.classifier.evaluate(X, labels, verbose = 1)
             loss = self.loss_fn(labels, y_pred)
         
-        grads = tape.gradients(loss, self.gptGenerator.trainable_weights)
+        grads = tape.gradient(loss, self.gptGenerator.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.gptGenerator.trainable_weights))
 
         match = 0
