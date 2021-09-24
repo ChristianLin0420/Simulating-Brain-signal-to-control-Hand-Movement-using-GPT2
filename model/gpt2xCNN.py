@@ -103,13 +103,7 @@ class gpt2xcnn(tf.keras.Model):
             else:
                 images = tf.concat([images, Zxx], axis = 0)
 
-
-        # images = np.asarray(images)
-        # print("images shape: {}".format(images.shape))
-        # print("images tyoe : {}".format(type(images)))
-
         images = images.numpy()
-        # images = np.add(images, 0)
 
         print("images shape: {}".format(images.shape))
         print("images type: {}".format(type(images)))
