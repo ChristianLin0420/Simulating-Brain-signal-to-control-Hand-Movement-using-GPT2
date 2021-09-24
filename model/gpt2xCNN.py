@@ -78,7 +78,7 @@ class gpt2xcnn(tf.keras.Model):
 
         for idx in range(left_brain_activation.shape[0]):
             brain_activation = tf.concat([left_brain_activation[idx], right_brain_activation[idx]], axis = 0)
-            signal = tf.matmul(self.transformation_matrix, tf.transpose(brain_activation))
+            signal = tf.matmul(self.transformation_matrix, brain_activation)
             signal = tf.expand_dims(signal, axis = 0)
 
             if len(signals) == 0:

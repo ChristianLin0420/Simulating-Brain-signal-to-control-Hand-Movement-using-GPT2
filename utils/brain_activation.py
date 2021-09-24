@@ -39,8 +39,8 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
         l = activation[:1022]
         r = activation[1022:]
 
-    print("l shape: {}".format(l.shape))
-    print("r shape: {}".format(r.shape))
+    # print("l shape: {}".format(l.shape))
+    # print("r shape: {}".format(r.shape))
 
     left_brain_activation = tf.constant([])
     right_brain_activation = tf.constant([])
@@ -86,8 +86,8 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
         else:
             right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
 
-    print("left_brain_activation shape: {}".format(left_brain_activation.shape))
-    print("right_brain_activation shape: {}".format(right_brain_activation.shape))
+    # print("left_brain_activation shape: {}".format(left_brain_activation.shape))
+    # print("right_brain_activation shape: {}".format(right_brain_activation.shape))
 
     return (left_brain_activation, right_brain_activation)
 
