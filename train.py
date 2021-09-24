@@ -329,7 +329,7 @@ def training(args, datasets, time, num_classes: int = 2):
             print("random_vectors shape: {}".format(random_vectors.shape))
             print("labels shape: {}".format(labels.shape))
 
-            new_model = gpt2xcnn(generator = model.generator, classifier = classifier)
+            new_model = gpt2xcnn(generator = model, classifier = classifier)
 
             new_model.compile(
                 optimizer = optimizer,

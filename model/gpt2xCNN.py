@@ -14,7 +14,7 @@ class gpt2xcnn(tf.keras.Model):
         super(gpt2xcnn, self).__init__()
 
         if generator is None:
-            self.gptGenerator = gpt2cgan(config, noise_len = noise_len, noise_dim = noise_dim, d_extra_steps = d_extra_steps, last_dim = last_dim).generator
+            self.gptGenerator = gpt2cgan(config, noise_len = noise_len, noise_dim = noise_dim, d_extra_steps = d_extra_steps, last_dim = last_dim)
         else:
             self.gptGenerator = generator
 
@@ -42,7 +42,7 @@ class gpt2xcnn(tf.keras.Model):
         generate_round = int(seeds.shape[0] / generate_count)
 
         for idx in range(generate_round):
-            sigs = self.gptGenerator(seeds[idx * generate_count:(idx + 1) * generate_count])
+            sigs = self.gptGenerator.generator(seeds[idx * generate_count:(idx + 1) * generate_count])
 
             print("idx: {}, shape of sigs: {}".format(idx, sigs.shape))
 
@@ -167,8 +167,8 @@ class gpt2xcnn(tf.keras.Model):
             # loss, acc = self.classifier.evaluate(X, labels, verbose = 1)
             loss = self.loss_fn(labels, y_pred)
         
-        grads = tape.gradient(loss, self.gptGenerator.trainable_weights)
-        self.optimizer.apply_gradients(zip(grads, self.gptGenerator.trainable_weights))
+        grads = tape.gradient(loss, self.gptGenerator.generator.trainable_weights)
+        self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
 
         match = 0
 
