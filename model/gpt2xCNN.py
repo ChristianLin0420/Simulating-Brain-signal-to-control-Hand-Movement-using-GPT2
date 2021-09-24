@@ -156,15 +156,8 @@ class gpt2xcnn(tf.keras.Model):
 
         print("Input X shape: {}".format(X.shape))
 
-        # strategy = tf.distribute.MirroredStrategy(['GPU:0'])
-        # def func():
-        #     replica_context = tf.distribute.get_replica_context()
-        #     return replica_context.replica_id_in_sync_group
-        # strategy.run(func)
-
         with tf.GradientTape() as tape:
             y_pred = self.classifier(X)
-            # loss, acc = self.classifier.evaluate(X, labels, verbose = 1)
             loss = self.loss_fn(labels, y_pred)
         
         grads = tape.gradient(loss, self.gptGenerator.generator.trainable_weights)
