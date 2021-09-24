@@ -45,7 +45,7 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
     left_brain_activation = tf.constant([])
     right_brain_activation = tf.constant([])
 
-    zero = [0] * 500
+    zero = [0.0] * 500
     zero = tf.constant(zero)
     zero = tf.expand_dims(zero, axis = 0)
 
