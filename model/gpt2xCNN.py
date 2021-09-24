@@ -86,6 +86,7 @@ class gpt2xcnn(tf.keras.Model):
             else:
                 signals = tf.concat([signals, signal], axis = 0)
 
+        signals = signals[:, 11:14, :]
         print("signals shape: {}".format(signals.shape))
 
         batch = signals.shape[0]
