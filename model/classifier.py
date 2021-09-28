@@ -41,6 +41,23 @@ import gc
 
 DIRECTORY_PATH = os.getcwd()
 
+@tfplot.autowrap()
+    def plot_spectrogram(data):
+        fig = tfplot.Figure(figsize=(16, 40), dpi=1)
+        plot = fig.add_subplot(111)
+
+        log_spec = tf.math.log(data.T)
+        height = log_spec.shape[0]
+        width = log_spec.shape[1]
+        x_axis = tf.linspace(0, 2, num=width)
+        y_axis = tf.range(height)
+        plot.pcolormesh(x_axis, y_axis, log_spec)
+        plot.axis('off')
+        fig.tight_layout(pad=0)
+        fig.canvas.draw()
+        plt.close(fig)
+        return fig
+
 def create_model():
         model = tf.keras.models.Sequential([
             Conv2D(filters=4, kernel_size=(3, 3), strides=(1, 1), padding='same', activation="selu"),
@@ -517,22 +534,22 @@ def get_pretrained_classfier(shape = None):
                 gc.collect()
 
     #apply_inverse_and_forward(epochs)
-    @tfplot.autowrap()
-    def plot_spectrogram(data):
-        fig = tfplot.Figure(figsize=(16, 40), dpi=1)
-        plot = fig.add_subplot(111)
+    # @tfplot.autowrap()
+    # def plot_spectrogram(data):
+    #     fig = tfplot.Figure(figsize=(16, 40), dpi=1)
+    #     plot = fig.add_subplot(111)
 
-        log_spec = tf.math.log(data.T)
-        height = log_spec.shape[0]
-        width = log_spec.shape[1]
-        x_axis = tf.linspace(0, 2, num=width)
-        y_axis = tf.range(height)
-        plot.pcolormesh(x_axis, y_axis, log_spec)
-        plot.axis('off')
-        fig.tight_layout(pad=0)
-        fig.canvas.draw()
-        plt.close(fig)
-        return fig
+    #     log_spec = tf.math.log(data.T)
+    #     height = log_spec.shape[0]
+    #     width = log_spec.shape[1]
+    #     x_axis = tf.linspace(0, 2, num=width)
+    #     y_axis = tf.range(height)
+    #     plot.pcolormesh(x_axis, y_axis, log_spec)
+    #     plot.axis('off')
+    #     fig.tight_layout(pad=0)
+    #     fig.canvas.draw()
+    #     plt.close(fig)
+    #     return fig
 
     """
     labels
