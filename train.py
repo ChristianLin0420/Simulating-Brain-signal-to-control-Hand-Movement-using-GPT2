@@ -22,7 +22,7 @@ from model.gpt2cgan import gpt2cgan
 from model.gpt2xCNN import gpt2xcnn
 from model.model_utils import load_model
 from config.config_gpt2 import GPT2Config, save_model_config
-from model.classifier import get_pretrained_classfier
+from model.classifier import get_pretrained_classfier, get_pretrained_classfier_from_path
 
 LEARNING_RATE = 0.0003
 
@@ -50,7 +50,7 @@ def training(args, datasets, time, num_classes: int = 2):
     current_round = 1
     add_class_dim = False
 
-    classifier = get_pretrained_classfier()
+    classifier = get_pretrained_classfier_from_path()#get_pretrained_classfier()
 
     while round_num >= current_round:
 

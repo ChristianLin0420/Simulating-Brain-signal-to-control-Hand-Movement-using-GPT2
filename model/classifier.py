@@ -27,6 +27,7 @@ import PIL
 from PIL import Image
 import datetime
 import tensorflow as tf
+import tfplot
 from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras import Sequential
@@ -39,6 +40,31 @@ from sklearn.model_selection import StratifiedKFold
 import gc
 
 DIRECTORY_PATH = os.getcwd()
+
+def create_model():
+        model = tf.keras.models.Sequential([
+            Conv2D(filters=4, kernel_size=(3, 3), strides=(1, 1), padding='same', activation="selu"),
+            BatchNormalization(),
+            MaxPool2D(pool_size=(2, 2), strides=(1, 1), padding="valid"),
+            Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), padding='same', activation="selu"),
+            BatchNormalization(),
+            MaxPool2D(pool_size=(2, 2), strides=(1, 1), padding="valid"),
+            Flatten(),
+            Dense(50, activation="selu"),
+            Dense(1, activation="sigmoid")
+        ])
+        optimizer = Adam(learning_rate=1e-5)
+        model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=["accuracy"])
+        
+        return model
+
+def get_pretrained_classfier_from_path(path = '/home/jupyter-ivanljh123/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/pretrained/09_1.0/'):
+    #load pretrained model
+    model = create_model()
+    model.load_weights(path)
+    model.trainable = False
+
+    return model
 
 def get_pretrained_classfier(shape = None):
 
@@ -143,75 +169,75 @@ def get_pretrained_classfier(shape = None):
     """
     plot graph utility function
     """
-    def plot_average_graph(subject_name="A01T.gdf", Class="left", filter_channels=None):
-        average = {"left": None, "right": None, "foot": None, "tongue": None, "unknown": None}
-        for event_class, event_data in data[subject_name]["epoch_data"].items():
-            if event_data != []:
-                average[event_class] = np.transpose(np.mean(event_data, axis=0))
+    # def plot_average_graph(subject_name="A01T.gdf", Class="left", filter_channels=None):
+    #     average = {"left": None, "right": None, "foot": None, "tongue": None, "unknown": None}
+    #     for event_class, event_data in data[subject_name]["epoch_data"].items():
+    #         if event_data != []:
+    #             average[event_class] = np.transpose(np.mean(event_data, axis=0))
 
-        x = average[Class]
-        if filter_channels is None:
-            fig, axs = plt.subplots(x.shape[1], gridspec_kw={'hspace': 0})
-            fig.set_size_inches(37, 21)
-            for channel in range(x.shape[1]):
-                axs[channel].title.set_text(ch_names[channel])
-                axs[channel].title.set_size(20)
-                axs[channel].title.set_y(0.7)
-                axs[channel].plot(range(x.shape[0]), x[:, channel])
-                axs[channel].axvline(x=250, color="r", linestyle='--')
-            #axs[channel].axvline(x=875, color="r", linestyle='--')
-        else :
-            fig, axs = plt.subplots(len(filter_channels), gridspec_kw={'hspace': 0})
-            fig.set_size_inches(37, 10.5)
-            for i in range(len(filter_channels)):
-                for channel in range(x.shape[1]):
-                    if(filter_channels[i] == ch_names[channel]):
-                        axs[i].title.set_text(ch_names[channel])
-                        axs[i].title.set_size(20)
-                        axs[i].title.set_y(0.7)
-                        axs[i].plot(range(x.shape[0]), x[:, channel])
-                        axs[i].axvline(x=250, color="r", linestyle='--')
-                        #axs[i].axvline(x=875, color="r", linestyle='--')
-                        break
-        plt.tight_layout()
+    #     x = average[Class]
+    #     if filter_channels is None:
+    #         fig, axs = plt.subplots(x.shape[1], gridspec_kw={'hspace': 0})
+    #         fig.set_size_inches(37, 21)
+    #         for channel in range(x.shape[1]):
+    #             axs[channel].title.set_text(ch_names[channel])
+    #             axs[channel].title.set_size(20)
+    #             axs[channel].title.set_y(0.7)
+    #             axs[channel].plot(range(x.shape[0]), x[:, channel])
+    #             axs[channel].axvline(x=250, color="r", linestyle='--')
+    #         #axs[channel].axvline(x=875, color="r", linestyle='--')
+    #     else :
+    #         fig, axs = plt.subplots(len(filter_channels), gridspec_kw={'hspace': 0})
+    #         fig.set_size_inches(37, 10.5)
+    #         for i in range(len(filter_channels)):
+    #             for channel in range(x.shape[1]):
+    #                 if(filter_channels[i] == ch_names[channel]):
+    #                     axs[i].title.set_text(ch_names[channel])
+    #                     axs[i].title.set_size(20)
+    #                     axs[i].title.set_y(0.7)
+    #                     axs[i].plot(range(x.shape[0]), x[:, channel])
+    #                     axs[i].axvline(x=250, color="r", linestyle='--')
+    #                     #axs[i].axvline(x=875, color="r", linestyle='--')
+    #                     break
+    #     plt.tight_layout()
 
-    def plot_multiple_graph(subject_name="A02T.gdf", classes=["left", "right", "foot", "tongue"], filter_channels=None):
-        average = {"left": None, "right": None, "foot": None, "tongue": None, "unknown": None}
-        for event_class, event_data in data[subject_name]["epoch_data"].items():
-            if event_data != []:
-                average[event_class] = np.transpose(np.mean(event_data, axis=0))
+    # def plot_multiple_graph(subject_name="A02T.gdf", classes=["left", "right", "foot", "tongue"], filter_channels=None):
+    #     average = {"left": None, "right": None, "foot": None, "tongue": None, "unknown": None}
+    #     for event_class, event_data in data[subject_name]["epoch_data"].items():
+    #         if event_data != []:
+    #             average[event_class] = np.transpose(np.mean(event_data, axis=0))
 
-        color = {"left": "b", "right": "g", "foot": "c", "tongue": "m", "tongue": "y"}
-        x = []
-        for Class in classes:
-            x.append(average[Class])
+    #     color = {"left": "b", "right": "g", "foot": "c", "tongue": "m", "tongue": "y"}
+    #     x = []
+    #     for Class in classes:
+    #         x.append(average[Class])
 
-        if filter_channels is None:
-            fig, axs = plt.subplots(x[0].shape[1], gridspec_kw={'hspace': 0})
-            fig.set_size_inches(37, 21)
-            for channel in range(x[0].shape[1]):
-                axs[channel].title.set_text(ch_names[channel])
-                axs[channel].title.set_size(20)
-                axs[channel].title.set_y(0.7)
-                axs[channel].axvline(x=250, color="r", linestyle='--')
-                #axs[channel].axvline(x=875, color="r", linestyle='--')
-                for i in range(len(classes)):
-                    axs[channel].plot(range(x[i].shape[0]), x[i][:, channel], color=color[classes[i]])
-        else:
-            fig, axs = plt.subplots(len(filter_channels), gridspec_kw={'hspace': 0})
-            fig.set_size_inches(37, 10.5)
-            for i in range(len(filter_channels)):
-                for channel in range(x[0].shape[1]):
-                    if(filter_channels[i] == ch_names[channel]):
-                        axs[i].title.set_text(ch_names[channel])
-                        axs[i].title.set_size(20)
-                        axs[i].title.set_y(0.7)
-                        axs[i].axvline(x=250, color="r", linestyle='--')
-                        #axs[i].axvline(x=875, color="r", linestyle='--')
-                        for j in range(len(classes)):
-                            axs[i].plot(range(x[j].shape[0]), x[j][:, channel], color=color[classes[j]])
-                        break
-        plt.tight_layout()
+    #     if filter_channels is None:
+    #         fig, axs = plt.subplots(x[0].shape[1], gridspec_kw={'hspace': 0})
+    #         fig.set_size_inches(37, 21)
+    #         for channel in range(x[0].shape[1]):
+    #             axs[channel].title.set_text(ch_names[channel])
+    #             axs[channel].title.set_size(20)
+    #             axs[channel].title.set_y(0.7)
+    #             axs[channel].axvline(x=250, color="r", linestyle='--')
+    #             #axs[channel].axvline(x=875, color="r", linestyle='--')
+    #             for i in range(len(classes)):
+    #                 axs[channel].plot(range(x[i].shape[0]), x[i][:, channel], color=color[classes[i]])
+    #     else:
+    #         fig, axs = plt.subplots(len(filter_channels), gridspec_kw={'hspace': 0})
+    #         fig.set_size_inches(37, 10.5)
+    #         for i in range(len(filter_channels)):
+    #             for channel in range(x[0].shape[1]):
+    #                 if(filter_channels[i] == ch_names[channel]):
+    #                     axs[i].title.set_text(ch_names[channel])
+    #                     axs[i].title.set_size(20)
+    #                     axs[i].title.set_y(0.7)
+    #                     axs[i].axvline(x=250, color="r", linestyle='--')
+    #                     #axs[i].axvline(x=875, color="r", linestyle='--')
+    #                     for j in range(len(classes)):
+    #                         axs[i].plot(range(x[j].shape[0]), x[j][:, channel], color=color[classes[j]])
+    #                     break
+    #     plt.tight_layout()
 
     """
     load data function
@@ -491,6 +517,22 @@ def get_pretrained_classfier(shape = None):
                 gc.collect()
 
     #apply_inverse_and_forward(epochs)
+    @tfplot.autowrap()
+    def plot_spectrogram(data):
+        fig = tfplot.Figure(figsize=(16, 40), dpi=1)
+        plot = fig.add_subplot(111)
+
+        log_spec = tf.math.log(data.T)
+        height = log_spec.shape[0]
+        width = log_spec.shape[1]
+        x_axis = tf.linspace(0, 2, num=width)
+        y_axis = tf.range(height)
+        plot.pcolormesh(x_axis, y_axis, log_spec)
+        plot.axis('off')
+        fig.tight_layout(pad=0)
+        fig.canvas.draw()
+        plt.close(fig)
+        return fig
 
     """
     labels
@@ -537,7 +579,7 @@ def get_pretrained_classfier(shape = None):
 
         Zxx = tf.signal.stft(X, frame_length=256, frame_step=16)
         Zxx = tf.abs(Zxx)
-        Zxx = Zxx.numpy() 
+        # Zxx = Zxx.numpy() 
 
         # if debug:
         #     print(data_name)
@@ -558,43 +600,50 @@ def get_pretrained_classfier(shape = None):
             current_data = Zxx[i][:, :, :40]
 
             for channel in range(current_data.shape[0]):
-                fig = plt.figure(figsize=(16, 40), dpi=1)
-                plot = fig.add_subplot(111)
-
-                log_spec = np.log(current_data[channel].T)
-                height = log_spec.shape[0]
-                width = log_spec.shape[1]
-                x_axis = np.linspace(0, 2, num=width)
-                y_axis = range(height)
-                plot.pcolormesh(x_axis, y_axis, log_spec)
-                plot.axis('off')
-                fig.tight_layout(pad=0)
-                fig.canvas.draw()
-
-                img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-                img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-
-                plt.close(fig)
-                img = np.array(img, dtype=np.float32) / 255
+                img = plot_spectrogram(current_data[channel])
+                img = img[:,:,:3]
+                img = tf.cast(img, dtype=tf.float32) / 255
 
                 # convert rgb to gray scale
-                img = np.dot(img[...,:3], rgb_weights)
-                img = np.expand_dims(img, axis = 2)
+                img = tf.matmul(img[...,:3], rgb_weights)
 
-                if Y[i] == 0:
-                    if channel == 0 :
-                        left_mean_img["c3"].append(img)
-                    elif channel == 1:
-                        left_mean_img["cZ"].append(img)
-                    else:
-                        left_mean_img["c4"].append(img)
-                else:
-                    if channel == 0 :
-                        right_mean_img["c3"].append(img)
-                    elif channel == 1:
-                        right_mean_img["cZ"].append(img)
-                    else:
-                        right_mean_img["c4"].append(img)
+                # fig = plt.figure(figsize=(16, 40), dpi=1)
+                # plot = fig.add_subplot(111)
+
+                # log_spec = np.log(current_data[channel].T)
+                # height = log_spec.shape[0]
+                # width = log_spec.shape[1]
+                # x_axis = np.linspace(0, 2, num=width)
+                # y_axis = range(height)
+                # plot.pcolormesh(x_axis, y_axis, log_spec)
+                # plot.axis('off')
+                # fig.tight_layout(pad=0)
+                # fig.canvas.draw()
+
+                # img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+                # img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+
+                # plt.close(fig)
+                # img = np.array(img, dtype=np.float32) / 255
+
+                # # convert rgb to gray scale
+                # img = np.dot(img[...,:3], rgb_weights)
+                # img = np.expand_dims(img, axis = 2)
+
+                # if Y[i] == 0:
+                #     if channel == 0 :
+                #         left_mean_img["c3"].append(img)
+                #     elif channel == 1:
+                #         left_mean_img["cZ"].append(img)
+                #     else:
+                #         left_mean_img["c4"].append(img)
+                # else:
+                #     if channel == 0 :
+                #         right_mean_img["c3"].append(img)
+                #     elif channel == 1:
+                #         right_mean_img["cZ"].append(img)
+                #     else:
+                #         right_mean_img["c4"].append(img)
 
                 if current_image is None:
                     current_image = img
@@ -607,23 +656,6 @@ def get_pretrained_classfier(shape = None):
                 X = current_image
             else:
                 X = np.append(X, current_image, axis=0)
-
-    def create_model():
-        model = tf.keras.models.Sequential([
-            Conv2D(filters=4, kernel_size=(3, 3), strides=(1, 1), padding='same', activation="selu"),
-            BatchNormalization(),
-            MaxPool2D(pool_size=(2, 2), strides=(1, 1), padding="valid"),
-            Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), padding='same', activation="selu"),
-            BatchNormalization(),
-            MaxPool2D(pool_size=(2, 2), strides=(1, 1), padding="valid"),
-            Flatten(),
-            Dense(50, activation="selu"),
-            Dense(1, activation="sigmoid")
-        ])
-        optimizer = Adam(learning_rate=1e-5)
-        model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=["accuracy"])
-        
-        return model
 
     kfold = 10
     accuracy = 0
