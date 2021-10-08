@@ -50,6 +50,9 @@ class gpt2cgan(tf.keras.Model):
         self.t_matrix = np.asarray(transformation_matrix())
         (self.boolean_l, self.boolean_r) = boolean_brain()
 
+        print(len(self.boolean_l))
+        print(len(self.boolean_r))
+
     def compile(self, d_optimizer, g_optimizer, loss_fn):
         super(gpt2cgan, self).compile()
         self.d_optimizer = d_optimizer

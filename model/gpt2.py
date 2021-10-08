@@ -99,9 +99,15 @@ class TFAttention(tf.keras.layers.Layer):
 
         b = None
         w = None
+        q = None
+        k = None
+        v = None
         
         del b
         del w
+        del q
+        del k
+        del v
 
         return outputs
 
@@ -204,10 +210,12 @@ class TFBlock(tf.keras.layers.Layer):
         a = None
         m = None
         x = None
+        output_attn = None
 
         del a
         del m
         del x
+        del output_attn
 
         return outputs  # x, present, (attentions)
 

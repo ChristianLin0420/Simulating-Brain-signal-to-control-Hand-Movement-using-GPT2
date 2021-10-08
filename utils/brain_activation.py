@@ -35,12 +35,12 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
     l = activation[:255]
     r = activation[255:]
 
-    if len(activation) > 1000:
+    if activation.shape[0] > 1000:
         l = activation[:1022]
         r = activation[1022:]
 
-    # print("l shape: {}".format(l.shape))
-    # print("r shape: {}".format(r.shape))
+    print("l shape: {}".format(l.shape))
+    print("r shape: {}".format(r.shape))
 
     left_brain_activation = tf.constant([])
     right_brain_activation = tf.constant([])
@@ -48,17 +48,20 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
     zero = [0.0] * 500
     zero = tf.constant(zero)
     zero = tf.expand_dims(zero, axis = 0)
+    zero = tf.expand_dims(zero, axis = 2)
 
     count = 0
-    factor = SUBGROUP_SIZE if len(activation) < 1000 else 1
+    factor = SUBGROUP_SIZE if activation.shape[0] < 1000 else 1
 
     for idx in range(len(boolean_l)):
+        # print(len(boolean_l))
+        # print(left_brain_activation.shape)
         if boolean_l[idx]:
             if count % factor == 0 and count < 1020:
                 tmp = l[int(count / factor)]
                 tmp = tf.expand_dims(tmp, axis = 0)
 
-                if len(left_brain_activation) == 0:
+                if left_brain_activation.shape[0] < 1:
                     left_brain_activation = tmp
                 else:
                     left_brain_activation = tf.concat([left_brain_activation, tmp], axis = 0)
@@ -76,7 +79,7 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
                 tmp = r[int(count / factor)]
                 tmp = tf.expand_dims(tmp, axis = 0)
 
-                if len(right_brain_activation) == 0:
+                if right_brain_activation.shape[0] == 0:
                     right_brain_activation = tmp
                 else:
                     right_brain_activation = tf.concat([right_brain_activation, tmp], axis = 0)
@@ -86,8 +89,8 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
         else:
             right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
 
-    # print("left_brain_activation shape: {}".format(left_brain_activation.shape))
-    # print("right_brain_activation shape: {}".format(right_brain_activation.shape))
+    print("left_brain_activation shape: {}".format(left_brain_activation.shape))
+    print("right_brain_activation shape: {}".format(right_brain_activation.shape))
 
     return (left_brain_activation, right_brain_activation)
 
@@ -476,9 +479,12 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
 
         signal = np.asarray(real_open_converted_matrix[channel_idx]).flatten()
         xf_original = fft(signal - np.mean(signal))
+
+        print("-" * 50)
+        print(idx)
         Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
         Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
-
+        print("*" * 50)
         process_collection.append(Sxx_original)
 
         if len(process_average) == 0:

@@ -132,6 +132,7 @@ def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
     title = "{}_average".format(line_name)
 
     l = np.asarray(loss)
+    print("l shape: {}".format(l.shape))
     mean = np.mean(l, axis = 0)
     standard_dev = np.std(l, axis = 0)
 

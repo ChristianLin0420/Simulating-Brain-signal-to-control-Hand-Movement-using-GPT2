@@ -12,7 +12,7 @@ from datetime import datetime
 from tensorflow import keras
  
 from folder import check_folders
-from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, get_training_raw_signals, generate_random_vaectors
+from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, get_training_raw_signals, generate_random_vectors
 from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages
 from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image
 
@@ -51,6 +51,7 @@ def training(args, datasets, time, num_classes: int = 2):
     add_class_dim = False
 
     classifier = get_pretrained_classfier_from_path()#get_pretrained_classfier()
+    # classifier = get_pretrained_classfier()
 
     while round_num >= current_round:
 
@@ -229,6 +230,8 @@ def training(args, datasets, time, num_classes: int = 2):
                 del d_loss
                 del history
 
+            print("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round))
+
             # save model
             save_model_config(config, str(args.model), time, current_round)
             model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
@@ -241,12 +244,120 @@ def training(args, datasets, time, num_classes: int = 2):
                 config.n_embd += num_classes
                 add_class_dim = True
 
+            # model = gpt2cgan(
+            #     config = config,
+            #     noise_len = int(args.noise_len),
+            #     noise_dim = int(args.noise_hidden_dim), 
+            #     last_dim = last_dim
+            # )
+
+            # print(model.config)
+
+            # model.compile(
+            #     d_optimizer = d_optimizer,
+            #     g_optimizer = g_optimizer,
+            #     loss_fn = loss_fn
+            # )
+
+            # filenames, labels = get_training_filenames_and_labels(batch_size = batch_size, subject_count = subject_count)
+            # raw_filenames, raw_labels = get_training_raw_signals(subject_count = subject_count)
+            # dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, batch_size = batch_size, subject_count = subject_count)
+
+            # train_x = np.asarray([])
+            # train_y = np.asarray([])
+
+            # eye_close_data = np.asarray([])
+            # eye_open_data = np.asarray([])
+
+            # (eye_close_data, eye_open_data) = dataGenerator.get_event()
+            # (raw_x, raw_y) = dataGenerator.get_raw()
+
+            # print("raw_x shape: {}".format(raw_x.shape))
+            # print("raw_y shape: {}".format(raw_y.shape))
+
+            # for idx in range(subject_count):
+
+            #     print("\n================================================= Subject {} =================================================\n".format(idx))
+                
+            #     get_data = False
+            #     (train_x, train_y, get_data) = dataGenerator.getItem()
+
+            #     while not get_data:
+            #         (train_x, train_y, valid) = dataGenerator.getItem()
+
+            #         if valid:
+            #             get_data = True
+            #             break
+
+            #     print("train_x shape: {}".format(train_x.shape))
+            #     print("train_y shape: {}".format(train_y.shape))
+
+            #     history = model.fit(
+            #                 x = train_x,
+            #                 y = train_y,
+            #                 batch_size = batch_size,
+            #                 epochs = epochs, 
+            #                 verbose = 1, 
+            #                 callbacks = []#[RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data, raw_x, raw_y)]#, tensorboard_callback]
+            #             )
+
+            #     g_loss = history.history['g_loss']
+            #     d_loss = history.history['d_loss']
+
+            #     g_loss_collection.append(g_loss)
+            #     d_loss_collection.append(d_loss)
+
+            #     # save training loss figure
+            #     save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
+            #     save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
+            #     save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
+
+            #     g_loss = None
+            #     d_loss = None
+            #     history = None
+
+            #     del g_loss
+            #     del d_loss
+            #     del history
+
+            # # save model
+            # model_path = "./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round)
+            # save_model_config(config, str(args.model), time, current_round)
+            # model.save_weights(model_path, save_format = 'tf')
+
+            # g_loss_collection = None
+            # d_loss_collection = None
+            # train_x = None
+            # train_y = None
+
+            # eye_close_data = None
+            # eye_open_data = None
+
+            # raw_x = None
+            # raw_y = None
+
+            # model = None
+
+            # del g_loss_collection
+            # del d_loss_collection
+            # del train_x
+            # del train_y
+            # del eye_close_data
+            # del eye_open_data
+            # del raw_x
+            # del raw_y
+            # del model
+
+            model_path = "/home/jupyter-ivanljh123/test/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/trained_model/gpt2cgan/06_10_2021_21_46_59/model_1" #"./trained_model/gpt2cgan/07_10_2021_02_06_54/model_1" 
+
             model = gpt2cgan(
-                config = config,
-                noise_len = int(args.noise_len),
-                noise_dim = int(args.noise_hidden_dim), 
-                last_dim = last_dim
+                config = config
             )
+
+            print(model_path)
+
+            model.load_weights(model_path)
+            model.trainable = True
 
             print(model.config)
 
@@ -256,75 +367,10 @@ def training(args, datasets, time, num_classes: int = 2):
                 loss_fn = loss_fn
             )
 
-            filenames, labels = get_training_filenames_and_labels(batch_size = batch_size, subject_count = subject_count)
-            raw_filenames, raw_labels = get_training_raw_signals(subject_count = subject_count)
-            dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, batch_size = batch_size, subject_count = subject_count)
-
-            train_x = np.asarray([])
-            train_y = np.asarray([])
-
-            eye_close_data = np.asarray([])
-            eye_open_data = np.asarray([])
-
-            (eye_close_data, eye_open_data) = dataGenerator.get_event()
-            (raw_x, raw_y) = dataGenerator.get_raw()
-
-            print("raw_x shape: {}".format(raw_x.shape))
-            print("raw_y shape: {}".format(raw_y.shape))
-
-            for idx in range(subject_count):
-
-                print("\n================================================= Subject {} =================================================\n".format(idx))
-                
-                get_data = False
-                (train_x, train_y, get_data) = dataGenerator.getItem()
-
-                while not get_data:
-                    (train_x, train_y, valid) = dataGenerator.getItem()
-
-                    if valid:
-                        get_data = True
-                        break
-
-                print("train_x shape: {}".format(train_x.shape))
-                print("train_y shape: {}".format(train_y.shape))
-
-                history = model.fit(
-                            x = train_x,
-                            y = train_y,
-                            batch_size = batch_size,
-                            epochs = epochs, 
-                            verbose = 1, 
-                            callbacks = []#[RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data, raw_x, raw_y)]#, tensorboard_callback]
-                        )
-
-                g_loss = history.history['g_loss']
-                d_loss = history.history['d_loss']
-
-                g_loss_collection.append(g_loss)
-                d_loss_collection.append(d_loss)
-
-                # save training loss figure
-                save_loss_record(np.arange(1, len(g_loss) + 1), g_loss, d_loss, time, str(args.model), current_round)
-                save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
-                save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
-
-                g_loss = None
-                d_loss = None
-                history = None
-
-                del g_loss
-                del d_loss
-                del history
-
-            # save model
-            save_model_config(config, str(args.model), time, current_round)
-            model.save_weights("./trained_model/" + str(args.model) + "/" + str(time) + "/model_" + str(current_round), save_format = 'tf')
-
 
             # using trained model with classifier
 
-            random_vectors, labels = generate_random_vaectors()
+            random_vectors, labels = generate_random_vectors()
 
             print("random_vectors shape: {}".format(random_vectors.shape))
             print("labels shape: {}".format(labels.shape))
@@ -339,7 +385,7 @@ def training(args, datasets, time, num_classes: int = 2):
             new_history = new_model.fit(
                             x = random_vectors, 
                             y = labels, 
-                            batch_size = 16, 
+                            batch_size = 4, 
                             epochs = epochs, 
                             verbose = 1 )
             
@@ -377,8 +423,8 @@ def training(args, datasets, time, num_classes: int = 2):
         save_loss_range_record(np.arange(len(g_loss_collection[0])), g_loss_collection, time, args.model, "g_loss")
         save_loss_range_record(np.arange(len(d_loss_collection[0])), d_loss_collection, time, args.model, "d_loss")
     elif args.model == "gpt2xcnn":
-        save_loss_range_record(np.arange(len(loss_collection)), loss_collection, time, args.model, "loss")
-        save_loss_range_record(np.arange(len(loss_collection)), acc_collection, time, args.model, "accuracy")
+        save_loss_range_record(np.arange(len(loss_collection[0])), loss_collection, time, args.model, "loss")
+        save_loss_range_record(np.arange(len(loss_collection[0])), acc_collection, time, args.model, "accuracy")
         
 
 def find_random_vector(model_path, model, noise_len: int = 784, noise_dim: int = 32):
@@ -455,9 +501,8 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 
-    tf.config.experimental_run_functions_eagerly(True)
-    tf.data.experimental.enable_debug_mode()
-
+    # tf.config.run_functions_eagerly(True)
+    # tf.data.experimental.enable_debug_mode()
     # if use_gpu is TRUE, then get one and run the program on it
     if args.use_gpu:
         try:

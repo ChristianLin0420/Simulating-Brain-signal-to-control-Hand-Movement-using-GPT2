@@ -7,6 +7,8 @@ from .gpt2cgan import gpt2cgan
 from .classifier import get_pretrained_classfier, plot_spectrogram
 from utils.brain_activation import boolean_brain, transformation_matrix, restore_brain_activation_tf
 
+from sklearn.metrics import accuracy_score
+
 class gpt2xcnn(tf.keras.Model):
 
     def __init__(self, config = None, generator = None, classifier = None, noise_len: int = 784, noise_dim: int = 32, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
@@ -33,122 +35,144 @@ class gpt2xcnn(tf.keras.Model):
         seeds, labels = data
 
         signals = tf.constant([])
-        generate_count = 16
+        generate_count = 4
         generate_round = int(seeds.shape[0] / generate_count)
 
-        with tf.GradientTape() as tape:
-            for idx in range(generate_round):
+        # print("generate_count: {}".format(generate_count))
+        # print("generate_round: {}".format(generate_round))
+
+        # left_brain_activation = tf.constant([])
+        # right_brain_activation = tf.constant([])
+
+        rgb_weights = tf.constant([0.2989, 0.5870, 0.1140], shape=[3, 1])
+
+        # images = tf.constant([])
+
+        loss = tf.constant([])
+        Y_pred = None
+
+        for idx in range(generate_round):
+            
+            # print("idx: {}, shape of seeds: {}".format(idx, seeds[idx * generate_count:(idx + 1) * generate_count].shape))
+
+            with tf.GradientTape() as tape:
                 sigs = self.gptGenerator.generator(seeds[idx * generate_count:(idx + 1) * generate_count])
 
-                print("idx: {}, shape of sigs: {}".format(idx, sigs.shape))
+                # print("idx: {}, shape of sigs: {}".format(idx, sigs.shape))
 
-                if signals.shape[0] == 0:
-                    signals = sigs
-                else:
-                    signals = tf.concat([signals, sigs], axis = 0)
-            
-            print("signals shape: {}".format(signals.shape))
+                brain = None
+                signals = None
 
-            signals_shape = signals.shape
-            signals = tf.reshape(signals, shape = [signals_shape[0], signals_shape[1], signals_shape[2]])
+                for i in range(sigs.shape[0]):
+                    (l_tmp, r_tmp) = restore_brain_activation_tf(sigs[i], self.boolean_l, self.boolean_r)
+                    brain_activation = tf.concat([l_tmp, r_tmp], axis = 0)
+                    brain_activation = tf.expand_dims(brain_activation, axis = 0)
 
-            left_brain_activation = np.asarray([])
-            right_brain_activation = np.asarray([])
-
-            for idx in range(signals.shape[0]):
-                (l_tmp, r_tmp) = restore_brain_activation_tf(signals[idx], self.boolean_l, self.boolean_r)
-                l_tmp = tf.expand_dims(l_tmp, axis = 0) 
-                r_tmp = tf.expand_dims(r_tmp, axis = 0)
-
-                if len(left_brain_activation) == 0:
-                    left_brain_activation = l_tmp
-                else:
-                    left_brain_activation = tf.concat([left_brain_activation, l_tmp], axis = 0)
-
-                if len(right_brain_activation) == 0:
-                    right_brain_activation = r_tmp
-                else:
-                    right_brain_activation = tf.concat([right_brain_activation, r_tmp], axis = 0)
-
-            signals = tf.constant([])
-
-            for idx in range(left_brain_activation.shape[0]):
-                brain_activation = tf.concat([left_brain_activation[idx], right_brain_activation[idx]], axis = 0)
-                signal = tf.matmul(self.transformation_matrix, brain_activation)
-                signal = tf.expand_dims(signal, axis = 0)
-
-                if len(signals) == 0:
-                    signals = signal
-                else:
-                    signals = tf.concat([signals, signal], axis = 0)
-
-            signals = signals[:, 11:14, :]
-            print("signals shape: {}".format(signals.shape))
-
-            batch = signals.shape[0]
-            images = tf.constant([])
-
-            for idx in range(batch):
-                signal = signals[idx]
-
-                Zxx = tf.signal.stft(signal, frame_length = 256, frame_step = 16)
-                Zxx = tf.abs(Zxx)
-                Zxx = tf.expand_dims(Zxx, axis = 0)
-
-                if images.shape[0] == 0:
-                    images = Zxx
-                else:
-                    images = tf.concat([images, Zxx], axis = 0)
-
-            # images = images.numpy()
-
-            print("images shape: {}".format(images.shape))
-            print("images type: {}".format(type(images)))
-
-            rgb_weights = [0.2989, 0.5870, 0.1140]
-            X = None
-
-            for idx in range(images.shape[0]):
-                current_image = None
-                current_data = images[idx][:, :, :40]
-
-                print("start processing number.{} to stft image".format(idx))
-
-                for channel in range(current_data.shape[0]):
-                    img = plot_spectrogram(current_data[channel])
-                    img = img[:,:,:3]
-                    img = tf.cast(img, dtype=tf.float32) / 255
-
-                    # convert rgb to gray scale
-                    img = np.dot(img[...,:3], rgb_weights)
-
-                    if current_image is None:
-                        current_image = img
+                    if brain == None:
+                        brain = brain_activation
                     else:
-                        current_image = np.append(current_image, img, axis = 1)
+                        brain = tf.concat([brain, brain_activation], axis = 0)
 
-                current_image = np.expand_dims(current_image, axis = 0)
+                # brain_activation = tf.concat([l_tmp, r_tmp], axis = 0)
+                # print("brain shape: {}".format(brain.shape))
+                brain = tf.reshape(brain, shape = [brain.shape[0], brain.shape[1], brain.shape[2]])
+                # print("brain_activation shape: {}".format(brain.shape))
+                # print("transformation_matrix shape: {}".format(self.transformation_matrix.shape))
 
-                if X is None:
-                    X = current_image
+                for i in range(brain.shape[0]):
+                    signal = tf.matmul(self.transformation_matrix, brain[i])
+                    signal = tf.expand_dims(signal, axis = 0)
+
+                    if signals == None:
+                        signals = signal
+                    else:
+                        signals = tf.concat([signals, signal], axis = 0)
+
+                signals = signals[:, 11:14, :]
+                # print("signal shape: {}".format(signals.shape))
+
+                Zxx = None
+
+                for i in range(signals.shape[0]):
+                    zxx = tf.signal.stft(signals[i], frame_length = 256, frame_step = 16)
+                    zxx = tf.abs(zxx)
+
+                    # print("images shape: {}".format(zxx.shape))
+                    # print("images type: {}".format(type(zxx)))
+                    zxx = zxx[:, :, :40]
+                    zxx = tf.expand_dims(zxx, axis = 0)
+
+                    if Zxx == None:
+                        Zxx = zxx
+                    else:
+                        Zxx = tf.concat([Zxx, zxx], axis = 0)
+                
+                # print("Zxx shape: {}".format(Zxx.shape))
+
+                images = None
+
+                for k in range(Zxx.shape[0]):
+                    current_image = None
+
+                    for i in range(Zxx[k].shape[0]):
+                        if current_image == None:
+                            current_image = Zxx[k][i]
+                        else:
+                            current_image = tf.concat([current_image, Zxx[k][i]], axis = 0)
+
+                    current_image = tf.expand_dims(current_image, axis = 0)
+
+                    if images == None:
+                        images = current_image
+                    else:
+                        images = tf.concat([images, current_image], axis = 0)
+
+                # print("images shape: {}".format(images.shape))
+
+                X = images
+                # Expand last dimension to gray scale
+                X = tf.expand_dims(X, axis = 3)
+
+                # print("Input X shape: {}".format(X.shape))
+
+                y_pred = self.classifier(X)
+                y_true = labels[idx * generate_count: (idx + 1) * generate_count]
+                # print("y_pred shape: {}".format(y_pred.shape))
+                # print("y_true shape: {}".format(y_true.shape))
+                loss = self.loss_fn(y_true, y_pred)
+
+                # print("y_pred: {}".format(y_pred))
+                # print("y_pred type: {}".format(type(y_pred)))
+                # print("loss: {}".format(loss))
+
+                if Y_pred == None:
+                    Y_pred = y_pred
                 else:
-                    X = np.append(X, current_image, axis=0)
+                    Y_pred = tf.concat([Y_pred, y_pred], axis = 0)
+            
+            grads = tape.gradient(loss, self.gptGenerator.generator.trainable_weights)
+            self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
 
-            print("Input X shape: {}".format(X.shape))
+        Y_pred = tf.reshape(Y_pred, [Y_pred.shape[0]])
 
-        # with tf.GradientTape() as tape:
-            y_pred = self.classifier(X)
-            loss = self.loss_fn(labels, y_pred)
-        
-        grads = tape.gradient(loss, self.gptGenerator.generator.trainable_weights)
-        self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
+        labels = tf.cast(labels, tf.int64)
+        Y_pred = tf.cast(Y_pred, tf.int64)
 
-        match = 0
+        # print("labels : {}".format(labels))
+        # print("Y_pred : {}".format(Y_pred))
 
-        for x, y in zip(labels, y_pred):
-            if x == y:
-                match += 1
+        # print("labels shape: {}".format(labels.shape))
+        # print("Y_pred shape: {}".format(Y_pred.shape))
 
-        return {"loss": loss, "accuracy": float(match) / float(batch)}
+        # print("labels type: {}".format(type(labels)))
+        # print("Y_pred type: {}".format(type(Y_pred)))
+
+        accuracy = tf.math.equal(labels, Y_pred)
+        accuracy = tf.math.reduce_mean(tf.cast(accuracy, tf.float32))
+
+        # print("loss: {}".format(loss))
+        # print("accuracy: {}".format(accuracy))
+
+        return {"loss": loss, "accuracy": accuracy}
 
         # return {"loss": loss, "accuracy": acc}

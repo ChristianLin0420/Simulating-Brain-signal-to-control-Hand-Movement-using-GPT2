@@ -28,6 +28,8 @@ from PIL import Image
 import datetime
 import tensorflow as tf
 import tfplot
+from tensorflow.python.ops.numpy_ops import np_config
+np_config.enable_numpy_behavior()
 from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras import Sequential
@@ -43,12 +45,15 @@ DIRECTORY_PATH = os.getcwd()
 
 @tfplot.autowrap()
 def plot_spectrogram(data):
+    print("data type: {}".format(type(data)))
     fig = tfplot.Figure(figsize=(16, 40), dpi=1)
     plot = fig.add_subplot(111)
-
+    
     log_spec = tf.math.log(data.T)
     height = log_spec.shape[0]
     width = log_spec.shape[1]
+    print("height : {}".format(height))
+    print("width : {}".format(width))
     x_axis = tf.linspace(0, 2, num=width)
     y_axis = tf.range(height)
     plot.pcolormesh(x_axis, y_axis, log_spec)
@@ -56,6 +61,7 @@ def plot_spectrogram(data):
     fig.tight_layout(pad=0)
     fig.canvas.draw()
     plt.close(fig)
+    print("fig shape: {}".format(fig))
     return fig
 
 def create_model():
@@ -75,7 +81,7 @@ def create_model():
         
         return model
 
-def get_pretrained_classfier_from_path(path = '/home/jupyter-ivanljh123/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/pretrained/09_1.0/'):
+def get_pretrained_classfier_from_path(path = '/home/jupyter-ivanljh123/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/pretrained/09_0.9387/'):
     #load pretrained model
     model = create_model()
     model.load_weights(path)
@@ -604,7 +610,7 @@ def get_pretrained_classfier(shape = None):
         #     print("shape of Zxx: " + str(Zxx.shape))
 
         # preprocess data
-        rgb_weights = [0.2989, 0.5870, 0.1140]
+        rgb_weights = tf.constant([0.2989, 0.5870, 0.1140], shape=[3, 1])
         X = None
 
         # spectrogram

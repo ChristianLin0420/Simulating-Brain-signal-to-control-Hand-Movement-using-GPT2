@@ -10,7 +10,6 @@ from tensorflow import keras
 
 ROOT_DIR = '/home/jupyter-ivanljh123/rsc/Source Estimate'
 
-SUBGROUP_SIZE = 4
 TEMP = 8
 
 def get_training_filenames_and_labels(batch_size: int = 8, subject_count: int = 10):
@@ -65,7 +64,7 @@ def get_training_raw_signals(subject_count: int = 10):
 
     return train_data_filenames, train_data_label
 
-def generate_random_vaectors(num: int = 128, length: int = 2089, emb: int = 500, one_hot_vector_size: int = 4):
+def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, one_hot_vector_size: int = 4):
 
     random_vectors = np.random.normal(size = (num, length, (emb - one_hot_vector_size)))
 
