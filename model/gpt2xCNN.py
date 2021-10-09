@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from .gpt2cgan import gpt2cgan
 from .classifier import get_pretrained_classfier, plot_spectrogram
 from utils.brain_activation import boolean_brain, transformation_matrix, restore_brain_activation_tf
+from utils.model_monitor import record_model_weight
 
 from sklearn.metrics import accuracy_score
 
@@ -152,6 +153,9 @@ class gpt2xcnn(tf.keras.Model):
             
             grads = tape.gradient(loss, self.gptGenerator.generator.trainable_weights)
             self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
+
+            # record the weight to observe the change of the weight
+            record_model_weight(self.gptGenerator.generator.trainable_weights)
 
         Y_pred = tf.reshape(Y_pred, [Y_pred.shape[0]])
 

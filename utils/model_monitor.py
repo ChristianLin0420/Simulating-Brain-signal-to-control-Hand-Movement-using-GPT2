@@ -211,3 +211,25 @@ def save_distribution_record(data, epoch, time, model_name, n_round):
     del real_open_data
     del generated_close_data
     del generated_open_data
+
+
+def record_model_weight(weights):
+
+    directory = 'weight'
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+    step = 0
+
+    while os.path.exists('weight/{}.txt'.format(step)):
+        step += 1
+
+    f = open("weight/{}.txt".format(step), "x")
+    f.write(weights)
+
+    f.close()
+
+
+
+    
