@@ -54,6 +54,9 @@ class TFAttention(tf.keras.layers.Layer):
         self.resid_dropout = tf.keras.layers.Dropout(config.resid_pdrop)
         self.pruned_heads = set()
 
+    def get_weights(self):
+        return self.c_attn.get_weights()
+
     def prune_heads(self, heads):
         pass
 
@@ -192,6 +195,9 @@ class TFBlock(tf.keras.layers.Layer):
         self.attn = TFAttention(nx, n_ctx, config, scale, name="attn")
         self.ln_2 = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_2")
         self.mlp = TFMLP(inner_dim, config, name="mlp")
+    
+    def get_weights(self):
+        return self.attn.get_weights()
 
     def call(self, x, layer_past, attention_mask, head_mask, use_cache, output_attentions, training=False):
         a = self.ln_1(x)

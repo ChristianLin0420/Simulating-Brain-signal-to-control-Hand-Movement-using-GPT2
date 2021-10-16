@@ -10,10 +10,11 @@ import tensorflow as tf
 
 from datetime import datetime
 from tensorflow import keras
- 
+from tensorflow.keras.optimizers import Adam
+
 from folder import check_folders
 from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, get_training_raw_signals, generate_random_vectors
-from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages
+from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages, RecordWeight
 from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image
 
 from model.gpt2gan import gpt2gan
@@ -51,6 +52,8 @@ def training(args, datasets, time, num_classes: int = 2):
     add_class_dim = False
 
     classifier = get_pretrained_classfier_from_path()#get_pretrained_classfier()
+    optimizer_c = Adam(learning_rate=1e-5)
+    classifier.compile(optimizer=optimizer_c, loss="binary_crossentropy", metrics=["accuracy"])
     # classifier = get_pretrained_classfier()
 
     while round_num >= current_round:
@@ -244,7 +247,24 @@ def training(args, datasets, time, num_classes: int = 2):
                 config.n_embd += num_classes
                 add_class_dim = True
 
-            model_path = "/home/jupyter-ivanljh123/test/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/trained_model/gpt2cgan/07_10_2021_02_06_54/model_1" #"./trained_model/gpt2cgan/07_10_2021_02_06_54/model_1" 
+            filenames, labels = get_training_filenames_and_labels(batch_size = batch_size, subject_count = 1)
+            raw_filenames, raw_labels = get_training_raw_signals(subject_count = 1)
+            dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, batch_size = batch_size, subject_count = subject_count)
+
+            train_x = np.asarray([])
+            train_y = np.asarray([])
+
+            eye_close_data = np.asarray([])
+            eye_open_data = np.asarray([])
+
+            (eye_close_data, eye_open_data) = dataGenerator.get_event()
+            (raw_x, raw_y) = dataGenerator.get_raw()
+
+            print("raw_x shape: {}".format(raw_x.shape))
+            print("raw_y shape: {}".format(raw_y.shape))
+
+            # model_path = "./trained_model/gpt2cgan/09_10_2021_20_15_54/model_1"
+            model_path = "/home/jupyter-ivanljh123/test/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/trained_model/gpt2cgan/07_10_2021_02_06_54/model_1"
 
             model = gpt2cgan(
                 config = config
@@ -281,9 +301,10 @@ def training(args, datasets, time, num_classes: int = 2):
             new_history = new_model.fit(
                             x = random_vectors, 
                             y = labels, 
-                            batch_size = 4, 
+                            batch_size = 32, 
                             epochs = epochs, 
-                            verbose = 1 )
+                            verbose = 1,
+                            callbacks = [EarlyStoppingAtMinLoss(), RecordGeneratedImages(time, current_round, args.model, eye_close_data, eye_open_data, raw_x, raw_y)] ) #RecordWeight(), 
             
 
             loss = new_history.history['loss']

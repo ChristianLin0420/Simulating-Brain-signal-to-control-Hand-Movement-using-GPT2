@@ -6,6 +6,7 @@ import glob
 import json
 import imageio
 import numpy as np
+import tensorflow as tf
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -225,10 +226,29 @@ def record_model_weight(weights):
     while os.path.exists('weight/{}.txt'.format(step)):
         step += 1
 
-    f = open("weight/{}.txt".format(step), "x")
-    f.write(weights)
+    if step == 100:
+        return
 
+    f = open("weight/{}.txt".format(step), "x")
+
+    # print("weights length: {}".format(len(weights)))
+
+    # count = 0
+
+    # content = ""
+
+    print(type(weights))
+    f.write(str(weights))
+
+    # for item in weights:
+    #     count += 1
+    #     f.write(str(item))
+        # print("item length: {}".format(len(item)))
+
+    # print("total weight items is {}".format(count))
     f.close()
+
+    # print(weights)
 
 
 

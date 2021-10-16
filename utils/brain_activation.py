@@ -480,11 +480,8 @@ def generate_stft(eye_open, raw_data, process_data, activation_l, activation_r, 
         signal = np.asarray(real_open_converted_matrix[channel_idx]).flatten()
         xf_original = fft(signal - np.mean(signal))
 
-        print("-" * 50)
-        print(idx)
         Sxx_original = 2 * dt ** 2 / T * (xf_original * xf_original.conj())         # Compute spectrum
         Sxx_original = Sxx_original[:int(N / 2)]                                    # Ignore negative frequencies
-        print("*" * 50)
         process_collection.append(Sxx_original)
 
         if len(process_average) == 0:
