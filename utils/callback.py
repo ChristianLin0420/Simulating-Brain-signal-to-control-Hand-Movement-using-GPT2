@@ -120,7 +120,7 @@ class RecordGeneratedImages(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs = None):
 
-        if (epoch + 1) % 50 == 0 || epoch == 0:
+        if (epoch + 1) % 50 == 0 or epoch == 0:
 
             generated = logs.get("generated")
 
