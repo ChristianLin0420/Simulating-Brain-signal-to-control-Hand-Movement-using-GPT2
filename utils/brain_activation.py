@@ -22,13 +22,15 @@ def boolean_brain():
     return (data_loaded["left"], data_loaded["right"])
 
 def transformation_matrix():
-    path = '/home/jupyter-ivanljh123/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/boolean.json'
+    # path = '/home/jupyter-ivanljh123/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/boolean.json'
+    path = '/home/jupyter-ivanljh123/test2/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/forward_matrix.json'
 
     # Read JSON file
     with open(path) as data_file:
         data_loaded = json.load(data_file)
 
-    return data_loaded["transformation"]
+    # return data_loaded["transformation"]
+    return data_loaded["matrix"]
 
 def restore_brain_activation_tf(activation, boolean_l, boolean_r):
     
@@ -38,9 +40,6 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
     if activation.shape[0] > 1000:
         l = activation[:1022]
         r = activation[1022:]
-
-    print("l shape: {}".format(l.shape))
-    print("r shape: {}".format(r.shape))
 
     left_brain_activation = tf.constant([])
     right_brain_activation = tf.constant([])
@@ -54,10 +53,8 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
     factor = SUBGROUP_SIZE if activation.shape[0] < 1000 else 1
 
     for idx in range(len(boolean_l)):
-        # print(len(boolean_l))
-        # print(left_brain_activation.shape)
-        if boolean_l[idx]:
-            if count % factor == 0 and count < 1020:
+        if boolean_l[idx]: 
+            if count % factor == 0 and count < 1022:
                 tmp = l[int(count / factor)]
                 tmp = tf.expand_dims(tmp, axis = 0)
 
@@ -65,17 +62,17 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
                     left_brain_activation = tmp
                 else:
                     left_brain_activation = tf.concat([left_brain_activation, tmp], axis = 0)
-            else:
-                left_brain_activation = tf.concat([left_brain_activation, zero], axis = 0)
+            # else:
+                # left_brain_activation = tf.concat([left_brain_activation, zero], axis = 0)
             count += 1
-        else:
-            left_brain_activation = tf.concat([left_brain_activation, zero], axis = 0)
+        # else:
+            # left_brain_activation = tf.concat([left_brain_activation, zero], axis = 0)
 
     count = 0
 
     for idx in range(len(boolean_r)):
-        if boolean_l[idx]:
-            if count % factor == 0 and count < 1064:
+        if boolean_r[idx]:
+            if count % factor == 0 and count < 1067:
                 tmp = r[int(count / factor)]
                 tmp = tf.expand_dims(tmp, axis = 0)
 
@@ -83,14 +80,17 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
                     right_brain_activation = tmp
                 else:
                     right_brain_activation = tf.concat([right_brain_activation, tmp], axis = 0)
-            else:
-                right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
+            # else:
+                # right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
             count += 1
-        else:
-            right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
+        # else:
+            # right_brain_activation = tf.concat([right_brain_activation, zero], axis = 0)
 
-    print("left_brain_activation shape: {}".format(left_brain_activation.shape))
-    print("right_brain_activation shape: {}".format(right_brain_activation.shape))
+    # print("l shape: {}".format(np.asarray(l).shape))
+    # print("r shape: {}".format(np.asarray(r).shape))
+
+    # print("left_brain_activation shape: {}".format(left_brain_activation.shape))
+    # print("right_brain_activation shape: {}".format(right_brain_activation.shape))
 
     return (left_brain_activation, right_brain_activation)
 
@@ -115,33 +115,40 @@ def restore_brain_activation(activation, boolean_l, boolean_r):
 
     for idx in range(len(boolean_l)):
         if boolean_l[idx]:
-            if count % factor == 0 and count < 1020:
+            if count % factor == 0 and count < 1022:
                 left_brain_activation.append(l[int(count / factor)])
-            else:
-                left_brain_activation.append(zero)
+            # else:
+            #     left_brain_activation.append(zero)
+            # count += 1
+        # else:
+        #     left_brain_activation.append(zero)
+
             count += 1
-        else:
-            left_brain_activation.append(zero)
 
     count = 0
 
     for idx in range(len(boolean_r)):
         if boolean_l[idx]:
-            if count % factor == 0 and count < 1064:
+            if count % factor == 0 and count < 1067:
                 right_brain_activation.append(r[int(count / factor)])
-            else:
-                right_brain_activation.append(zero)
+        #     else:
+        #         right_brain_activation.append(zero)
+        #     count += 1
+        # else:
+        #     right_brain_activation.append(zero)
+
             count += 1
-        else:
-            right_brain_activation.append(zero)
 
     left_brain_activation = np.asarray(left_brain_activation)
     right_brain_activation = np.asarray(right_brain_activation)
 
-    # print("left_brain_activation shape is {}".format(left_brain_activation.shape))
-    # print("right_brain_activation shape is {}".format(right_brain_activation.shape))
+    print("l shape: {}".format(np.asarray(l).shape))
+    print("r shape: {}".format(np.asarray(r).shape))
 
-    return (left_brain_activation, right_brain_activation)
+    print("left_brain_activation shape is {}".format(left_brain_activation.shape))
+    print("right_brain_activation shape is {}".format(right_brain_activation.shape))
+
+    return (l, r)
 
 def fetch_brain_template():
 
@@ -293,21 +300,12 @@ def generate_single_channel_eeg_signal(raw_close_data, raw_open_data, real_close
     plt.savefig("results/img_results/{}/{}/{}/EEG/iteration_{:04d}/Eye_Open_{:04d}.png".format(model_name, time, n_round, epoch, event_idx)) 
     plt.close()
 
-    target_channel = ["Oz"] #["C3", "C4", "Cz", "O1", "O2", "Oz"]
+    # target_channel = ["C3", "C4", "Cz"]
 
-    # apply sftf
-    # for idx in range(real_close_converted_matrix.shape[0]):
+    # for idx in range(len(channel_name)):
     #     if channel_name[idx] in target_channel:
-    #         generate_power_spectrum(False, channel_name[idx], real_close_converted_matrix[idx], generated_close_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
-
-    # for idx in range(real_open_converted_matrix.shape[0]):
-    #     if channel_name[idx] in target_channel:
-    #         generate_power_spectrum(True, channel_name[idx], real_open_converted_matrix[idx], generated_open_converted_matrix[idx], epoch, time, model_name, n_round, event_idx)
-
-    for idx in range(len(channel_name)):
-        if channel_name[idx] in target_channel:
-            generate_stft(False, raw_close_data, real_close_data, close_activation_l, close_activation_r, transformation_matrix, epoch, time, model_name, n_round, channel_name[idx], idx)
-            generate_stft(True, raw_open_data, real_open_data, open_activation_l, open_activation_r, transformation_matrix, epoch, time, model_name, n_round, channel_name[idx], idx)
+    #         generate_stft(False, raw_close_data, real_close_data, close_activation_l, close_activation_r, transformation_matrix, epoch, time, model_name, n_round, channel_name[idx], idx)
+    #         generate_stft(True, raw_open_data, real_open_data, open_activation_l, open_activation_r, transformation_matrix, epoch, time, model_name, n_round, channel_name[idx], idx)
 
 
     real_close_data = None

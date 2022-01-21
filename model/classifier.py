@@ -47,8 +47,8 @@ def stft_min_max(X):
     Zxx = tf.signal.stft(X, frame_length=256, frame_step=16)
     Zxx = tf.abs(Zxx)
 
-    print("shape of X: " + str(X.shape))
-    print("shape of Zxx: " + str(Zxx.shape))
+    # print("shape of X: " + str(X.shape))
+    # print("shape of Zxx: " + str(Zxx.shape))
     
     X = Zxx[:, :, :, :40]
     X = tf.reshape(X, [X.shape[0], -1, 40])
@@ -63,7 +63,7 @@ def stft_min_max(X):
     X = tf.math.divide(tf.math.subtract(X, X_min), tf.math.subtract(X_max, X_min))
     X = tf.reshape(X, original_shape)
 
-    print("shape of X: " + str(X.shape))
+    # print("shape of X: " + str(X.shape))
 
     return X
 
@@ -85,7 +85,7 @@ def plot_spectrogram(data):
     fig.tight_layout(pad=0)
     fig.canvas.draw()
     plt.close(fig)
-    print("fig shape: {}".format(fig))
+    # print("fig shape: {}".format(fig))
     return fig
 
 def create_model():
@@ -103,7 +103,7 @@ def create_model():
         
         return model
 
-def get_pretrained_classfier_from_path(path = '/home/jupyter-ivanljh123/test/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/pretrained/09_0.9387/'):
+def get_pretrained_classfier_from_path(path = '/home/jupyter-ivanljh123/EEG-forward-and-inverse/models/A09_0.9183/'):
     #load pretrained model
     model = create_model()
     model.load_weights(path)
@@ -173,7 +173,7 @@ def get_pretrained_classfier(shape = None):
 
     brodmann_data = img.get_fdata()
     brodmann_motor = brodmann_data.reshape(-1) == 4
-    print(brodmann_motor)
+    # print(brodmann_motor)
 
     shape, affine = img.shape[:3], img.affine
     coords = np.array(np.meshgrid(*(range(i) for i in shape), indexing='ij'))

@@ -112,8 +112,8 @@ def save_loss_record(lst_iter, g_loss, d_loss, time, model_name, n_round):
     title = "{}_loss".format(model_name)
 
     plt.figure(figsize=(8,5))
-    plt.plot(lst_iter, g_loss, '-b', label = 'generator_loss', linewidth = 2)
-    plt.plot(lst_iter, d_loss, '-r', label = 'discriminator_loss', linewidth = 2)
+    plt.plot(lst_iter, g_loss, '-b', label = 'generator_loss', linewidth = 1)
+    plt.plot(lst_iter, d_loss, '-r', label = 'discriminator_loss', linewidth = 1)
 
     plt.xlabel("n iteration")
     plt.legend(loc = 'upper left')
@@ -124,7 +124,7 @@ def save_loss_record(lst_iter, g_loss, d_loss, time, model_name, n_round):
     plt.close()
 
 
-def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
+def save_loss_range_record(lst_iter, loss_1, loss_2, time, model_name, line_name, line_name2):
     directory = 'results/training_loss/{}/{}'.format(model_name, time)
 
     if not os.path.exists(directory):
@@ -132,14 +132,26 @@ def save_loss_range_record(lst_iter, loss, time, model_name, line_name):
 
     title = "{}_average".format(line_name)
 
-    l = np.asarray(loss)
-    print("l shape: {}".format(l.shape))
-    mean = np.mean(l, axis = 0)
-    standard_dev = np.std(l, axis = 0)
+    l = np.asarray(loss_1)
+
+    if loss_2 is not None:
+        ll = np.asarray(loss_2)
+    # print("l shape: {}".format(l.shape))
+
+    mean_1 = np.mean(l, axis = 0)
+    standard_dev_1 = np.std(l, axis = 0)
+
+    if loss_2 is not None:
+        mean_2 = np.mean(ll, axis = 0)
+        standard_dev_2 = np.std(ll, axis = 0)
 
     plt.figure(figsize=(8,5))
-    plt.plot(lst_iter, mean, '-')
-    plt.fill_between(lst_iter, mean - standard_dev, mean + standard_dev, alpha = 0.2)
+    plt.plot(lst_iter, mean_1, '-b', label = line_name, linewidth = 1)
+    plt.fill_between(lst_iter, mean_1 - standard_dev_1, mean_1 + standard_dev_1, color = 'blue', alpha = 0.2)
+    
+    if loss_2 is not None:
+        plt.plot(lst_iter, mean_2, '-r', label = line_name2, linewidth = 1)
+        plt.fill_between(lst_iter, mean_2 - standard_dev_2, mean_2 + standard_dev_2, color = 'red', alpha = 0.2)
 
     plt.xlabel("n iteration")
     plt.legend(loc = 'upper left')
@@ -251,5 +263,26 @@ def record_model_weight(weights):
     # print(weights)
 
 
+def save_spectrum(X, epoch, time, model_name, n_round):
+
+    Zxx = tf.signal.stft(X, frame_length=256, frame_step=16)
+    Zxx = tf.abs(Zxx)
+
+    samples = 0
+    log_spec = tf.math.log(tf.transpose(Zxx[samples][0]))
+    height = 40
+    width = log_spec.shape[1]
+    x_axis = tf.linspace(0, 2, num=width)
+    y_axis = range(height)
+    plt.pcolormesh(x_axis, y_axis, log_spec[:40, ])
+    plt.title('STFT Magnitude')
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+    
+    plt.close()
+
+
+def save_ground_truth():
+    pass
 
     

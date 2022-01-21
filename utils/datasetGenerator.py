@@ -64,9 +64,20 @@ def get_training_raw_signals(subject_count: int = 10):
 
     return train_data_filenames, train_data_label
 
-def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, one_hot_vector_size: int = 4):
+def get_training_reconstruct_signals():
 
-    random_vectors = np.random.normal(size = (num, length, (emb - one_hot_vector_size)))
+    _, dirs, files = os.walk('/home/jupyter-ivanljh123/rsc/Source_Reconstructed').__next__()
+
+    subject_folder_name = "A09"
+
+    train_data_filenames = ["/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_train_X.npz", "/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_test_X.npz"]
+    train_data_label = ["/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_train_Y.npz", "/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_test_Y.npz"]
+
+    return train_data_filenames, train_data_label
+
+def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, one_hot_vector_size: int = 20, variance: float = 1.0):
+
+    random_vectors = np.random.normal(scale = variance, size = (num, length, (emb - one_hot_vector_size)))
 
     tmp = [0] * int(num / 2) + [1] * int(num / 2)
     random.shuffle(tmp)
@@ -148,6 +159,87 @@ class DatasetGenerator():
             return (train_data, train_label, True)
         else:
             return (None, None, False)
+
+    def get_reconstructed_items(self, X_filenames, Y_filenames):
+
+        train_data = None
+        train_label = None
+
+        for x, y in zip(X_filenames, Y_filenames):
+
+            xx = np.load(x, allow_pickle = True)
+            yy = np.load(y, allow_pickle = True)
+
+            xx = xx['data']
+            yy = yy['data']
+
+            if train_data is None:
+                train_data = xx
+            else:
+                train_data = np.concatenate([train_data, xx], axis = 0)
+            
+            if train_label is None:
+                train_label = yy
+            else:
+                train_label = np.concatenate([train_label, yy], axis = 0)
+
+        bz = int(train_data.shape[0])
+
+        feet_data = None
+        tongue_data = None
+
+        ## get average 
+        for data, label in zip(train_data, train_label):
+            expand_data = np.expand_dims(data, axis = 0)
+
+            if label == 0:
+                if feet_data is None:
+                    feet_data = expand_data
+                else:
+                    feet_data = np.concatenate([feet_data, expand_data], axis = 0)
+            else:
+                if tongue_data is None:
+                    tongue_data = expand_data
+                else:
+                    tongue_data = np.concatenate([tongue_data, expand_data], axis = 0)
+
+        print("feet data shape: {}".format(feet_data.shape))
+        print("tongue data shape: {}".format(tongue_data.shape))
+
+        feet_data = np.mean(feet_data, axis = 0)
+        tongue_data = np.mean(tongue_data, axis = 0)
+
+        print("feet data shape: {}".format(feet_data.shape))
+        print("tongue data shape: {}".format(tongue_data.shape))
+
+        feet_data = np.expand_dims(feet_data, axis = 0)
+        tongue_data = np.expand_dims(tongue_data, axis = 0)
+
+        print("feet data shape: {}".format(feet_data.shape))
+        print("tongue data shape: {}".format(tongue_data.shape))
+
+        real_data = np.concatenate([feet_data, tongue_data], axis = 0)
+
+        print("real data shape: {}".format(real_data.shape))
+
+        ## shuffle dataset
+        p = np.random.permutation(bz)
+        train_data = train_data[p]
+        train_label = train_label[p]
+
+        remain_count = int(bz / 8) * 8
+
+        train_data = train_data[:remain_count]
+        train_label = train_label[:remain_count]
+
+        train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
+        train_label = keras.utils.to_categorical(train_label, 2)
+
+        train_data = train_data.astype(np.float32)
+        train_label = train_label.astype(np.float32)
+
+        return train_data, train_label, real_data
+
 
     def get_event(self):
 
