@@ -1,11 +1,27 @@
 
 import os
 
-from datetime import datetime
+class DirectoryGenerator:
 
-class DirectorySetter:
-    def __init__(self):
-        pass
+    def __init__(self, time, config):
+        self.time = time
+        self.config = config
+
+        self.check_roots()
+        self.set_roots()
+
+    def set_roots(self):
+        roots_path = "./result/{}/{}".format(self.config.model_name, self.time)
+
+        for root in ["", "config", "models", "topography", "eeg", "history"]:
+            os.mkdir(roots_path + "/{}".format(root))
+
+    def check_roots(self):
+        if not os.path.exists("./result"):
+            os.mkdir("./result")
+
+        if not os.path.exists("./result/{}".format(self.config.model_name)):
+            os.mkdir("./result/{}".format(self.config.model_name))
 
 def is_logs_folder_exist(time: str = None, model_name: str = 'gpt2gan'):
 

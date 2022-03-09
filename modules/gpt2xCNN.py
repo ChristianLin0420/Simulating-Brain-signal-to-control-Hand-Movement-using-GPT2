@@ -128,7 +128,7 @@ class gpt2xcnn(tf.keras.Model):
             if XX is None:
                 XX = X
             else:
-                XX = tr.concat([XX, X], axis = 0)
+                XX = tf.concat([XX, X], axis = 0)
             
 
             y_pred = self.classifier(X)

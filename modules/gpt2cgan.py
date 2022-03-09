@@ -18,13 +18,13 @@ CHANNEL_NAME  = [   "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5", "FC1", "F
 
 class gpt2cgan(tf.keras.Model):
 
-    def __init__(self, config, data_avg, noise_len: int = 2089, noise_dim: int = 498, d_extra_steps: int = 5, last_dim: int = 1, **kwargs):
+    def __init__(self, config, data_avg, d_extra_steps: int = 5, last_dim: int = 1, **kwargs):
         super(gpt2cgan, self).__init__()
 
         self.generator = TFGPT2MainLayer(config = config, name = "name", last_dim = last_dim)
         self.discriminator = Discriminator(config = config)
-        self.noise_len = noise_len
-        self.noise_dim = noise_dim
+        self.noise_len = config.n_positions
+        self.noise_dim = config.n_embd
 
         self.gp_weight = 10.0
         self.d_extra_steps = d_extra_steps
@@ -32,7 +32,7 @@ class gpt2cgan(tf.keras.Model):
         generated_count = 40
 
         # add one hot vector for every seed
-        self.seed = tf.random.normal([generated_count, noise_len, noise_dim])
+        self.seed = tf.random.normal([generated_count, config.n_positions, config.n_embd])
 
         tmp = [0] * int(generated_count / 2) + [1] * int(generated_count / 2)
         l = tf.constant(tmp)
@@ -40,7 +40,7 @@ class gpt2cgan(tf.keras.Model):
         # l = tf.constant([x % 2 for x in range(2)])
         one_hot = tf.one_hot(l, depth = 2)
         one_hot = tf.expand_dims(one_hot, axis = 1)
-        one_hot = tf.repeat(one_hot, repeats = noise_len, axis = 1)
+        one_hot = tf.repeat(one_hot, repeats = config.n_positions, axis = 1)
         self.seed = tf.concat([self.seed, one_hot], axis = 2)
 
         self.last_dim = last_dim

@@ -12,19 +12,19 @@ from datetime import datetime
 from tensorflow import keras
 from tensorflow.keras.optimizers import Adam
 
-from folder import check_folders
+from utils.directory import check_folders
 from utils.datasetGenerator import DatasetGenerator, get_training_filenames_and_labels, get_training_raw_signals, generate_random_vectors, get_training_reconstruct_signals
 from utils.callback import EarlyStoppingAtMinLoss, RecordGeneratedImages, RecordWeight, RecordReconstructedGeneratedImages
 from utils.model_monitor import save_loss_range_record, save_loss_record, save_random_vector, save_result_as_gif, show_generated_image, record_model_weight
 from utils.brain_activation import boolean_brain, restore_brain_activation, transformation_matrix, restore_brain_activation_tf
 
-from model.gpt2gan import gpt2gan
-from model.gpt2wgan import gpt2wgan
-from model.gpt2cgan import gpt2cgan
-from model.gpt2xCNN import gpt2xcnn
-from model.model_utils import load_model
+from modules.gpt2gan import gpt2gan
+from modules.gpt2wgan import gpt2wgan
+from modules.gpt2cgan import gpt2cgan
+from modules.gpt2xCNN import gpt2xcnn
+from modules.model_utils import load_model
 from config.config_gpt2 import GPT2Config, save_model_config
-from model.classifier import get_pretrained_classfier, get_pretrained_classfier_from_path, stft_min_max
+from modules.classifier import get_pretrained_classfier, get_pretrained_classfier_from_path, stft_min_max
 
 LEARNING_RATE = 0.0003
 
