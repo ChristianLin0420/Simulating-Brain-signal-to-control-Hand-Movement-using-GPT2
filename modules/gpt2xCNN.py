@@ -14,12 +14,12 @@ from sklearn.metrics import accuracy_score
 
 class gpt2xcnn(tf.keras.Model):
 
-    def __init__(self, data_avg = None, config = None, generator = None, classifier = None, noise_len: int = 2089, noise_dim: int = 498, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
+    def __init__(self, data_avg = None, config = None, generator = None, classifier = None, d_extra_steps: int = 5, last_dim: int = 3, **kwargs):
 
         super(gpt2xcnn, self).__init__()
 
         if generator is None:
-            self.gptGenerator = gpt2cgan(config, data_avg, noise_len = noise_len, noise_dim = noise_dim, d_extra_steps = d_extra_steps, last_dim = last_dim)
+            self.gptGenerator = gpt2cgan(config, data_avg, noise_len = config.n_positions, noise_dim = config.n_embd, d_extra_steps = d_extra_steps, last_dim = last_dim)
         else:
             self.gptGenerator = generator
 
@@ -31,14 +31,14 @@ class gpt2xcnn(tf.keras.Model):
         self.generate_count = 32
 
         # add one hot vector for every seed
-        self.seed = tf.random.normal([self.generate_count, noise_len, noise_dim])
+        self.seed = tf.random.normal([self.generate_count, config.n_positions, config.n_embd])
 
         tmp = [0] * int(self.generate_count / 2) + [1] * int(self.generate_count / 2)
         l = tf.constant(tmp)
 
         one_hot = tf.one_hot(l, depth = 2)
         one_hot = tf.expand_dims(one_hot, axis = 1)
-        one_hot = tf.repeat(one_hot, repeats = noise_len, axis = 1)
+        one_hot = tf.repeat(one_hot, repeats = config.n_positions, axis = 1)
         self.seed = tf.concat([self.seed, one_hot], axis = 2)
 
         self.epoch_count = 0
