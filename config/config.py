@@ -88,48 +88,10 @@ from .config_utils import PretrainedConfig
 class TrainingConfig(PretrainedConfig):
 
     def __init__(self):
+        super().__init__(   bos_token_id = 50256, 
+                            eos_token_id = 50256)
 
         self.load_config("./config/config.json")
-
-        # with open("./config/config.json") as f:
-        #     d = json.load(f)
-
-        # self.gpu = bool(d["gpu"])
-        # self.parallel = bool(d["parallel"])
-
-        # self.subject_count = int(d["subject_count"])
-
-        # self.model_name = str(d["model_name"])
-        # self.buffer_size = int(d["buffer_size"])
-        # self.batch_size = int(d["batch_size"])
-        # self.epochs = int(d["epochs"])
-        # self.learning_rate = float(d["learning_rate"])
-        # self.example_to_generate = int(d["example_to_generate"])
-        # self.noise_hidden_dim = int(d["noise_hidden_dim"])
-
-        # self.vocab_size = int(d["vocab_size"])
-        # self.n_positions = int(d["n_positions"])
-        # self.n_ctx = int(d["n_ctx"])
-        # self.n_embd = int(d["n_embd"])
-        # self.n_layer = int(d["n_layer"])
-        # self.n_head = int(d["n_head"])
-        # self.n_inner = None if str(d["n_inner"]) == "None" else int(d["n_inner"])
-        # self.activation_function = str(d["activation_function"])
-        # self.resid_pdrop = float(d["resid_pdrop"])
-        # self.embd_pdrop = float(d["embd_pdrop"])
-        # self.attn_pdrop = float(d["attn_pdrop"])
-        # self.layer_norm_epsilon = float(d["layer_norm_epsilon"])
-        # self.initializer_range = float(d["initializer_range"])
-        # self.summary_type = str(d["summary_type"])
-        # self.summary_use_proj = bool(d["summary_use_proj"]),
-        # self.summary_activation = None if str(d["summary_activation"]) == "None" else str(d["summary_activation"])
-        # self.summary_proj_to_labels = bool(d["summary_proj_to_labels"])
-        # self.summary_first_dropout = float(d["summary_first_dropout"])
-        # self.scale_attn_weights = bool(d["scale_attn_weights"])
-        # self.gradient_checkpointing = bool(d["gradient_checkpointing"])
-        # self.use_cache = bool(d["use_cache"])
-        # self.bos_token_id = int(d["bos_token_id"])
-        # self.eos_token_id = int(d["eos_token_id"])
 
     @property
     def max_position_embeddings(self):
