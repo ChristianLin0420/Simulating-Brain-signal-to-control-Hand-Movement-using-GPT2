@@ -26,8 +26,9 @@ if __name__ == '__main__':
         now = datetime.now()
         time = now.strftime("%d_%m_%Y_%H_%M_%S")
 
-        ## initialize the configuration
+        ## initialize the configuration and directory
         config = TrainingConfig()
+        _ = DirectoryGenerator(time, config)
         config.save_config(config.model_name, time)
 
         print("time: {}".format(time))
@@ -46,8 +47,6 @@ if __name__ == '__main__':
                     tf.config.experimental.set_memory_growth(gpus[0], True)
             except:
                 print("[No GPR] there is no availible gpu to use!!!")
-
-        _ = DirectoryGenerator(time, config)
 
         ## initialize the training runner and start training    
         runner = Runner(config)
