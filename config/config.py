@@ -176,7 +176,7 @@ class TrainingConfig(PretrainedConfig):
 
             "Accuracy": self.Accuracy,
             "Loss": self.Loss,
-            "STFtgenerator": self.STFtgenerator,
+            "STFTgenerator": self.STFTgenerator,
 
             "vocab_size": self.vocab_size,
             "n_positions": self.n_positions,
