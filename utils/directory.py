@@ -15,6 +15,8 @@ class DirectoryGenerator:
 
         for root in ["", "config", "models", "topography", "eeg", "history"]:
             os.mkdir(roots_path + "/{}".format(root))
+            for idx in range(self.config.rounds):
+                os.mkdir(roots_path + "/{}/{}".format(root, idx))
 
     def check_roots(self):
         if not os.path.exists("./result"):

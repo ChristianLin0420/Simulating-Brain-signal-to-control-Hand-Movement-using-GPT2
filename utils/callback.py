@@ -1,4 +1,5 @@
 
+from calendar import c
 import os
 import io
 import json
@@ -9,6 +10,99 @@ import matplotlib.pyplot as plt
 
 from .model_monitor import generate_and_save_images, save_result_as_gif, save_distribution_record, record_model_weight, save_loss_range_record
 from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, generate_eeg, generate_single_channel_eeg_signal, fetch_brain_template, generate_mne_plot, restore_brain_activation_tf
+
+'''
+----- Accuracy -----
+@desciption:
+    ...
+'''
+class Accuracy(tf.keras.callbacks.Callback):
+
+    def __init__(self, config, time, _round):
+        self.config = config
+        self.time = time
+        self.round = _round
+
+        self.batch_accuracy = list()
+        self.accuracy = list()
+
+    def on_train_batch_end(self, epoch, logs = None):
+        self.batch_accuracy.append(float(logs.get('accuracy')))
+
+    def on_epoch_end(self, epoch, logs = None):
+        mean_accuracy = float(sum(self.batch_accuracy)) / float(len(self.batch_accuracy))
+        self.accuracy.append(mean_accuracy)
+        self.batch_accuracy = list()
+
+        data = { "accuracy" : self.accuracy}
+
+        if epoch == self.config.epoches - 1:
+            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "accuracy"), 'w', encoding = 'utf8') as outfile:
+                s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
+                outfile.write(s)
+            
+            self.batch_accuracy = None
+            self.accuracy = None
+
+'''
+----- Loss -----
+@desciption:
+    ...
+'''
+class Loss(tf.keras.callbacks.Callback):
+
+    def __init__(self, config, time, _round):
+        self.config = config
+        self.time = time
+        self.round = _round
+
+        self.batch_loss = list()
+        self.loss = list()
+
+    def on_train_batch_end(self, epoch, logs = None):
+        self.batch_loss.append(float(logs.get('loss')))
+
+    def on_epoch_end(self, epoch, logs = None):
+        mean_accuracy = float(sum(self.batch_loss)) / float(len(self.batch_loss))
+        self.loss.append(mean_accuracy)
+        self.batch_loss = list()
+
+        data = { "accuracy" : self.loss}
+
+        if epoch == self.config.epoches - 1:
+            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "loss"), 'w', encoding = 'utf8') as outfile:
+                s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
+                outfile.write(s)
+            
+            self.batch_loss = None
+            self.loss = None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
     """Stop training when the loss is at its min, i.e. the loss stops decreasing.

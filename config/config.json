@@ -12,11 +12,13 @@
     "epoches": 50,
     "rounds": 3,
     "learning_rate": 0.0003,
+    "random_vector_num": 128,
     "example_to_generate": 16,
     "condition_size": 2,
     "class_count": 2,
     "noise_variance": 1.0,
     "fine_tune": false,
+    "pretrained_finetune_path": "",
     "pretrained_classifier_path": "",
     
     "vocab_size": 50257,

@@ -165,11 +165,13 @@ class TrainingConfig(PretrainedConfig):
             "epoches": self.epoches,
             "rounds": self.rounds,
             "learning_rate": self.learning_rate,
+            "random_vector_num": self.random_vector_num,
             "example_to_generate": self.example_to_generate,
             "condition_size": self.condition_size,
             "class_count": self.class_count,
             "noise_variance": self.noise_variance,
             "fine_tune": self.fine_tune,
+            "pretrained_finetune_path": self.pretrained_finetune_path,
             "pretrained_classifier_path": self.pretrained_classifier_path,
 
             "vocab_size": self.vocab_size,
@@ -228,11 +230,13 @@ class TrainingConfig(PretrainedConfig):
                 self.epoches = int(d["epoches"])
                 self.rounds = int(d["rounds"])
                 self.learning_rate = float(d["learning_rate"])
+                self.random_vector_num = int(d["random_vector_num"])
                 self.example_to_generate = int(d["example_to_generate"])
                 self.condition_size = int(d["condition_size"])
                 self.class_count = int(d["class_count"])
                 self.noise_variance = float(d["noise_variance"])
                 self.fine_tune = bool(d["fine_tune"])
+                self.pretrained_finetune_path = str(d["pretrained_finetune_path"])
                 self.pretrained_classifier_path = str(d["pretrained_classifier_path"])
 
                 self.vocab_size = int(d["vocab_size"])
