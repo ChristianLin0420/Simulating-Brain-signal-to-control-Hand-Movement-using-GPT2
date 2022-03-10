@@ -34,11 +34,12 @@ class gpt2cgan(tf.keras.Model):
         # add one hot vector for every seed
         self.seed = tf.random.normal([generated_count, config.n_positions, config.n_embd])
 
-        tmp = [0] * int(generated_count / 2) + [1] * int(generated_count / 2)
+        tmp = list()
+        for i in range(config.class_count):
+            tmp += [i] * int(generated_count / config.class_count)
         l = tf.constant(tmp)
 
-        # l = tf.constant([x % 2 for x in range(2)])
-        one_hot = tf.one_hot(l, depth = 2)
+        one_hot = tf.one_hot(l, depth = config.condition_size)
         one_hot = tf.expand_dims(one_hot, axis = 1)
         one_hot = tf.repeat(one_hot, repeats = config.n_positions, axis = 1)
         self.seed = tf.concat([self.seed, one_hot], axis = 2)

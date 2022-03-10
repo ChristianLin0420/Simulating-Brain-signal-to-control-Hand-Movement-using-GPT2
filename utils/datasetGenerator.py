@@ -93,17 +93,19 @@ def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, 
 
 class DatasetGenerator():
 
-    def __init__(self, filenames, raw_filenames, labels, raw_labels, batch_size, subject_count) :
+    def __init__(self, filenames, raw_filenames, labels, raw_labels, config = None) :
         self.image_filenames = filenames
         self.raw_filenames = raw_filenames
         self.labels = labels
         self.raw_labels = raw_labels
 
-        self.batch_size = batch_size
-        self.subjects_count = subject_count
+        self.batch_size = config.batch_size
+        self.subjects_count = config.subject_count
 
         self.current_subject_index = 0
         self.raw_current_subject_index = 0
+
+        self.config = config
 
     def getItem(self):
 
@@ -233,7 +235,7 @@ class DatasetGenerator():
         train_label = train_label[:remain_count]
 
         train_data = np.reshape(train_data, [train_data.shape[0], train_data.shape[1], train_data.shape[2], 1])
-        train_label = keras.utils.to_categorical(train_label, 2)
+        train_label = keras.utils.to_categorical(train_label, self.config.class_count)
 
         train_data = train_data.astype(np.float32)
         train_label = train_label.astype(np.float32)

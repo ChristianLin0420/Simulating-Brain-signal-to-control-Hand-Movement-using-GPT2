@@ -101,7 +101,7 @@ class Runner():
         ### retrieve training data
         filenames, labels = get_training_reconstruct_signals()
         raw_filenames, raw_labels = get_training_raw_signals(subject_count = self.config.subject_count)
-        dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, batch_size = self.config.batch_size, subject_count = self.config.subject_count)
+        dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, config = self.config)
         
         (self.train_x, self.train_y, self.real_average_data) = dataGenerator.get_reconstructed_items(filenames, labels)
 

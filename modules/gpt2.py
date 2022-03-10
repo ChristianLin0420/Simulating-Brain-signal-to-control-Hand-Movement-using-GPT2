@@ -273,7 +273,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             config.vocab_size, config.hidden_size, initializer_range=config.initializer_range, name="wte"
         )
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
-        self.h = [TFBlock(config.n_ctx, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
+        self.h = [TFBlock(config.n_ctx + config.condition_size, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
         self.activation_layer = tf.keras.layers.ReLU(max_value = 1)
         self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
