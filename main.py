@@ -49,7 +49,7 @@ if __name__ == '__main__':
                 print("[No GPR] there is no availible gpu to use!!!")
 
         ## initialize the training runner and start training    
-        runner = Runner(config)
+        runner = Runner(config, time)
 
         print("Runner starts training!!!")
         runner.run()
