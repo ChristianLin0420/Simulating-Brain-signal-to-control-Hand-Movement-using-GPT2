@@ -23,10 +23,13 @@ from modules.classifier import (
 )
 
 from utils.callback import (
-    EarlyStoppingAtMinLoss, 
-    RecordGeneratedImages, 
-    RecordWeight, 
-    RecordReconstructedGeneratedImages
+    # EarlyStoppingAtMinLoss, 
+    # RecordGeneratedImages, 
+    # RecordWeight, 
+    # RecordReconstructedGeneratedImages, 
+    Accuracy, 
+    Loss, 
+    STFTgenerator
 )
 
 from utils.datasetGenerator import (
@@ -64,7 +67,8 @@ class Runner():
 
         ## model initialization
         if config.model_name == "gpt2cgan":
-            self.model = gpt2cgan(data_avg = ..., config = config)
+            self.model = gpt2cgan(config = config, data_avg = self.real_average_data)
+            
             ## compile the model
             self.model.compile(
                 d_optimizer = self.d_optimizer,
@@ -73,14 +77,14 @@ class Runner():
                 loss_kl = self.loss_kl
             )
         elif config.model_name == "gpt2xcnn":
-            self.pretrained_model = gpt2cgan(data_avg = ..., config = config)
+            self.pretrained_model = gpt2cgan(data_avg = self.real_average_data, config = config)
 
             ## fine-tune (load model)
             if config.fine_tune:
                 self.pretrained_model.load_weights(config.pretrained_finetune_path)
                 self.pretrained_model.trainable = True
 
-            self.model = gpt2xcnn(data_avg = ..., generator = self.pretrained_model, classifier = self.classifier)
+            self.model = gpt2xcnn(data_avg = self.real_average_data, generator = self.pretrained_model, classifier = self.classifier)
         
             ## compile the model
             self.model.compile(
@@ -99,18 +103,22 @@ class Runner():
         raw_filenames, raw_labels = get_training_raw_signals(subject_count = self.config.subject_count)
         dataGenerator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, batch_size = self.config.batch_size, subject_count = self.config.subject_count)
         
-        (_, _, self.real_average_data) = dataGenerator.get_reconstructed_items(filenames, labels)
+        (self.train_x, self.train_y, self.real_average_data) = dataGenerator.get_reconstructed_items(filenames, labels)
 
         self.left_hand_data = np.expand_dims(self.real_average_data[0], axis = 0)
         self.right_hand_data = np.expand_dims(self.real_average_data[1], axis = 0)
 
-    def set_callbacks(self, round):
+    def set_callbacks(self, _round):
         
         self.callbacks = list()
-        callbacks_list = {  "EarlyStoppingAtMinLoss" : EarlyStoppingAtMinLoss, 
-                            "RecordGeneratedImages": RecordGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
-                            "RecordWeight" : RecordWeight, 
-                            "RecordReconstructedGeneratedImages" : RecordReconstructedGeneratedImages(self.time, round, self.config.model_name, self.real_average_data)
+        callbacks_list = {  
+                            # "EarlyStoppingAtMinLoss" : EarlyStoppingAtMinLoss, 
+                            # "RecordGeneratedImages": RecordGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
+                            # "RecordWeight" : RecordWeight, 
+                            # "RecordReconstructedGeneratedImages" : RecordReconstructedGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
+                            "Accuracy" : Accuracy(self.config, self.time, _round),
+                            "Loss" : Loss(self.config, self.time, _round),
+                            "STFTgenerator" : STFTgenerator(self.config, self.time, _round)
                          }
 
         for callback in self.callbacks:
@@ -147,17 +155,31 @@ class Runner():
 
             ## set required callbacks
             self.set_callbacks(idx)
-            
-            ## start training and record training histroy
-            history = self.model.fit(   x = random_vectors, 
-                                        y = labels, 
-                                        batch_size = self.config.batch_size, 
-                                        epochs = self.config.epochs, 
-                                        verbose = 1,
-                                        callbacks = self.callbacks
-                                    )
 
+            ## start training and record training histroy
+            if self.config.model_name:
+                history = self.model.fit(   x = self.train_x,
+                                            y = self.train_y,
+                                            batch_size = self.config.batch_size,
+                                            epochs = self.config.epochs, 
+                                            verbose = 1
+                                        )
+            elif self.config.model_name == "gpt2xcnn":
+                history = self.model.fit(   x = random_vectors, 
+                                            y = labels, 
+                                            batch_size = self.config.batch_size, 
+                                            epochs = self.config.epochs, 
+                                            verbose = 1,
+                                            callbacks = self.callbacks
+                                        )
+            elif self.config.model_name == "gpt2scnn":
+                pass
+            else:
+                error("[Runner] invalid training model!!!")
+                return
+            
             ## store training history
             self.store_history(history)
 
             ## save model
+            self.model.save_weights("results/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')

@@ -36,7 +36,7 @@ class Accuracy(tf.keras.callbacks.Callback):
 
         data = { "accuracy" : self.accuracy}
 
-        if epoch == self.config.epoches - 1:
+        if epoch == self.config.epochs - 1:
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "accuracy"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
@@ -63,13 +63,13 @@ class Loss(tf.keras.callbacks.Callback):
         self.batch_loss.append(float(logs.get('loss')))
 
     def on_epoch_end(self, epoch, logs = None):
-        mean_accuracy = float(sum(self.batch_loss)) / float(len(self.batch_loss))
-        self.loss.append(mean_accuracy)
+        mean_loss = float(sum(self.batch_loss)) / float(len(self.batch_loss))
+        self.loss.append(mean_loss)
         self.batch_loss = list()
 
-        data = { "accuracy" : self.loss}
+        data = { "loss" : self.loss}
 
-        if epoch == self.config.epoches - 1:
+        if epoch == self.config.epochs - 1:
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "loss"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
@@ -77,9 +77,92 @@ class Loss(tf.keras.callbacks.Callback):
             self.batch_loss = None
             self.loss = None
 
+'''
+----- STFTgenerator -----
+@desciption:
+    ...
+'''
+class STFTgenerator(tf.keras.callbacks.Callback):
 
+    def __init__(self, config, time, _round):
+        self.config = config
+        self.time = time
+        self.round = _round
 
+        self.stft = list()
+        (self.boolean_l, self.boolean_r) = boolean_brain()
 
+    def on_train_batch_end(self, epoch, logs = None):
+        if epoch == 1 or (epoch + 1) % 10 == 0:
+           self.stft += list(logs.get("generated"))
+
+    def on_epoch_end(self, epoch, logs = None):
+        if epoch == 1 or (epoch + 1) % 10 == 0:
+            brain = None
+            signals = None
+
+            ## reconstruct the brain voxels from the given generated output
+            for i in range(self.stft.shape[0]):
+                (l_tmp, r_tmp) = restore_brain_activation_tf(self.stft[i], self.boolean_l, self.boolean_r)
+                brain_activation = tf.concat([l_tmp, r_tmp], axis = 0)
+                brain_activation = tf.expand_dims(brain_activation, axis = 0)
+
+                if brain == None:
+                    brain = brain_activation
+                else:
+                    brain = tf.concat([brain, brain_activation], axis = 0)
+
+            ## calculate the average value of the generated signals
+            tmp = tf.reshape(brain, shape = [brain.shape[0], brain.shape[1], brain.shape[2]])
+            brain = None
+
+            generated_num_per_class = int(self.example_to_generate / self.class_count)
+            
+            for i in range(self.class_count):
+                mean = tf.reduce_mean(tmp[i * generated_num_per_class : (i + 1) * generated_num_per_class], axis = 0)
+                mean = tf.expand_dims(mean, axis = 0)
+
+                if brain is None:
+                    brain = mean
+                else:
+                    brain = tf.concat([brain, mean], axis = 0)
+                
+
+            ## forward implenmentation (brain voxels -> EEG signals)
+            for i in range(brain.shape[0]):
+                signal = tf.matmul(self.transformation_matrix, brain[i])
+                signal = tf.expand_dims(signal, axis = 0)
+
+                if signals == None:
+                    signals = signal
+                else:
+                    signals = tf.concat([signals, signal], axis = 0)
+
+            signals = signals[:, 11:14, :]
+
+            Zxx = tf.signal.stft(signals, frame_length = 256, frame_step = 16)
+            Zxx = tf.abs(Zxx)
+            
+            bz = int(self.stft.shape[0])
+            channels = ["C3", "C4", "Cz"]
+
+            ## generate short-time fourier transform figures
+            for sample in range(bz):
+                if not os.path.exists('results/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch)):
+                    os.mkdir('results/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch))
+
+                for idx in range(int(len(channels))):
+                    log_spec = tf.math.log(tf.transpose(Zxx[sample][idx]))
+                    height = 40
+                    width = log_spec.shape[1]
+                    x_axis = tf.linspace(0, 2, num = width)
+                    y_axis = range(height)
+                    plt.pcolormesh(x_axis, y_axis, log_spec[:40, ])
+                    plt.title('STFT Magnitude for channel {} of class {} in iteration {}'.format(channels[idx], sample + 1, epoch))
+                    plt.ylabel('Frequency [Hz]')
+                    plt.xlabel('Time [sec]')
+                    plt.savefig('results/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}'.format(self.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
+                    plt.close()
 
 
 

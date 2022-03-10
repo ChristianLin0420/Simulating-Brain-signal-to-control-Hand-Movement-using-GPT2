@@ -35,7 +35,7 @@ different tasks and different subjects.
 | model_name     | String        | Training model name |
 | buffer_size    | Integer       | ... |
 | batch_size     | Integer       | Number of batch |
-| epoches        | Integer       | Number of training epoches |
+| epochs        | Integer       | Number of training epochs |
 | rounds         | Integer       | Number of training rounds  |
 | learning_rate  | Float         | Learning rate(d_optimizer, g_optimizer, c_optimizer) |
 | random_vector_num | Integer    | Number of generated random vectors |

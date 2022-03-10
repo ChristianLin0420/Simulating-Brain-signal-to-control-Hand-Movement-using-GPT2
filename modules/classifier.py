@@ -103,7 +103,7 @@ def create_model():
         
         return model
 
-def get_pretrained_classfier_from_path(path = '/home/jupyter-ivanljh123/EEG-forward-and-inverse/models/A09_0.9183/'):
+def get_pretrained_classfier_from_path(path):
     #load pretrained model
     model = create_model()
     model.load_weights(path)

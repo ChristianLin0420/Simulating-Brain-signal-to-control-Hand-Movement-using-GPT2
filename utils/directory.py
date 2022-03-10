@@ -13,8 +13,8 @@ class DirectoryGenerator:
     def set_roots(self):
         roots_path = "./result/{}/{}".format(self.config.model_name, self.time)
 
-        for root in ["", "config", "models", "topography", "eeg", "history"]:
-            os.mkdir(roots_path + "/{}".format(root))
+        for root in ["", "/config", "/models", "/topography", "/eeg", "/history", "/stft"]:
+            os.mkdir(roots_path + "{}".format(root))
             for idx in range(self.config.rounds):
                 os.mkdir(roots_path + "/{}/{}".format(root, idx))
 

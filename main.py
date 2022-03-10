@@ -29,6 +29,8 @@ if __name__ == '__main__':
         ## initialize the configuration
         config = TrainingConfig()
         config.save_config(config.model_name, time)
+
+        print("time: {}".format(time))
         print(config)
 
         ## environment settings

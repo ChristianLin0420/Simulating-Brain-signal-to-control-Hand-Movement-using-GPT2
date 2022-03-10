@@ -102,7 +102,7 @@ class TrainingConfig(PretrainedConfig):
         # self.model_name = str(d["model_name"])
         # self.buffer_size = int(d["buffer_size"])
         # self.batch_size = int(d["batch_size"])
-        # self.epoches = int(d["epoches"])
+        # self.epochs = int(d["epochs"])
         # self.learning_rate = float(d["learning_rate"])
         # self.example_to_generate = int(d["example_to_generate"])
         # self.noise_hidden_dim = int(d["noise_hidden_dim"])
@@ -162,7 +162,7 @@ class TrainingConfig(PretrainedConfig):
             "model_name": self.model_name,
             "buffer_size": self.buffer_size,
             "batch_size": self.batch_size,
-            "epoches": self.epoches,
+            "epochs": self.epochs,
             "rounds": self.rounds,
             "learning_rate": self.learning_rate,
             "random_vector_num": self.random_vector_num,
@@ -173,6 +173,10 @@ class TrainingConfig(PretrainedConfig):
             "fine_tune": self.fine_tune,
             "pretrained_finetune_path": self.pretrained_finetune_path,
             "pretrained_classifier_path": self.pretrained_classifier_path,
+
+            "Accuracy": self.Accuracy,
+            "Loss": self.Loss,
+            "STFtgenerator": self.STFtgenerator,
 
             "vocab_size": self.vocab_size,
             "n_positions": self.n_positions,
@@ -227,7 +231,7 @@ class TrainingConfig(PretrainedConfig):
                 self.model_name = str(d["model_name"])
                 self.buffer_size = int(d["buffer_size"])
                 self.batch_size = int(d["batch_size"])
-                self.epoches = int(d["epoches"])
+                self.epochs = int(d["epochs"])
                 self.rounds = int(d["rounds"])
                 self.learning_rate = float(d["learning_rate"])
                 self.random_vector_num = int(d["random_vector_num"])
@@ -238,6 +242,10 @@ class TrainingConfig(PretrainedConfig):
                 self.fine_tune = bool(d["fine_tune"])
                 self.pretrained_finetune_path = str(d["pretrained_finetune_path"])
                 self.pretrained_classifier_path = str(d["pretrained_classifier_path"])
+
+                self.Accuracy = bool(d["Accuracy"])
+                self.Loss = bool(d["Loss"])
+                self.STFTgenerator = bool(d["STFTgenerator"])
 
                 self.vocab_size = int(d["vocab_size"])
                 self.n_positions = int(d["n_positions"])
