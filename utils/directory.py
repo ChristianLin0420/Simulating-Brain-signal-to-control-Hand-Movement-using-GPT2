@@ -15,7 +15,7 @@ class DirectoryGenerator:
 
         for root in ["", "/config", "/models", "/topography", "/eeg", "/history", "/stft"]:
             os.mkdir(roots_path + "{}".format(root))
-            if root != "" || root != "/config":
+            if root != "" or root != "/config":
                 for idx in range(self.config.rounds):
                     os.mkdir(roots_path + "/{}/{}".format(root, idx))
 
