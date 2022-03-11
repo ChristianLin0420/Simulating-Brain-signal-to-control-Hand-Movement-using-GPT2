@@ -13,11 +13,12 @@ class DirectoryGenerator:
     def set_roots(self):
         roots_path = "./result/{}/{}".format(self.config.model_name, self.time)
 
-        for root in ["", "/config", "/models", "/topography", "/eeg", "/history", "/stft"]:
+        os.mkdir(roots_path + "/config")
+
+        for root in ["/models", "/topography", "/eeg", "/history", "/stft"]:
             os.mkdir(roots_path + "{}".format(root))
-            if root != "" or root != "/config":
-                for idx in range(self.config.rounds):
-                    os.mkdir(roots_path + "{}/{}".format(root, idx))
+            for idx in range(self.config.rounds):
+                os.mkdir(roots_path + "{}/{}".format(root, idx))
 
     def check_roots(self):
         if not os.path.exists("./result"):
