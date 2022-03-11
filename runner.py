@@ -129,8 +129,10 @@ class Runner():
 
         for key in list(history.history.keys()):
             data = {
-                key : list(history.history[key])
+                str(key) : list(history.history[str(key)])
             }
+
+            print(type(history.history[key]))
 
             # if type(history.history[key]) == np.ndarray:
             #     data[key] = history.history[key].tolist()
