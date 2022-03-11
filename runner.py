@@ -129,13 +129,13 @@ class Runner():
 
         for key in list(history.history.keys()):
             data = {}
-            data[key] = history.history[key]
+            data[key] = list(history.history[key])
 
-            if type(history.history[key]) == np.ndarray:
-                data[key] = history.history[key].tolist()
-            elif type(history.history[key]) == list:
-                if  type(history.history[key][0]) == np.float64:
-                    data[key] = list(map(float, history.history[key]))
+            # if type(history.history[key]) == np.ndarray:
+            #     data[key] = history.history[key].tolist()
+            # elif type(history.history[key]) == list:
+            #     if  type(history.history[key][0]) == np.float64:
+            #         data[key] = list(map(float, history.history[key]))
 
             with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
