@@ -162,7 +162,7 @@ class Runner():
                                             y = self.train_y,
                                             batch_size = self.config.batch_size,
                                             epochs = self.config.epochs, 
-                                            verbose = 1
+                                            verbose = 0
                                         )
             elif self.config.model_name == "gpt2xcnn":
                 history = self.model.fit(   x = random_vectors, 
@@ -179,7 +179,7 @@ class Runner():
                 return
             
             ## store training history
-            self.store_history(history)
+            self.store_history(history, idx)
 
             ## save model
             self.model.save_weights("results/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')
