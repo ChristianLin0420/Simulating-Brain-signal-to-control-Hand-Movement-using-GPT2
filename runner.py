@@ -134,11 +134,7 @@ class Runner():
                 data = {
                     str(key) : list(history.history[str(key)])
                 }
-
-                print(key)
-                print(type(history.history[key]))
-                print(type(data))
-
+                
                 with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
                     s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                     outfile.write(s)
