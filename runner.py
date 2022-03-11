@@ -128,8 +128,9 @@ class Runner():
     def store_history(self, history, _round):
 
         for key in list(history.history.keys()):
-            data = {}
-            data[key] = list(history.history[key])
+            data = {
+                key : list(history.history[key])
+            }
 
             # if type(history.history[key]) == np.ndarray:
             #     data[key] = history.history[key].tolist()
@@ -138,7 +139,7 @@ class Runner():
             #         data[key] = list(map(float, history.history[key]))
 
             with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
-                s = json.dumps(data.tolist(), indent = 4, sort_keys = True, ensure_ascii = False)
+                s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
 
     def run(self):
