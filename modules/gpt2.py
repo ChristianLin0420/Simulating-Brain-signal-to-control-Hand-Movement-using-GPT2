@@ -169,7 +169,7 @@ class TFAttention(tf.keras.layers.Layer):
 class TFMLP(tf.keras.layers.Layer):
     def __init__(self, n_state, config, **kwargs):
         super().__init__(**kwargs)
-        nx = config.n_embd
+        nx = config.n_embd + config.condition_size
         self.c_fc = TFConv1D(n_state, nx, initializer_range=config.initializer_range, name="c_fc")
         self.c_proj = TFConv1D(nx, n_state, initializer_range=config.initializer_range, name="c_proj")
         self.act = get_activation("gelu")
@@ -189,7 +189,7 @@ class TFMLP(tf.keras.layers.Layer):
 class TFBlock(tf.keras.layers.Layer):
     def __init__(self, n_ctx, config, scale=False, **kwargs):
         super().__init__(**kwargs)
-        nx = config.n_embd
+        nx = (config.n_embd + config.condition_size) 
         inner_dim = config.n_inner if config.n_inner is not None else 4 * nx
         self.ln_1 = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_1")
         self.attn = TFAttention(nx + config.condition_size, n_ctx, config, scale, name="attn")
