@@ -17,7 +17,7 @@ class DirectoryGenerator:
             os.mkdir(roots_path + "{}".format(root))
             if root != "" or root != "/config":
                 for idx in range(self.config.rounds):
-                    os.mkdir(roots_path + "/{}/{}".format(root, idx))
+                    os.mkdir(roots_path + "{}/{}".format(root, idx))
 
     def check_roots(self):
         if not os.path.exists("./result"):
