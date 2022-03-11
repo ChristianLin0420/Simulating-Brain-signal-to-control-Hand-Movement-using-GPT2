@@ -134,7 +134,7 @@ class Runner():
                 data = {
                     str(key) : list(history.history[str(key)])
                 }
-                
+
                 with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
                     s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                     outfile.write(s)
@@ -160,7 +160,7 @@ class Runner():
                                             y = self.train_y,
                                             batch_size = self.config.batch_size,
                                             epochs = self.config.epochs, 
-                                            verbose = 0
+                                            verbose = 1
                                         )
             elif self.config.model_name == "gpt2xcnn":
                 history = self.model.fit(   x = random_vectors, 
@@ -180,4 +180,4 @@ class Runner():
             self.store_history(history, idx)
 
             ## save model
-            self.model.save_weights("results/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')
+            self.model.save_weights("result/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')
