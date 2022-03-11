@@ -130,23 +130,18 @@ class Runner():
         print(list(history.history.keys()))
 
         for key in list(history.history.keys()):
-            data = {
-                str(key) : list(history.history[str(key)])
-            }
+            if key != "generated":
+                data = {
+                    str(key) : list(history.history[str(key)])
+                }
 
-            print(key)
-            print(type(history.history[key]))
-            print(type(data))
+                print(key)
+                print(type(history.history[key]))
+                print(type(data))
 
-            # if type(history.history[key]) == np.ndarray:
-            #     data[key] = history.history[key].tolist()
-            # elif type(history.history[key]) == list:
-            #     if  type(history.history[key][0]) == np.float64:
-            #         data[key] = list(map(float, history.history[key]))
-
-            with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
-                s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
-                outfile.write(s)
+                with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
+                    s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
+                    outfile.write(s)
 
     def run(self):
 
