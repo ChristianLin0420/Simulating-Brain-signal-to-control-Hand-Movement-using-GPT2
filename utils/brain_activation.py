@@ -13,7 +13,7 @@ SUBGROUP_SIZE = 1
 
 def boolean_brain():
 
-    path = '/home/jupyter-ivanljh123/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/boolean.json'
+    path = '/home/jupyter-ivanljh123/test2/Simulating-Brain-signal-to-control-Hand-Movement-using-GPT2/boolean.json'
 
     # Read JSON file
     with open(path) as data_file:
