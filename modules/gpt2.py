@@ -192,7 +192,7 @@ class TFBlock(tf.keras.layers.Layer):
         nx = config.n_embd
         inner_dim = config.n_inner if config.n_inner is not None else 4 * nx
         self.ln_1 = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_1")
-        self.attn = TFAttention(nx + config.condition_size, n_ctx + config.condition_size, config, scale, name="attn")
+        self.attn = TFAttention(nx + config.condition_size, n_ctx, config, scale, name="attn")
         self.ln_2 = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_2")
         self.mlp = TFMLP(inner_dim, config, name="mlp")
     
@@ -265,7 +265,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         self.num_hidden_layers = config.n_layer
         self.vocab_size = config.vocab_size
-        self.n_embd = config.n_embd
+        self.n_embd = config.n_embd + config.condition_size
         self.n_positions = config.n_positions
         self.initializer_range = config.initializer_range
 
