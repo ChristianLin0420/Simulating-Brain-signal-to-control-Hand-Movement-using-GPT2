@@ -127,12 +127,16 @@ class Runner():
 
     def store_history(self, history, _round):
 
+        print(list(history.history.keys()))
+
         for key in list(history.history.keys()):
             data = {
                 str(key) : list(history.history[str(key)])
             }
 
+            print(key)
             print(type(history.history[key]))
+            print(type(data))
 
             # if type(history.history[key]) == np.ndarray:
             #     data[key] = history.history[key].tolist()
