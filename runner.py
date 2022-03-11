@@ -148,7 +148,7 @@ class Runner():
                                                             length = self.config.n_positions, 
                                                             emb = self.config.n_embd, 
                                                             one_hot_vector_size = self.config.condition_size, 
-                                                            variance = self.config.variance )
+                                                            variance = self.config.noise_variance )
 
         ## start training
         for idx in range(self.config.rounds):
