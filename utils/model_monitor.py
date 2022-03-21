@@ -4,6 +4,7 @@
 import os
 import glob
 import json
+from typing import Dict
 import imageio
 import numpy as np
 import tensorflow as tf
@@ -13,6 +14,9 @@ import matplotlib.pyplot as plt
 from logging import error
 
 from .brain_activation import restore_brain_activation, generate_eeg 
+
+def show_avg_history(title: str, records: Dict, path: str):
+    pass
 
 def show_generated_image(prediction):
     

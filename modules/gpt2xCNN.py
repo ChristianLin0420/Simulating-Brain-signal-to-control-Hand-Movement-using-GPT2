@@ -270,7 +270,8 @@ class gpt2xcnn(tf.keras.Model):
         self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
 
 
-        return {"loss": loss, "accuracy": accuracy, 
+        return {"loss": loss, 
+                "accuracy": accuracy, 
                 "raw_feet_signal_kl": raw_signal_feet_kl, 
                 "raw_tongue_signal_kl": raw_signal_tongue_kl, 
                 "raw_feet_spectrum_c3_signal_kl": raw_feet_spectrum_c3_signal_kl, 
@@ -279,8 +280,11 @@ class gpt2xcnn(tf.keras.Model):
                 "raw_tongue_spectrum_c4_signal_kl": raw_tongue_spectrum_c4_signal_kl, 
                 "raw_feet_spectrum_cz_signal_kl": raw_feet_spectrum_cz_signal_kl, 
                 "raw_tongue_spectrum_cz_signal_kl": raw_tongue_spectrum_cz_signal_kl, 
-                "generated": predictions, "original_loss": orignal_loss, "delta_kl_loss": delta_kl_loss, 
-                "sum_kl": sum_kl, "delta": self.delta}
+                "generated": predictions, 
+                "original_loss": orignal_loss, 
+                "delta_kl_loss": delta_kl_loss, 
+                "sum_kl": sum_kl, 
+                "delta": self.delta}
 
     def call(self, inputs):
         

@@ -6,7 +6,7 @@
     "subject_count": 1,
     "data_path": "",
 
-    "model_name": "gpt2cgan",
+    "model_name": "gpt2xcnn",
     "buffer_size": 1000,
     "batch_size": 8,
     "epochs": 3,
@@ -17,13 +17,13 @@
     "condition_size": 2,
     "class_count": 2,
     "noise_variance": 1.0,
-    "fine_tune": false,
-    "pretrained_finetune_path": "./result/gpt2cgan/models/",
+    "fine_tune": true,
+    "pretrained_finetune_path": "./result/gpt2cgan/13_03_2022_11_11_03/models/0/model",
     "pretrained_classifier_path": "/home/jupyter-ivanljh123/EEG-forward-and-inverse/models/A09_0.9183/",
 
-    "Accuracy": false,
-    "Loss": false,
-    "STFTgenerator": false,
+    "Accuracy": true,
+    "Loss": true,
+    "STFTgenerator": true,
     
     "vocab_size": 50257,
     "n_positions": 2089,
