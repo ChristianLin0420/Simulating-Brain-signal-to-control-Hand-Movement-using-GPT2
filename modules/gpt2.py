@@ -201,11 +201,14 @@ class TFBlock(tf.keras.layers.Layer):
         return self.attn.get_weights()
 
     def call(self, x, layer_past, attention_mask, head_mask, use_cache, output_attentions, training=False):
+        print(x.shape)
         a = self.ln_1(x)
+        print(a.shape)
         output_attn = self.attn(
             a, layer_past, attention_mask, head_mask, use_cache, output_attentions, training=training
         )
         a = output_attn[0]  # output_attn: a, present, (attentions)
+        print(a.shape)
         x = x + a
 
         m = self.ln_2(x)
@@ -213,6 +216,7 @@ class TFBlock(tf.keras.layers.Layer):
         x = x + m
 
         outputs = [x] + output_attn[1:]
+        print(outputs.shape)
 
         a = None
         m = None
@@ -412,6 +416,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
         hidden_states = self.drop(hidden_states, training=inputs["training"])
         output_shape = input_shape
+
+        print("hidden_states: {}".format(hidden_states))
 
         presents = () if inputs["use_cache"] else None
         all_attentions = () if inputs["output_attentions"] else None
