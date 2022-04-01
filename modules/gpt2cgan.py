@@ -306,7 +306,7 @@ class gpt2cgan(tf.keras.Model):
                 "generated": predictions}
 
     def call(self, inputs):
-        
+        print(inputs.shape)
         predictions = np.asarray(self.generator(inputs, training = True))
 
         batch = predictions.shape[0]
