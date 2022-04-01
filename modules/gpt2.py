@@ -406,7 +406,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         else:
             token_type_embeds = tf.constant(0.0)
 
-        position_embeds = tf.cast(position_embeds, dtype=inputs["inputs_embeds"].dtype)
+        position_embeds = tf.cast(self.wpe, dtype=inputs["inputs_embeds"].dtype)
         token_type_embeds = tf.cast(token_type_embeds, dtype=inputs["inputs_embeds"].dtype)
 
         inputs["inputs_embeds"] = tf.reshape(inputs["inputs_embeds"], shape_list(inputs["token_type_ids"])[:3])
