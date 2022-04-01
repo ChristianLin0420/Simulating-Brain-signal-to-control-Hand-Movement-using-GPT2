@@ -411,10 +411,12 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
 
         inputs["inputs_embeds"] = tf.reshape(inputs["inputs_embeds"], shape_list(inputs["inputs_embeds"])[:3])
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
+        print("hidden_states: {}, {}".format(hidden_states, type(hidden_states)))
         hidden_states = self.drop(hidden_states, training=inputs["training"])
+        print("hidden_states: {}, {}".format(hidden_states, type(hidden_states)))
         hidden_states = tf.reshape(hidden_states, shape_list(inputs["inputs_embeds"]))
+        print("hidden_states: {}, {}".format(hidden_states, type(hidden_states)))
         output_shape = input_shape
-        print("hidden_states: {}".format(hidden_states))
 
         presents = () if inputs["use_cache"] else None
         all_attentions = () if inputs["output_attentions"] else None
