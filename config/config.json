@@ -9,7 +9,7 @@
     "model_name": "gpt2xcnn",
     "buffer_size": 1000,
     "batch_size": 4,
-    "epochs": 3,
+    "epochs": 3000,
     "rounds": 3,
     "learning_rate": 0.0003,
     "random_vector_num": 128,

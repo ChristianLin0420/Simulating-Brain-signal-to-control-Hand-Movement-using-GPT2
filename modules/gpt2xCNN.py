@@ -86,7 +86,7 @@ class gpt2xcnn(tf.keras.Model):
         idx = 0
         tmp_delta = 0.0
             
-        print("idx: {}, shape of seeds: {}".format(idx, seeds[idx * generate_count:(idx + 1) * generate_count].shape))
+        # print("idx: {}, shape of seeds: {}".format(idx, seeds[idx * generate_count:(idx + 1) * generate_count].shape))
 
         with tf.GradientTape() as tape:
             sigs = self.gptGenerator.generator(seeds[idx * generate_count:(idx + 1) * generate_count])
@@ -168,8 +168,8 @@ class gpt2xcnn(tf.keras.Model):
                 else:
                     predictions_right = tf.concat([predictions_right, predictions_r], axis = 0)
 
-            print("predictions_left shape: {}".format(predictions_left.shape))
-            print("predictions_right shape: {}".format(predictions_right.shape))
+            # print("predictions_left shape: {}".format(predictions_left.shape))
+            # print("predictions_right shape: {}".format(predictions_right.shape))
 
             predictions_left = tf.reduce_mean(predictions_left, axis = 0)
             predictions_right = tf.reduce_mean(predictions_right, axis = 0)
@@ -183,7 +183,7 @@ class gpt2xcnn(tf.keras.Model):
             predictions = tf.concat([predictions_left, predictions_right], axis = 0)
             predictions = tf.concat([predictions, self.real_data], axis = 0)
 
-            print("predictions shape: {}".format(predictions.shape))
+            # print("predictions shape: {}".format(predictions.shape))
 
             ## raw signal kl
             data1 = tf.reshape(self.real_data[0], shape = [1, 2089, 500])
@@ -222,7 +222,7 @@ class gpt2xcnn(tf.keras.Model):
             Zxx = tf.signal.stft(signals, frame_length=256, frame_step=16)
             Zxx = tf.abs(Zxx)
 
-            print("Zxx shape: {}".format(Zxx.shape))
+            # print("Zxx shape: {}".format(Zxx.shape))
 
             raw_feet_spectrum_c3_signal_kl = self.loss_kl(signals[2, 0, :], signals[0, 0, :])
             raw_tongue_spectrum_c3_signal_kl = self.loss_kl(signals[3, 0, :], signals[1, 0, :])
