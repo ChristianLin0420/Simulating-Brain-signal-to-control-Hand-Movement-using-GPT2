@@ -410,7 +410,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         token_type_embeds = tf.cast(token_type_embeds, dtype=inputs["inputs_embeds"].dtype)
 
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
-        print("hidden_states: {}".format(hidden_states))
+        print("position_embeds: {}".format(position_embeds))
+        print("token_type_embeds: {}".format(token_type_embeds))
         hidden_states = self.drop(hidden_states, training=inputs["training"])
         output_shape = input_shape
         print(inputs["inputs_embeds"])
