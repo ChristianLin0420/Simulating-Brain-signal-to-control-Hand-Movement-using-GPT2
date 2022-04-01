@@ -84,6 +84,13 @@ class Runner():
                 self.pretrained_model.load_weights(config.pretrained_finetune_path)
                 self.pretrained_model.trainable = True
 
+            self.pretrained_model.compile(
+                d_optimizer = self.d_optimizer,
+                g_optimizer = self.g_optimizer,
+                loss_fn = self.loss_fn,
+                loss_kl = self.loss_kl
+            )
+
             self.model = gpt2xcnn(data_avg = self.real_average_data, config = config, generator = self.pretrained_model, classifier = self.classifier)
         
             ## compile the model
@@ -147,7 +154,6 @@ class Runner():
                                                             emb = self.config.n_embd, 
                                                             one_hot_vector_size = self.config.condition_size, 
                                                             variance = self.config.noise_variance )
-        print(random_vectors_labels)
         
         ## start training
         for idx in range(self.config.rounds):
