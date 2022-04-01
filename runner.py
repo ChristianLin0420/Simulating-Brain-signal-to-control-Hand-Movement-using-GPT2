@@ -84,7 +84,7 @@ class Runner():
                 self.pretrained_model.load_weights(config.pretrained_finetune_path)
                 self.pretrained_model.trainable = True
 
-            self.model = gpt2xcnn(data_avg = self.real_average_data, generator = self.pretrained_model, classifier = self.classifier)
+            self.model = gpt2xcnn(data_avg = self.real_average_data, config = config, generator = self.pretrained_model, classifier = self.classifier)
         
             ## compile the model
             self.model.compile(
