@@ -101,8 +101,6 @@ class gpt2xcnn(tf.keras.Model):
                 else:
                     brain = tf.concat([brain, brain_activation], axis = 0)
 
-            print("2")
-
             brain = tf.reshape(brain, shape = [brain.shape[0], brain.shape[1], brain.shape[2]])
 
             for i in range(brain.shape[0]):
@@ -114,8 +112,6 @@ class gpt2xcnn(tf.keras.Model):
                 else:
                     signals = tf.concat([signals, signal], axis = 0)
 
-            print("3")
-
             signals = signals[:, 11:14, :]
             signals_stft = signals
 
@@ -125,10 +121,12 @@ class gpt2xcnn(tf.keras.Model):
                 XX = X
             else:
                 XX = tf.concat([XX, X], axis = 0)
-            
+
 
             y_pred = self.classifier(X)
+            print(y_pred)
             y_true = labels[idx * generate_count: (idx + 1) * generate_count]
+            print(y_true)
 
             loss = self.loss_fn(y_true, y_pred)
 
