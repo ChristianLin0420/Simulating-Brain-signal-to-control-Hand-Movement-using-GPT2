@@ -65,20 +65,13 @@ class gpt2xcnn(tf.keras.Model):
 
     def train_step(self, data):
 
-        # self.count += 1
-
         seeds, labels = data
 
         signals_stft = tf.constant([])
         generate_count = 4
         generate_round = int(seeds.shape[0] / generate_count)
 
-        # rgb_weights = tf.constant([0.2989, 0.5870, 0.1140], shape=[3, 1])
         tt = self.optimizer.weights
-        # tf.print("original tt: {}".format(tt))
-        # tt = int(tt[0])
-        # tf.print("optimizer iteration: {} and type {}".format(tt, type(tt)))
-
 
         loss = tf.constant([])
         Y_pred = None
@@ -87,7 +80,6 @@ class gpt2xcnn(tf.keras.Model):
         sigs_spectrum = tf.constant([])
         sigs_record = tf.constant([])
 
-        # for idx in range(generate_round):
         idx = 0
         tmp_delta = 0.0
             
@@ -95,6 +87,8 @@ class gpt2xcnn(tf.keras.Model):
 
         with tf.GradientTape() as tape:
             sigs = self.gptGenerator.generator(seeds[idx * generate_count:(idx + 1) * generate_count])
+
+            print("1")
 
             brain = None
             signals = None
@@ -109,6 +103,8 @@ class gpt2xcnn(tf.keras.Model):
                 else:
                     brain = tf.concat([brain, brain_activation], axis = 0)
 
+            print("2")
+
             brain = tf.reshape(brain, shape = [brain.shape[0], brain.shape[1], brain.shape[2]])
 
             for i in range(brain.shape[0]):
@@ -119,6 +115,8 @@ class gpt2xcnn(tf.keras.Model):
                     signals = signal
                 else:
                     signals = tf.concat([signals, signal], axis = 0)
+
+            print("3")
 
             signals = signals[:, 11:14, :]
             signals_stft = signals
