@@ -66,6 +66,7 @@ class gpt2xcnn(tf.keras.Model):
     def train_step(self, data):
 
         seeds, labels = data
+        print(labels.shape)
 
         signals_stft = tf.constant([])
         generate_count = 4
@@ -124,8 +125,6 @@ class gpt2xcnn(tf.keras.Model):
 
 
             y_pred = self.classifier(X)
-            # y_pred = tf.reshape(y_pred, [generate_count, 1])
-            # y_pred = tf.cast(y_pred, tf.float32)
             y_true = labels[idx * generate_count: (idx + 1) * generate_count]
             print(y_true.shape)
             print(y_pred.shape)

@@ -142,7 +142,7 @@ class Runner():
     def run(self):
 
         ## initialize random vectors
-        random_vectors, labels = generate_random_vectors(   num = self.config.random_vector_num,
+        random_vectors, random_vectors_labels = generate_random_vectors(   num = self.config.random_vector_num,
                                                             length = self.config.n_positions, 
                                                             emb = self.config.n_embd, 
                                                             one_hot_vector_size = self.config.condition_size, 
@@ -164,7 +164,7 @@ class Runner():
                                         )
             elif self.config.model_name == "gpt2xcnn":
                 history = self.model.fit(   x = random_vectors, 
-                                            y = labels, 
+                                            y = random_vectors_labels, 
                                             batch_size = self.config.batch_size, 
                                             epochs = self.config.epochs, 
                                             verbose = 1,
