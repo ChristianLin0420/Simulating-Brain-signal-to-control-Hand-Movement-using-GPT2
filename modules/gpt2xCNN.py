@@ -128,6 +128,7 @@ class gpt2xcnn(tf.keras.Model):
             y_true = labels[idx * generate_count: (idx + 1) * generate_count]
             y_true = tf.argmax(y_true, 1)
             y_true = tf.cast(y_true, tf.float32)
+            y_true = tf.reshape(y_true, [generate_count, 1])
             print(y_true.shape)
             print(y_pred.shape)
 
