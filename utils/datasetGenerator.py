@@ -82,7 +82,6 @@ def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, 
     tmp = [0] * int(num / 2) + [1] * int(num / 2)
     random.shuffle(tmp)
     l = np.asarray(tmp)
-    print(l)
 
     # l = tf.constant([x % 2 for x in range(2)])
     one_hot = np.eye(one_hot_vector_size)[l]
