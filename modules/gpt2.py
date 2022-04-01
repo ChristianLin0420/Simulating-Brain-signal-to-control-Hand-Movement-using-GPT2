@@ -396,7 +396,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             # inputs["inputs_embeds"] = self.wte(inputs["input_ids"], mode="embedding")
 
         # print(inputs["position_ids"])
-        position_embeds = tf.gather(self.wpe, inputs["position_ids"])
+        # position_embeds = tf.gather(self.wpe, inputs["position_ids"])
 
         if inputs["token_type_ids"] is not None:
             inputs["token_type_ids"] = tf.reshape(
@@ -409,12 +409,11 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         position_embeds = tf.cast(position_embeds, dtype=inputs["inputs_embeds"].dtype)
         token_type_embeds = tf.cast(token_type_embeds, dtype=inputs["inputs_embeds"].dtype)
 
+        inputs["inputs_embeds"] = tf.reshape(inputs["inputs_embeds"], shape_list(inputs["token_type_ids"])[:3])
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
-        print("position_embeds: {}".format(position_embeds))
-        print("token_type_embeds: {}".format(token_type_embeds))
         hidden_states = self.drop(hidden_states, training=inputs["training"])
+        hidden_states = tf.reshape(hidden_states, shape_list(inputs["token_type_ids"]))
         output_shape = input_shape
-        print(inputs["inputs_embeds"])
         print("hidden_states: {}".format(hidden_states))
 
         presents = () if inputs["use_cache"] else None
