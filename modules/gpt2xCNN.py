@@ -86,9 +86,7 @@ class gpt2xcnn(tf.keras.Model):
         print("idx: {}, shape of seeds: {}".format(idx, seeds[idx * generate_count:(idx + 1) * generate_count].shape))
 
         with tf.GradientTape() as tape:
-            sigs = self.gptGenerator(seeds[idx * generate_count:(idx + 1) * generate_count])
-
-            print("1")
+            sigs = self.gptGenerator.generator(seeds[idx * generate_count:(idx + 1) * generate_count])
 
             brain = None
             signals = None
