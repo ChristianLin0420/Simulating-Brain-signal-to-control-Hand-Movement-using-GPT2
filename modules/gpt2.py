@@ -458,6 +458,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         # hidden_states = self.activation_layer(hidden_states)
         # hidden_states = self.transformer(hidden_states)
         bz, _ = shape_list(hidden_states)[:2]
+        print(bz)
         hidden_states = tf.reshape(hidden_states, [bz, 2089, 500, 1])
         
         return hidden_states
