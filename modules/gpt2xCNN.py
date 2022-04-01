@@ -174,6 +174,9 @@ class gpt2xcnn(tf.keras.Model):
             predictions_left = tf.reduce_mean(predictions_left, axis = 0)
             predictions_right = tf.reduce_mean(predictions_right, axis = 0)
 
+            predictions_left = tf.expand_dims(predictions_left, axis = 2)
+            predictions_right = tf.expand_dims(predictions_right, axis = 2)
+
             predictions_left = tf.reshape(predictions_left, shape = [1, predictions_left.shape[0], predictions_left.shape[1], predictions_left.shape[2]])
             predictions_right = tf.reshape(predictions_right, shape = [1, predictions_right.shape[0], predictions_right.shape[1], predictions_right.shape[2]])
 
