@@ -89,7 +89,7 @@ def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, 
     one_hot = np.repeat(one_hot, repeats = length, axis = 1)
     random_vectors = np.concatenate([random_vectors, one_hot], axis = 2)
 
-    return (random_vectors, l)
+    return (random_vectors, tmp)
 
 class DatasetGenerator():
 

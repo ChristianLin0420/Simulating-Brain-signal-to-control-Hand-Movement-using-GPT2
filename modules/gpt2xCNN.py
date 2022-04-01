@@ -123,9 +123,9 @@ class gpt2xcnn(tf.keras.Model):
                 XX = tf.concat([XX, X], axis = 0)
 
 
-            y_pred = tf.argmax(self.classifier(X), 1)
-            y_pred = tf.reshape(y_pred, [generate_count, 1])
-            y_pred = tf.cast(y_pred, tf.float32)
+            y_pred = self.classifier(X)
+            # y_pred = tf.reshape(y_pred, [generate_count, 1])
+            # y_pred = tf.cast(y_pred, tf.float32)
             y_true = labels[idx * generate_count: (idx + 1) * generate_count]
             print(y_true.shape)
             print(y_pred.shape)
