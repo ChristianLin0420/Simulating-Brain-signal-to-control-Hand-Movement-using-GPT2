@@ -1110,6 +1110,7 @@ class TFConv1D(tf.keras.layers.Layer):
 
     def call(self, x):
         bz, sl = shape_list(x)[:2]
+        print("bz: {}, sl: {}".format(bz, sl))
 
         x = tf.reshape(x, [-1, self.nx])
         x = tf.matmul(x, self.weight) + self.bias

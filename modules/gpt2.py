@@ -127,6 +127,7 @@ class TFAttention(tf.keras.layers.Layer):
         return tf.transpose(x, (0, 2, 1, 3))  # (batch, head, seq_length, head_features)
 
     def call(self, x, layer_past, attention_mask, head_mask, use_cache, output_attentions, training=False):
+        print("x: {}".format(x.shape))
         x = self.c_attn(x)
         query, key, value = tf.split(x, 3, axis=2)
         query = self.split_heads(query)
