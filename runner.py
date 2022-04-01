@@ -147,37 +147,37 @@ class Runner():
                                                             emb = self.config.n_embd, 
                                                             one_hot_vector_size = self.config.condition_size, 
                                                             variance = self.config.noise_variance )
-
+        
         ## start training
-        for idx in range(self.config.rounds):
+        # for idx in range(self.config.rounds):
 
-            ## set required callbacks
-            self.set_callbacks(idx)
+        #     ## set required callbacks
+        #     self.set_callbacks(idx)
 
-            ## start training and record training histroy
-            if self.config.model_name:
-                history = self.model.fit(   x = self.train_x,
-                                            y = self.train_y,
-                                            batch_size = self.config.batch_size,
-                                            epochs = self.config.epochs, 
-                                            verbose = 1
-                                        )
-            elif self.config.model_name == "gpt2xcnn":
-                history = self.model.fit(   x = random_vectors, 
-                                            y = random_vectors_labels, 
-                                            batch_size = self.config.batch_size, 
-                                            epochs = self.config.epochs, 
-                                            verbose = 1,
-                                            callbacks = self.callbacks
-                                        )
-            elif self.config.model_name == "gpt2scnn":
-                pass
-            else:
-                error("[Runner] invalid training model!!!")
-                return
+        #     ## start training and record training histroy
+        #     if self.config.model_name:
+        #         history = self.model.fit(   x = self.train_x,
+        #                                     y = self.train_y,
+        #                                     batch_size = self.config.batch_size,
+        #                                     epochs = self.config.epochs, 
+        #                                     verbose = 1
+        #                                 )
+        #     elif self.config.model_name == "gpt2xcnn":
+        #         history = self.model.fit(   x = random_vectors, 
+        #                                     y = random_vectors_labels, 
+        #                                     batch_size = self.config.batch_size, 
+        #                                     epochs = self.config.epochs, 
+        #                                     verbose = 1,
+        #                                     callbacks = self.callbacks
+        #                                 )
+        #     elif self.config.model_name == "gpt2scnn":
+        #         pass
+        #     else:
+        #         error("[Runner] invalid training model!!!")
+        #         return
             
-            ## store training history
-            self.store_history(history, idx)
+        #     ## store training history
+        #     self.store_history(history, idx)
 
-            ## save model
-            self.model.save_weights("result/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')
+        #     ## save model
+        #     self.model.save_weights("result/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')

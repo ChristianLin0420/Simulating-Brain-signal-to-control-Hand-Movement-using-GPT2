@@ -66,7 +66,6 @@ class gpt2xcnn(tf.keras.Model):
     def train_step(self, data):
 
         seeds, labels = data
-        print(labels.shape)
 
         signals_stft = tf.constant([])
         generate_count = 4
