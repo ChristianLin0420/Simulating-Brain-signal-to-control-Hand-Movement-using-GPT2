@@ -124,14 +124,11 @@ class gpt2xcnn(tf.keras.Model):
 
 
             y_pred = tf.argmax(self.classifier(X), 1)
+            print(y_pred.shape)
+            y_pred = tf.cast(y_pred, tf.int64)
             y_true = labels[idx * generate_count: (idx + 1) * generate_count]
 
             loss = self.loss_fn(y_true, y_pred)
-
-            if str(y_true) == "1":
-                pass
-            else:
-                pass
 
             if Y_pred == None:
                 Y_pred = y_pred
