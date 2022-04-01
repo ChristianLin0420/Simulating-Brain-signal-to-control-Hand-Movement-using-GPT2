@@ -64,12 +64,14 @@ class gpt2xcnn(tf.keras.Model):
         self.count = weights
 
     def train_step(self, data):
+        
+        generate_count = 4
 
         seeds, labels = data
-        print(labels)
+        labels = tf.argmax(labels, 1)
+        labels = tf.cast(labels, tf.float32)
+        labels = tf.reshape(labels, [generate_count, 1])
 
-        signals_stft = tf.constant([])
-        generate_count = 4
         generate_round = int(seeds.shape[0] / generate_count)
 
         tt = self.optimizer.weights
@@ -126,11 +128,6 @@ class gpt2xcnn(tf.keras.Model):
 
             y_pred = self.classifier(X)
             y_true = labels[idx * generate_count: (idx + 1) * generate_count]
-            y_true = tf.argmax(y_true, 1)
-            y_true = tf.cast(y_true, tf.float32)
-            y_true = tf.reshape(y_true, [generate_count, 1])
-            print(y_true.shape)
-            print(y_pred.shape)
 
             loss = self.loss_fn(y_true, y_pred)
 
