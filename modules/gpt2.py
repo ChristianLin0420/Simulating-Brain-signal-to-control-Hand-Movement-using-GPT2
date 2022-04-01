@@ -201,14 +201,11 @@ class TFBlock(tf.keras.layers.Layer):
         return self.attn.get_weights()
 
     def call(self, x, layer_past, attention_mask, head_mask, use_cache, output_attentions, training=False):
-        print(x.shape)
         a = self.ln_1(x)
-        print(a.shape)
         output_attn = self.attn(
             a, layer_past, attention_mask, head_mask, use_cache, output_attentions, training=training
         )
         a = output_attn[0]  # output_attn: a, present, (attentions)
-        print(a.shape)
         x = x + a
 
         m = self.ln_2(x)
@@ -216,7 +213,6 @@ class TFBlock(tf.keras.layers.Layer):
         x = x + m
 
         outputs = [x] + output_attn[1:]
-        print(outputs.shape)
 
         a = None
         m = None
@@ -278,7 +274,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             config.vocab_size, config.hidden_size, initializer_range=config.initializer_range, name="wte"
         )
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
-        self.h = [TFBlock(config.n_ctx + config.condition_size, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
+        self.h = [TFBlock(config.n_embd + config.condition_size, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
         self.activation_layer = tf.keras.layers.ReLU(max_value = 1)
         self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
@@ -416,7 +412,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         hidden_states = inputs["inputs_embeds"] + position_embeds + token_type_embeds
         hidden_states = self.drop(hidden_states, training=inputs["training"])
         output_shape = input_shape
-
+        print(inputs["inputs_embeds"])
         print("hidden_states: {}".format(hidden_states))
 
         presents = () if inputs["use_cache"] else None
