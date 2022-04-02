@@ -67,7 +67,10 @@ class Runner():
 
         ## model initialization
         if config.model_name == "gpt2cgan":
-            self.model = gpt2cgan(config = config, data_avg = self.real_average_data)
+            self.model = gpt2cgan(
+                config = config, 
+                data_avg = self.real_average_data
+            )
             
             ## compile the model
             self.model.compile(
@@ -77,7 +80,10 @@ class Runner():
                 loss_kl = self.loss_kl
             )
         elif config.model_name == "gpt2xcnn":
-            self.pretrained_model = gpt2cgan(data_avg = self.real_average_data, config = config)
+            self.pretrained_model = gpt2cgan(
+                data_avg = self.real_average_data, 
+                config = config
+            )
 
             ## fine-tune (load model)
             if config.fine_tune:
@@ -91,7 +97,13 @@ class Runner():
                 loss_kl = self.loss_kl
             )
 
-            self.model = gpt2xcnn(data_avg = self.real_average_data, config = config, generator = self.pretrained_model, classifier = self.classifier)
+            ## fine-tune (build new model)
+            self.model = gpt2xcnn(
+                data_avg = self.real_average_data, 
+                config = config, 
+                generator = self.pretrained_model, 
+                classifier = self.classifier
+            )
         
             ## compile the model
             self.model.compile(
@@ -149,10 +161,11 @@ class Runner():
     def run(self):
 
         ## initialize random vectors
-        random_vectors, random_vectors_labels = generate_random_vectors(   num = self.config.random_vector_num,
+        random_vectors, random_vectors_labels, _ = generate_random_vectors(   num = self.config.random_vector_num,
                                                             length = self.config.n_positions, 
                                                             emb = self.config.n_embd, 
-                                                            one_hot_vector_size = self.config.condition_size, 
+                                                            class_rate_random_vector = self.config.class_rate_random_vector, 
+                                                            class_count = self.config.class_count,
                                                             variance = self.config.noise_variance )
         
         ## start training

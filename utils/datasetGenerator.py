@@ -75,21 +75,47 @@ def get_training_reconstruct_signals():
 
     return train_data_filenames, train_data_label
 
-def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, one_hot_vector_size: int = 20, variance: float = 1.0):
+def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, class_rate_random_vector: float = 0.004, class_count: int = 2, variance: float = 1.0, shuffle: bool = True):
+
+    one_hot_vector_size = int(emb * class_rate_random_vector)
+
+    while(one_hot_vector_size % class_count and num % class_count):
+        if one_hot_vector_size % class_count > 0:
+            one_hot_vector_size += 1
+        if num % class_count > 0:
+            num += 1
 
     random_vectors = np.random.normal(scale = variance, size = (num, length, (emb - one_hot_vector_size)))
 
-    tmp = [0] * int(num / 2) + [1] * int(num / 2)
-    random.shuffle(tmp)
-    l = np.asarray(tmp)
+    tmp = []
+    one_hot = []
 
-    # l = tf.constant([x % 2 for x in range(2)])
-    one_hot = np.eye(one_hot_vector_size)[l]
+    for i in range(class_count):
+        t = [i for _ in range(int(num / class_count))]
+        tmp += t
+
+    if shuffle:
+        random.shuffle(tmp)
+
+    for val in tmp:
+        s = []
+        sub_vector_size = int(one_hot_vector_size / class_count)
+
+        for i in range(one_hot_vector_size):
+            check = int(i / sub_vector_size) == val
+            if check:
+                s.append(1)
+            else:
+                s.append(0)
+
+        one_hot.append(s)
+
+    one_hot = np.asarray(one_hot)
     one_hot = np.expand_dims(one_hot, axis = 1)
     one_hot = np.repeat(one_hot, repeats = length, axis = 1)
     random_vectors = np.concatenate([random_vectors, one_hot], axis = 2)
 
-    return (random_vectors, tmp)
+    return (random_vectors, tmp, sub_vector_size)
 
 class DatasetGenerator():
 
