@@ -1,16 +1,12 @@
 
-import io
-import json
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
 
 from .gpt2cgan import gpt2cgan
-from .classifier import get_pretrained_classfier, plot_spectrogram, stft_min_max
+from .classifier import stft_min_max
+from .model_utils import instance_norm, upsampling2D, filled_zeros
 from utils.brain_activation import boolean_brain, restore_brain_activation, transformation_matrix, restore_brain_activation_tf
-from utils.model_monitor import record_model_weight
-
-from sklearn.metrics import accuracy_score
+from utils.datasetGenerator import generate_random_vectors
 
 class gpt2sgan(tf.keras.Model):
 
@@ -28,21 +24,11 @@ class gpt2sgan(tf.keras.Model):
         (self.boolean_l, self.boolean_r) = boolean_brain()
         self.transformation_matrix = tf.constant(transformation_matrix())
 
-        self.generate_count = 32
+        self.generate_count = config.example_to_generate
+        assert self.generate_count % config.class_count == 0
 
         # add one hot vector for every seed
-        self.seed = tf.random.normal([self.generate_count, config.n_positions, config.n_embd])
-
-        tmp = [0] * int(self.generate_count / 2) + [1] * int(self.generate_count / 2)
-        l = tf.constant(tmp)
-
-        one_hot = tf.one_hot(l, depth = 2)
-        one_hot = tf.expand_dims(one_hot, axis = 1)
-        one_hot = tf.repeat(one_hot, repeats = config.n_positions, axis = 1)
-        self.seed = tf.concat([self.seed, one_hot], axis = 2)
-
-        self.epoch_count = 0
-        self.epoch_acc_average = None
+        self.seed, _, self.sub_vector_size = generate_random_vectors(self.generate_count, config.n_positions, config.n_embd, config.class_rate_random_vector, config.class_count, config.variance, False)
 
         self.t_matrix = tf.constant(transformation_matrix(), dtype = tf.float32)
         (self.boolean_l, self.boolean_r) = boolean_brain()
@@ -51,7 +37,8 @@ class gpt2sgan(tf.keras.Model):
         self.real_data = tf.reshape(self.real_data, shape = [self.real_data.shape[0], self.real_data.shape[1], self.real_data.shape[2], 1])
 
         self.delta = 0.0001
-        self.count = 0
+        self.config = config
+        self.upsampling_base_size = 32
 
     def compile(self, optimizer, loss_fn, loss_kl):
         super(gpt2sgan, self).compile()
@@ -65,40 +52,33 @@ class gpt2sgan(tf.keras.Model):
 
     def train_step(self, data):
 
-        # self.count += 1
-
         seeds, labels = data
-
-        signals_stft = tf.constant([])
-        generate_count = 4
-        generate_round = int(seeds.shape[0] / generate_count)
-
-        # rgb_weights = tf.constant([0.2989, 0.5870, 0.1140], shape=[3, 1])
-        tt = self.optimizer.weights
-        # tf.print("original tt: {}".format(tt))
-        # tt = int(tt[0])
-        # tf.print("optimizer iteration: {} and type {}".format(tt, type(tt)))
-
+        labels = tf.argmax(labels, 1)
+        labels = tf.cast(labels, tf.float32)
+        labels = tf.reshape(labels, [self.config.batch_size, 1])
 
         loss = tf.constant([])
         Y_pred = None
-        XX = None
-
-        sigs_spectrum = tf.constant([])
-        sigs_record = tf.constant([])
-
-        # for idx in range(generate_round):
-        idx = 0
-        tmp_delta = 0.0
-            
-        print("idx: {}, shape of seeds: {}".format(idx, seeds[idx * generate_count:(idx + 1) * generate_count].shape))
 
         with tf.GradientTape() as tape:
-            sigs = self.gptGenerator.generator(seeds[idx * generate_count:(idx + 1) * generate_count])
+
+            sigs = seeds
+
+            # sysnthesis procedure
+            for i in range(5):
+                sigs = self.gptGenerator.generator(sigs)
+
+                if i < 4:
+                    sigs = tf.reshape(sigs, sigs.shape[:3])
+                    sigs = instance_norm(sigs)                              # adaptive instance normalization
+                    sigs = upsampling2D(sigs, (4, 1))                       # upsampling 
+                    sigs = filled_zeros(sigs, self.upsampling_base_size)    # filled zeros for unsampling place
+                    self.upsampling_base_size *= 4
 
             brain = None
             signals = None
 
+            # restore the generated signals back to source activity
             for i in range(sigs.shape[0]):
                 (l_tmp, r_tmp) = restore_brain_activation_tf(sigs[i], self.boolean_l, self.boolean_r)
                 brain_activation = tf.concat([l_tmp, r_tmp], axis = 0)
@@ -111,6 +91,7 @@ class gpt2sgan(tf.keras.Model):
 
             brain = tf.reshape(brain, shape = [brain.shape[0], brain.shape[1], brain.shape[2]])
 
+            # inverse procedure
             for i in range(brain.shape[0]):
                 signal = tf.matmul(self.transformation_matrix, brain[i])
                 signal = tf.expand_dims(signal, axis = 0)
@@ -121,33 +102,16 @@ class gpt2sgan(tf.keras.Model):
                     signals = tf.concat([signals, signal], axis = 0)
 
             signals = signals[:, 11:14, :]
-            signals_stft = signals
-
             X = stft_min_max(signals)
 
-            if XX is None:
-                XX = X
-            else:
-                XX = tf.concat([XX, X], axis = 0)
-            
-
+            # training records (loss, accuracy)
             y_pred = self.classifier(X)
-            y_true = labels[idx * generate_count: (idx + 1) * generate_count]
-
-            loss = self.loss_fn(y_true, y_pred)
-
-            if str(y_true) == "1":
-                pass
-            else:
-                pass
+            loss = self.loss_fn(labels, y_pred)
 
             if Y_pred == None:
                 Y_pred = y_pred
             else:
                 Y_pred = tf.concat([Y_pred, y_pred], axis = 0)
-        
-            # grads = tape.gradient(loss, self.gptGenerator.generator.trainable_weights)
-            # self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
 
             Y_pred = tf.reshape(Y_pred, [Y_pred.shape[0]])
 
@@ -158,48 +122,45 @@ class gpt2sgan(tf.keras.Model):
             accuracy = tf.math.reduce_mean(tf.cast(accuracy, tf.float32))
             accuracy = tf.expand_dims(accuracy, axis = 0)
 
-            # generate image from given seed
-            predictions_left = None
-            predictions_right = None
-            generate_count = 8
-            generate_round = int(self.generate_count / (generate_count * 2))
+            # generate signals from given seed
+            predictions = None
+            predictions_raw = None
 
-            for i in range(generate_round):
-                predictions_l = self.gptGenerator.generator(self.seed[i * generate_count : (i + 1) * generate_count], training = False)
-                predictions_r = self.gptGenerator.generator(self.seed[(i + generate_round) * generate_count : (i + generate_round + 1) * generate_count], training = False)
+            for i in range(self.generate_count):
+                raw = self.gptGenerator.generator(tf.expand_dims(self.seed[i], axis = 0), training = False)
 
-                if predictions_left == None:
-                    predictions_left = predictions_l
+                if predictions_raw == None:
+                    predictions_raw = raw
                 else:
-                    predictions_left = tf.concat([predictions_left, predictions_l], axis = 0)
+                    predictions_raw = tf.concat([predictions_raw, raw], axis = 0)
 
-                if predictions_right == None:
-                    predictions_right = predictions_r
+            for i in range(self.config.class_count):
+                avg_prediction = tf.reduce_mean(predictions_raw[i * self.sub_vector_size : (i + 1) * self.sub_vector_size], axis = 0)
+                avg_prediction = tf.expand_dims(avg_prediction, axis = 0)
+
+                if predictions is None:
+                    predictions = avg_prediction
                 else:
-                    predictions_right = tf.concat([predictions_right, predictions_r], axis = 0)
+                    predictions = tf.concat([predictions, avg_prediction], axis = 0)
 
-            print("predictions_left shape: {}".format(predictions_left.shape))
-            print("predictions_right shape: {}".format(predictions_right.shape))
-
-            predictions_left = tf.reduce_mean(predictions_left, axis = 0)
-            predictions_right = tf.reduce_mean(predictions_right, axis = 0)
-
-            predictions_left = tf.reshape(predictions_left, shape = [1, predictions_left.shape[0], predictions_left.shape[1], predictions_left.shape[2]])
-            predictions_right = tf.reshape(predictions_right, shape = [1, predictions_right.shape[0], predictions_right.shape[1], predictions_right.shape[2]])
-
-            predictions = tf.concat([predictions_left, predictions_right], axis = 0)
-            predictions = tf.concat([predictions, self.real_data], axis = 0)
-
-            print("predictions shape: {}".format(predictions.shape))
+            # check whether the training class count equals to average predictions count
+            assert self.real_data.shape[0] == predictions.shape[0]
 
             ## raw signal kl
-            data1 = tf.reshape(self.real_data[0], shape = [1, 2089, 500])
-            data2 = tf.reshape(self.real_data[1], shape = [1, 2089, 500])
-            raw_signal_feet_kl = self.loss_kl(data1, predictions_left)
-            raw_signal_tongue_kl = self.loss_kl(data2, predictions_right)
+            kl_losses = None
 
-            ## spectrum kl
-            sigs = predictions
+            for i in range(int(self.real_data.shape[0])):
+                real = tf.reshape(self.real_data[i], shape = [1, 2089, 500])
+                kl = self.loss_kl(real, predictions[i])
+                kl = tf.expand_dims(kl, axis = 0)
+
+                if kl_losses is None:
+                    kl_losses = kl
+                else:
+                    kl_losses = tf.concat([kl_losses, kl], axis = 0)
+
+            ## channels kl
+            sigs = tf.concat([predictions, self.real_data], axis = 0)
             brain = None
             signals = None
 
@@ -225,93 +186,96 @@ class gpt2sgan(tf.keras.Model):
                     signals = tf.concat([signals, signal], axis = 0)
 
             signals = signals[:, 11:14, :]
+            signal_kl_losses = None
+            
+            for chan_i in range(int(signals.shape[1])):
+                for class_i in range(int(self.config.class_count)):
+                    kl = self.loss_kl(signals[class_i, chan_i, :], signals[class_i + int(self.config.class_count), chan_i, :])
+                    kl = tf.expand_dims(kl, axis = 0)
 
-            Zxx = tf.signal.stft(signals, frame_length=256, frame_step=16)
-            Zxx = tf.abs(Zxx)
+                    if signal_kl_losses is None:
+                        signal_kl_losses = kl
+                    else:
+                        signal_kl_losses = tf.concat([signal_kl_losses, kl], axis = 0)
 
-            print("Zxx shape: {}".format(Zxx.shape))
-
-            raw_feet_spectrum_c3_signal_kl = self.loss_kl(signals[2, 0, :], signals[0, 0, :])
-            raw_tongue_spectrum_c3_signal_kl = self.loss_kl(signals[3, 0, :], signals[1, 0, :])
-            raw_feet_spectrum_c4_signal_kl = self.loss_kl(signals[2, 1, :], signals[0, 1, :])
-            raw_tongue_spectrum_c4_signal_kl = self.loss_kl(signals[3, 1, :], signals[1, 1, :])
-            raw_feet_spectrum_cz_signal_kl = self.loss_kl(signals[2, 2, :], signals[0, 2, :])
-            raw_tongue_spectrum_cz_signal_kl = self.loss_kl(signals[3, 2, :], signals[1, 2, :])
-
-            orignal_loss = loss
-            sum_kl = tf.math.add(raw_signal_feet_kl, raw_signal_tongue_kl)
+            original_loss = loss
+            sum_kl = tf.math.add(tf.reduce_sum(kl_losses))
             delta_kl_loss = tf.math.multiply(tf.constant(-self.delta), sum_kl)
             loss = loss + delta_kl_loss
-            
-            # tf.print("=" * 30)
-            # tf.print("delta: {}".format(tf.constant(-self.delta)))
-            # tf.print("delta_kl_loss prev: {}, later: {}".format(delta_kl_loss, sum_kl))
-            # tf.print("=" * 30)
 
-        Zxx = None
+        # update gradient
+        grads = tape.gradient(original_loss, self.gptGenerator.generator.trainable_weights)
+        self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
+
+        result = {}
+        result["loss"] = loss
+        result["accuracy"] = accuracy
+        result["generated"] = predictions
+        result["original_loss"] = original_loss
+        result["delta_kl_loss"] = delta_kl_loss
+
+        ## record raw signal loss
+        for class_i in range(int(self.config.class_count)):
+            name = "class{}_signal_kl".format(class_i)
+            result[name] = kl_losses[class_i]
+
+        ## record channels signal loss
+        channels = ["C3", "C4", "Cz"]
+        for chan_i in range(int(signals.shape[1])):
+            for class_i in range(int(self.config.class_count)):
+                name = "class{}_channel_{}_signal_kl".format(class_i, channels[chan_i])
+                result[name] = signal_kl_losses[class_i * int(self.config.class_count) + chan_i]
+
+        print(result)
+
         X = None
         sigs = None
         brain = None
         signals = None
-        data1 = None
-        data2 = None
+        kl_losses = None
+        signal_kl_losses = None
 
-
-        del Zxx
         del X
         del sigs
         del brain
         del signals
-        del data1
-        del data2
+        del kl_losses
+        del signal_kl_losses
 
-        # update gradient
-        grads = tape.gradient(orignal_loss, self.gptGenerator.generator.trainable_weights)
-        self.optimizer.apply_gradients(zip(grads, self.gptGenerator.generator.trainable_weights))
-
-
-        return {"loss": loss, 
-                "accuracy": accuracy, 
-                "raw_feet_signal_kl": raw_signal_feet_kl, 
-                "raw_tongue_signal_kl": raw_signal_tongue_kl, 
-                "raw_feet_spectrum_c3_signal_kl": raw_feet_spectrum_c3_signal_kl, 
-                "raw_tongue_spectrum_c3_signal_kl": raw_tongue_spectrum_c3_signal_kl, 
-                "raw_feet_spectrum_c4_signal_kl": raw_feet_spectrum_c4_signal_kl, 
-                "raw_tongue_spectrum_c4_signal_kl": raw_tongue_spectrum_c4_signal_kl, 
-                "raw_feet_spectrum_cz_signal_kl": raw_feet_spectrum_cz_signal_kl, 
-                "raw_tongue_spectrum_cz_signal_kl": raw_tongue_spectrum_cz_signal_kl, 
-                "generated": predictions, 
-                "original_loss": orignal_loss, 
-                "delta_kl_loss": delta_kl_loss, 
-                "sum_kl": sum_kl, 
-                "delta": self.delta}
+        return result
 
     def call(self, inputs):
-        
-        predictions = np.asarray(self.generator(inputs, training = False))
+
+        predictions = None
+
+        for i in range(inputs.shape[0]):
+            prediction = np.asarray(self.gptGenerator.generator(tf.expand_dims(inputs[i], axis = 0), training = False))
+
+            if predictions is None:
+                predictions = prediction
+            else:
+                predictions = tf.concat([predictions, prediction], axis = 0)
 
         batch = predictions.shape[0]
-
-        filtered_activations = np.asarray([])
+        filtered_activations = None
 
         for idx in range(batch):
             (l_act, r_act) = restore_brain_activation(predictions[idx], self.boolean_l, self.boolean_r)
             act = np.concatenate([l_act, r_act], axis = 0)
             eeg_signal = np.dot(self.t_matrix, act)
             eeg_signal = np.expand_dims(eeg_signal, axis = 0)
-
-            motor_signal = np.asarray([])
+            motor_signal = None
 
             for name, i in enumerate(eeg_signal):
-                if name in CHANNEL_NAME:
+                if name in Brain.get_channel_names():
                     sig = np.expand_dims(eeg_signal[i], axis = 0)
 
-                    if len(motor_signal) == 0:
+                    if motor_signal is None:
                         motor_signal = sig
                     else:
                         motor_signal = np.concatenate([motor_signal, sig], axis = 0)
 
-            if len(filtered_activations) == 0:
+            if filtered_activations is None:
                 filtered_activations = motor_signal
             else:
                 filtered_activations = np.concatenate([filtered_activations, motor_signal], axis = 0)

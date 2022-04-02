@@ -1,5 +1,6 @@
 
 import os
+import tensorflow as tf
 
 from logging import error
 from config.config_gpt2 import load_model_config
@@ -32,3 +33,31 @@ def load_model(path, model_name: str = "gpt2gan", noise_len: int = 784, noise_di
             return None
 
     return None
+
+# Instance normalization.
+def instance_norm(x, epsilon = 1e-8):
+    assert len(x.shape) == 3 # NLT
+
+    with tf.variable_scope('InstanceNorm'):
+        orig_dtype = x.dtype
+        x = tf.cast(x, tf.float32)
+        x -= tf.reduce_mean(x, axis = [1, 2], keepdims = True)
+        epsilon = tf.constant(epsilon, dtype = x.dtype, name = 'epsilon')
+        x *= tf.rsqrt(tf.reduce_mean(tf.square(x), axis = [1, 2], keepdims = True) + epsilon)
+        x = tf.cast(x, orig_dtype)
+
+        return x
+
+# Upsampling
+def upsampling2D(x, size = (2, 1)):
+    return tf.keras.layers.UpSampling2D(size = size)(x)
+
+# Filled zeros
+def filled_zeros(x, size):
+
+    if size == x.shape[1]:
+        return x
+    else:
+        for b in range(x.shape[0]):
+            x[b, size:x.shape[1], :] = tf.zeros((x.shape[1] - size, x.shape[2]))
+        return x
