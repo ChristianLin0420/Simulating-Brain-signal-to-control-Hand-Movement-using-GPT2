@@ -231,24 +231,24 @@ class DatasetGenerator():
                 else:
                     tongue_data = np.concatenate([tongue_data, expand_data], axis = 0)
 
-        print("feet data shape: {}".format(feet_data.shape))
-        print("tongue data shape: {}".format(tongue_data.shape))
+        # print("feet data shape: {}".format(feet_data.shape))
+        # print("tongue data shape: {}".format(tongue_data.shape))
 
         feet_data = np.mean(feet_data, axis = 0)
         tongue_data = np.mean(tongue_data, axis = 0)
 
-        print("feet data shape: {}".format(feet_data.shape))
-        print("tongue data shape: {}".format(tongue_data.shape))
+        # print("feet data shape: {}".format(feet_data.shape))
+        # print("tongue data shape: {}".format(tongue_data.shape))
 
         feet_data = np.expand_dims(feet_data, axis = 0)
         tongue_data = np.expand_dims(tongue_data, axis = 0)
 
-        print("feet data shape: {}".format(feet_data.shape))
-        print("tongue data shape: {}".format(tongue_data.shape))
+        # print("feet data shape: {}".format(feet_data.shape))
+        # print("tongue data shape: {}".format(tongue_data.shape))
 
         real_data = np.concatenate([feet_data, tongue_data], axis = 0)
 
-        print("real data shape: {}".format(real_data.shape))
+        # print("real data shape: {}".format(real_data.shape))
 
         ## shuffle dataset
         p = np.random.permutation(bz)

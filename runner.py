@@ -150,16 +150,10 @@ class Runner():
 
         for key in list(history.history.keys()):
             if key != "generated":
-                
-                if isinstance(history.history[str(key)], np.ndarray):
-                    value = history.history[str(key)].tolist()
-                else:
-                    value = history.history[str(key)]
+                value = np.asarray(history.history[str(key)]).tolist()
+                print("Key: {}, value: {}".format(key, value))
 
-                data = {
-                    str(key) : value
-                }
-
+                data = { str(key) : value }
                 with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
                     s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                     outfile.write(s)
