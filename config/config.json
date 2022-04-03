@@ -28,7 +28,7 @@
     "vocab_size": 50257,
     "n_positions": 2089,
     "n_ctx": 1024,
-    "n_embd": 498,
+    "n_embd": 500,
     "n_layer": 1,
     "n_head": 5,
     "n_inner": "None",
