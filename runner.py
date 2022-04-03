@@ -2,24 +2,18 @@
 import io
 import json
 import numpy as np
-import tensorflow as tf
 
 from tensorflow import keras
 from tensorflow.keras.optimizers import Adam
-from torch import var
 
-from distutils.command.config import config
 from logging import error
 
-from modules.gpt2gan import gpt2gan
-from modules.gpt2wgan import gpt2wgan
 from modules.gpt2cgan import gpt2cgan
-from modules.gpt2xCNN import gpt2xcnn
+from modules.gpt2xcnn import gpt2xcnn
+from modules.gpt2sgan import gpt2sgan
 
 from modules.classifier import (
-    get_pretrained_classfier, 
     get_pretrained_classfier_from_path, 
-    stft_min_max
 )
 
 from utils.callback import (
@@ -29,18 +23,16 @@ from utils.callback import (
     # RecordReconstructedGeneratedImages, 
     Accuracy, 
     Loss, 
+    GANLoss,
     STFTgenerator
 )
 
 from utils.datasetGenerator import (
     DatasetGenerator,
     generate_random_vectors, 
-    get_training_filenames_and_labels, 
     get_training_raw_signals, 
     get_training_reconstruct_signals
 )
-
-
 
 
 class Runner():
@@ -79,7 +71,7 @@ class Runner():
                 loss_fn = self.loss_fn,
                 loss_kl = self.loss_kl
             )
-        elif config.model_name == "gpt2xcnn":
+        elif config.model_name == "gpt2xcnn" or config.model_name == "gpt2sgan":
             self.pretrained_model = gpt2cgan(
                 data_avg = self.real_average_data, 
                 config = config
@@ -98,12 +90,20 @@ class Runner():
             )
 
             ## fine-tune (build new model)
-            self.model = gpt2xcnn(
-                data_avg = self.real_average_data, 
-                config = config, 
-                generator = self.pretrained_model, 
-                classifier = self.classifier
-            )
+            if config.model_name == "gpt2xcnn":
+                self.model = gpt2xcnn(
+                    data_avg = self.real_average_data, 
+                    config = config, 
+                    generator = self.pretrained_model, 
+                    classifier = self.classifier
+                )
+            else:
+                self.model = gpt2sgan(
+                    data_avg = self.real_average_data, 
+                    config = config, 
+                    generator = self.pretrained_model, 
+                    classifier = self.classifier
+                )
         
             ## compile the model
             self.model.compile(
@@ -111,8 +111,6 @@ class Runner():
                 loss_fn = self.loss_fn,
                 loss_kl = self.loss_kl
             )
-        elif config.model_name == "gpt2sgan":
-            pass
         else:
             error("[Runner] invalid model name was given!!!")
     
@@ -154,7 +152,7 @@ class Runner():
         print(list(history.history.keys()))
 
         for key in list(history.history.keys()):
-            if key not in ["generated, accuracy, loss"]:
+            if key not in ["generated", "accuracy", "loss"]:
                 value = np.asarray(history.history[str(key)]).tolist()
                 print("Key: {}, value: {}".format(key, value))
 

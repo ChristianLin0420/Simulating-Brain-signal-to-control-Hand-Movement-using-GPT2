@@ -21,7 +21,7 @@ from utils.brain_activation import boolean_brain, restore_brain_activation, tran
 from modules.gpt2gan import gpt2gan
 from modules.gpt2wgan import gpt2wgan
 from modules.gpt2cgan import gpt2cgan
-from modules.gpt2xCNN import gpt2xcnn
+from modules.gpt2xcnn import gpt2xcnn
 from modules.model_utils import load_model
 from config.config_gpt2 import GPT2Config, save_model_config
 from modules.classifier import get_pretrained_classfier, get_pretrained_classfier_from_path, stft_min_max

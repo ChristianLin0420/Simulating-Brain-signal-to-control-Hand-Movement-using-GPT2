@@ -37,7 +37,6 @@ class Accuracy(tf.keras.callbacks.Callback):
         data = { "accuracy" : self.accuracy }
 
         if epoch == self.config.epochs - 1:
-            print("Accuracy callback: {}".format(data))
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "accuracy"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
@@ -77,6 +76,52 @@ class Loss(tf.keras.callbacks.Callback):
             
             self.batch_loss = None
             self.loss = None
+
+'''
+----- Loss -----
+@desciption:
+    ...
+'''
+class GANLoss(tf.keras.callbacks.Callback):
+
+    def __init__(self, config, time, _round):
+        self.config = config
+        self.time = time
+        self.round = _round
+
+        self.batch_d_loss = list()
+        self.batch_g_loss = list()
+        self.d_loss = list()
+        self.g_loss = list()
+
+    def on_train_batch_end(self, epoch, logs = None):
+        self.batch_d_loss.append(float(logs.get('d_loss')))
+        self.batch_g_loss.append(float(logs.get('g_loss')))
+
+    def on_epoch_end(self, epoch, logs = None):
+        mean_d_loss = float(sum(self.batch_d_loss)) / float(len(self.batch_d_loss))
+        mean_g_loss = float(sum(self.batch_g_loss)) / float(len(self.batch_g_loss))
+        self.d_loss.append(mean_d_loss)
+        self.g_loss.append(mean_g_loss)
+        self.batch_d_loss = list()
+        self.batch_g_loss = list()
+
+        d_data = { "d_loss" : self.d_loss}
+        g_data = { "g_loss" : self.g_loss}
+
+        if epoch == self.config.epochs - 1:
+            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "d_loss"), 'w', encoding = 'utf8') as outfile:
+                s = json.dumps(d_data, indent = 4, sort_keys = True, ensure_ascii = False)
+                outfile.write(s)
+
+            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "g_loss"), 'w', encoding = 'utf8') as outfile:
+                s = json.dumps(g_data, indent = 4, sort_keys = True, ensure_ascii = False)
+                outfile.write(s)
+            
+            self.batch_d_loss = None
+            self.batch_g_loss = None
+            self.d_loss = None
+            self.g_loss = None
 
 '''
 ----- STFTgenerator -----
