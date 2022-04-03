@@ -286,8 +286,6 @@ class gpt2cgan(tf.keras.Model):
                 name = "class{}_channel_{}_signal_kl".format(class_i, channels[chan_i])
                 result[name] = signal_kl_losses[class_i * int(self.config.class_count) + chan_i]
 
-        print(result)
-
         sigs = None
         brain = None
         signals = None
