@@ -139,11 +139,12 @@ class STFTgenerator(tf.keras.callbacks.Callback):
         (self.boolean_l, self.boolean_r) = boolean_brain()
 
     def on_train_batch_end(self, epoch, logs = None):
-        if epoch == 1 or (epoch + 1) % 10 == 0:
+        if epoch % 10 == 0:
            self.stft += list(logs.get("generated"))
 
     def on_epoch_end(self, epoch, logs = None):
-        if epoch == 1 or (epoch + 1) % 10 == 0:
+        if epoch % 10 == 0:
+            print("STFTgenerator epoch: {}".format(epoch))
             brain = None
             signals = None
 
@@ -207,7 +208,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
                     plt.title('STFT Magnitude for channel {} of class {} in iteration {}'.format(channels[idx], sample + 1, epoch))
                     plt.ylabel('Frequency [Hz]')
                     plt.xlabel('Time [sec]')
-                    plt.savefig('results/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}'.format(self.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
+                    plt.savefig('results/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
                     plt.close()
 
 
