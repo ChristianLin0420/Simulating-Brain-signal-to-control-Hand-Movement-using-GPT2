@@ -34,9 +34,10 @@ class Accuracy(tf.keras.callbacks.Callback):
         self.accuracy.append(mean_accuracy)
         self.batch_accuracy = list()
 
-        data = { "accuracy" : self.accuracy}
+        data = { "accuracy" : self.accuracy }
 
         if epoch == self.config.epochs - 1:
+            print("Accuracy callback: {}".format(data))
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "accuracy"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
@@ -70,6 +71,7 @@ class Loss(tf.keras.callbacks.Callback):
         data = { "loss" : self.loss}
 
         if epoch == self.config.epochs - 1:
+            print("Loss callback: {}".format(data))
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "loss"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)

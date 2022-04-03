@@ -129,20 +129,25 @@ class Runner():
 
     def set_callbacks(self, _round):
         
-        self.callbacks = list()
-        callbacks_list = {  
-                            # "EarlyStoppingAtMinLoss" : EarlyStoppingAtMinLoss, 
-                            # "RecordGeneratedImages": RecordGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
-                            # "RecordWeight" : RecordWeight, 
-                            # "RecordReconstructedGeneratedImages" : RecordReconstructedGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
-                            "Accuracy" : Accuracy(self.config, self.time, _round),
-                            "Loss" : Loss(self.config, self.time, _round),
-                            "STFTgenerator" : STFTgenerator(self.config, self.time, _round)
-                         }
+        # self.callbacks = list()
+        # callbacks_list = {  
+        #                     # "EarlyStoppingAtMinLoss" : EarlyStoppingAtMinLoss, 
+        #                     # "RecordGeneratedImages": RecordGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
+        #                     # "RecordWeight" : RecordWeight, 
+        #                     # "RecordReconstructedGeneratedImages" : RecordReconstructedGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
+        #                     "Accuracy" : Accuracy(self.config, self.time, _round),
+        #                     "Loss" : Loss(self.config, self.time, _round),
+        #                     "STFTgenerator" : STFTgenerator(self.config, self.time, _round)
+        #                  }
 
-        for callback in self.callbacks:
-            if self.config[callback]:
-                self.callbacks.append(callbacks_list[callback])
+        if self.config.Accuracy:
+            self.callbacks.append(Accuracy(self.config, self.time, _round))
+
+        if self.config.Loss:
+            self.callbacks.append(Loss(self.config, self.time, _round))
+
+        if self.config.STFTgenerator:
+            self.callbacks.append(STFTgenerator(self.config, self.time, _round))
 
     def store_history(self, history, _round):
 
