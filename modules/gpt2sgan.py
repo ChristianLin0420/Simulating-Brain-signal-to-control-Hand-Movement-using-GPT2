@@ -200,7 +200,7 @@ class gpt2sgan(tf.keras.Model):
                         signal_kl_losses = tf.concat([signal_kl_losses, kl], axis = 0)
 
             original_loss = loss
-            sum_kl = tf.math.add(tf.reduce_sum(kl_losses))
+            sum_kl = tf.reduce_sum(kl_losses)
             delta_kl_loss = tf.math.multiply(tf.constant(-self.delta), sum_kl)
             loss = loss + delta_kl_loss
 
