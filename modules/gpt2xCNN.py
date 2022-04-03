@@ -146,6 +146,7 @@ class gpt2xcnn(tf.keras.Model):
                     kl_losses = tf.concat([kl_losses, kl], axis = 0)
 
             ## channels kl
+            predictions = tf.reshape(predictions, predictions.shape + [1])
             sigs = tf.concat([predictions, self.real_data], axis = 0)
             brain = None
             signals = None
