@@ -129,7 +129,7 @@ class Runner():
 
     def set_callbacks(self, _round):
         
-        # self.callbacks = list()
+        self.callbacks = list()
         # callbacks_list = {  
         #                     # "EarlyStoppingAtMinLoss" : EarlyStoppingAtMinLoss, 
         #                     # "RecordGeneratedImages": RecordGeneratedImages(self.time, round, self.config.model_name, self.real_average_data), 
@@ -154,7 +154,7 @@ class Runner():
         print(list(history.history.keys()))
 
         for key in list(history.history.keys()):
-            if key != "generated":
+            if key not in ["generated, accuracy, loss"]:
                 value = np.asarray(history.history[str(key)]).tolist()
                 print("Key: {}, value: {}".format(key, value))
 
