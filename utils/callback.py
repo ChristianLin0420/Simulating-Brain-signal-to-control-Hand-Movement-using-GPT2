@@ -71,7 +71,6 @@ class Loss(tf.keras.callbacks.Callback):
         data = { "loss" : self.loss}
 
         if epoch == self.config.epochs - 1:
-            print("Loss callback: {}".format(data))
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "loss"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
