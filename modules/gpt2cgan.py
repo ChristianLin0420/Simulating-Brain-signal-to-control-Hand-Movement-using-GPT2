@@ -32,7 +32,7 @@ class gpt2cgan(tf.keras.Model):
         assert self.generate_count % config.class_count == 0
 
         # add one hot vector for every seed
-        self.seed, _, self.sub_vector_size = generate_random_vectors(self.generate_count, config.n_positions, config.n_embd, config.class_rate_random_vector, config.class_count, config.variance, False)
+        self.seed, _, self.sub_vector_size = generate_random_vectors(self.generate_count, config.n_positions, config.n_embd, config.class_rate_random_vector, config.class_count, config.noise_variance, False)
 
         self.last_dim = last_dim
 

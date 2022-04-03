@@ -28,7 +28,7 @@ class gpt2sgan(tf.keras.Model):
         assert self.generate_count % config.class_count == 0
 
         # add one hot vector for every seed
-        self.seed, _, self.sub_vector_size = generate_random_vectors(self.generate_count, config.n_positions, config.n_embd, config.class_rate_random_vector, config.class_count, config.variance, False)
+        self.seed, _, self.sub_vector_size = generate_random_vectors(self.generate_count, config.n_positions, config.n_embd, config.class_rate_random_vector, config.class_count, config.noise_variance, False)
 
         self.t_matrix = tf.constant(transformation_matrix(), dtype = tf.float32)
         (self.boolean_l, self.boolean_r) = boolean_brain()
