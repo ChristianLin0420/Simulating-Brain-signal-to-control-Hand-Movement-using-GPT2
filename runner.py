@@ -139,12 +139,15 @@ class Runner():
         #                  }
 
         if self.config.Accuracy:
+            print("Accuracy")
             self.callbacks.append(Accuracy(self.config, self.time, _round))
 
         if self.config.Loss:
+            print("Loss")
             self.callbacks.append(Loss(self.config, self.time, _round))
 
         if self.config.STFTgenerator:
+            print("STFTgenerator")
             self.callbacks.append(STFTgenerator(self.config, self.time, _round))
 
     def store_history(self, history, _round):

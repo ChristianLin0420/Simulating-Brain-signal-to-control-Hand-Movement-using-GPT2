@@ -36,6 +36,8 @@ class Accuracy(tf.keras.callbacks.Callback):
 
         data = { "accuracy" : self.accuracy }
 
+        print("[Accuracy] current epoch: {}, target epoch: {}".format(epoch, self.config.epochs))
+
         if epoch == self.config.epochs - 1:
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "accuracy"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
@@ -68,6 +70,8 @@ class Loss(tf.keras.callbacks.Callback):
         self.batch_loss = list()
 
         data = { "loss" : self.loss}
+
+        print("[Loss] current epoch: {}, target epoch: {}".format(epoch, self.config.epochs))
 
         if epoch == self.config.epochs - 1:
             with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "loss"), 'w', encoding = 'utf8') as outfile:
@@ -143,8 +147,9 @@ class STFTgenerator(tf.keras.callbacks.Callback):
            self.stft += list(logs.get("generated"))
 
     def on_epoch_end(self, epoch, logs = None):
+        print("[STFTgenerator] current epoch: {}, target epoch: {}".format(epoch, self.config.epochs))
         if epoch % 10 == 0:
-            print("STFTgenerator epoch: {}".format(epoch))
+            print("STFTgenerator start generating")
             brain = None
             signals = None
 
