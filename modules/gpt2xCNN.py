@@ -52,6 +52,7 @@ class gpt2xcnn(tf.keras.Model):
         
         seeds, labels = data
         # labels = tf.argmax(labels, 1)
+        print(labels.shape)
         labels = tf.cast(labels, tf.float32)
         labels = tf.reshape(labels, [self.config.batch_size, 1])
 
