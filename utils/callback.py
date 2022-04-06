@@ -63,6 +63,7 @@ class Loss(tf.keras.callbacks.Callback):
 
     def on_train_batch_end(self, epoch, logs = None):
         self.batch_loss.append(float(logs.get('loss')))
+        print("Loss: {}".format(float(logs.get('loss'))))
 
     def on_epoch_end(self, epoch, logs = None):
         mean_loss = float(sum(self.batch_loss)) / float(len(self.batch_loss))

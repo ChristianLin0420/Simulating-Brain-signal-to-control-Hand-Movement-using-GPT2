@@ -152,7 +152,7 @@ class Runner():
 
     def store_history(self, history, _round):
 
-        print(list(history.history.keys()))
+        # print(list(history.history.keys()))
 
         for key in list(history.history.keys()):
             if key not in ["generated", "accuracy", "loss"]:
