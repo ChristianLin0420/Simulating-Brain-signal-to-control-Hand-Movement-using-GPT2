@@ -61,5 +61,6 @@ def filled_zeros(x, size):
         indicators = np.ones(x.shape)
         indicators[:, size:x.shape[1], :] *= 0
         indicators = tf.convert_to_tensor(indicators)
+        indicators = tf.cast(indicators, tf.float32)
         x = tf.math.multiply(x, indicators)
     return x
