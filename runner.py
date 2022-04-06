@@ -152,7 +152,7 @@ class Runner():
 
     def store_history(self, history, _round):
 
-        # print(list(history.history.keys()))
+        print(list(history.history.keys()))
 
         for key in list(history.history.keys()):
             if key not in ["generated", "accuracy", "loss"]:
@@ -180,7 +180,7 @@ class Runner():
             self.set_callbacks(idx)
 
             ## start training and record training histroy
-            if self.config.model_name:
+            if self.config.model_name == "got2cgan":
                 history = self.model.fit(   x = self.train_x,
                                             y = self.train_y,
                                             batch_size = self.config.batch_size,
@@ -193,9 +193,7 @@ class Runner():
                                             batch_size = self.config.batch_size, 
                                             epochs = self.config.epochs, 
                                             verbose = 1,
-                                            callbacks = [   Accuracy(self.config, self.time, idx), 
-                                                            Loss(self.config, self.time, idx), 
-                                                            STFTgenerator(self.config, self.time, idx)  ]
+                                            callbacks = self.callbacks
                                         )
             elif self.config.model_name == "gpt2scnn":
                 pass
