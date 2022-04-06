@@ -42,7 +42,7 @@ def instance_norm(x, epsilon = 1e-8):
     x = tf.cast(x, tf.float32)
     x -= tf.reduce_mean(x, axis = [1, 2], keepdims = True)
     epsilon = tf.constant(epsilon, dtype = x.dtype, name = 'epsilon')
-    x *= tf.rsqrt(tf.reduce_mean(tf.square(x), axis = [1, 2], keepdims = True) + epsilon)
+    x *= tf.math.rsqrt(tf.reduce_mean(tf.square(x), axis = [1, 2], keepdims = True) + epsilon)
     x = tf.cast(x, orig_dtype)
 
     return x
