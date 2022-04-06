@@ -139,17 +139,23 @@ class STFTgenerator(tf.keras.callbacks.Callback):
         self.time = time
         self.round = _round
 
-        self.stft = list()
+        self.stft = None
         (self.boolean_l, self.boolean_r) = boolean_brain()
 
     def on_train_batch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
-           self.stft += list(logs.get("generated"))
+            data = tf.constant(logs.get("generated"))
+            if self.stft is None:
+                self.stft = data
+            else:
+                self.stft = tf.add(self.stft, data)
 
     def on_epoch_end(self, epoch, logs = None):
         print("[STFTgenerator] current epoch: {}, target epoch: {}".format(epoch, self.config.epochs))
-        if epoch % 10 == 0:
+        if epoch == self.config.epochs - 1:
             print("STFTgenerator start generating")
+            print("shape: {}".format(self.stft.shape))
+            self.stft = self.stft / self.stft.shape[0]
             brain = None
             signals = None
 
