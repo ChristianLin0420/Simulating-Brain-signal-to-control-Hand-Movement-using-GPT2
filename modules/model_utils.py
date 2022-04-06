@@ -59,7 +59,7 @@ def upsampling2D(x, size = (2, 1)):
 def filled_zeros(x, size):
     if size != x.shape[1]:
         indicators = np.ones(x.shape)
-        indicators[:, size:x.shape, :] *= 0
+        indicators[:, size:x.shape[1], :] *= 0
         indicators = tf.convert_to_tensor(indicators)
         x = tf.math.multiply(x, indicators)
     return x
