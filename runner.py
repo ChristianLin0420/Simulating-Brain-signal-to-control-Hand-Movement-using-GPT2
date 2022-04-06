@@ -71,7 +71,7 @@ class Runner():
                 loss_fn = self.loss_fn,
                 loss_kl = self.loss_kl
             )
-        elif config.model_name == "gpt2xcnn" or config.model_name == "gpt2sgan":
+        elif (config.model_name == "gpt2xcnn") or (config.model_name == "gpt2sgan"):
             self.pretrained_model = gpt2cgan(
                 data_avg = self.real_average_data, 
                 config = config
@@ -183,8 +183,14 @@ class Runner():
                                             verbose = 1,
                                             callbacks = self.callbacks
                                         )
-            elif self.config.model_name == "gpt2scnn":
-                pass
+            elif self.config.model_name == "gpt2sgan":
+                history = self.model.fit(   x = random_vectors, 
+                                            y = random_vectors_labels, 
+                                            batch_size = self.config.batch_size, 
+                                            epochs = self.config.epochs, 
+                                            verbose = 1,
+                                            callbacks = self.callbacks
+                                        )
             else:
                 error("[Runner] invalid training model!!!")
                 return

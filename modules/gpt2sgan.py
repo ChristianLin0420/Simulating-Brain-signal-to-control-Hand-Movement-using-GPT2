@@ -53,7 +53,6 @@ class gpt2sgan(tf.keras.Model):
     def train_step(self, data):
 
         seeds, labels = data
-        labels = tf.argmax(labels, 1)
         labels = tf.cast(labels, tf.float32)
         labels = tf.reshape(labels, [self.config.batch_size, 1])
 
