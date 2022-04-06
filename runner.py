@@ -180,7 +180,7 @@ class Runner():
             self.set_callbacks(idx)
 
             ## start training and record training histroy
-            if self.config.model_name == "got2cgan":
+            if self.config.model_name == "gpt2cgan":
                 history = self.model.fit(   x = self.train_x,
                                             y = self.train_y,
                                             batch_size = self.config.batch_size,

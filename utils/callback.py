@@ -27,7 +27,7 @@ class Accuracy(tf.keras.callbacks.Callback):
         self.accuracy = list()
 
     def on_train_batch_end(self, epoch, logs = None):
-        self.batch_accuracy.append(float(logs.get('accuracy')))
+        self.batch_accuracy.append(float(logs.get("accuracy")))
 
     def on_epoch_end(self, epoch, logs = None):
         mean_accuracy = float(sum(self.batch_accuracy)) / float(len(self.batch_accuracy))
@@ -62,7 +62,7 @@ class Loss(tf.keras.callbacks.Callback):
         self.loss = list()
 
     def on_train_batch_end(self, epoch, logs = None):
-        self.batch_loss.append(float(logs.get('loss')))
+        self.batch_loss.append(float(logs.get("loss")))
 
     def on_epoch_end(self, epoch, logs = None):
         mean_loss = float(sum(self.batch_loss)) / float(len(self.batch_loss))
