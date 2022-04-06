@@ -1,5 +1,6 @@
 
 import os
+import numpy as np
 import tensorflow as tf
 
 from logging import error
@@ -56,10 +57,9 @@ def upsampling2D(x, size = (2, 1)):
 
 # Filled zeros
 def filled_zeros(x, size):
-
-    if size == x.shape[1]:
-        return x
-    else:
-        for b in range(x.shape[0]):
-            x[b, size:x.shape[1], :] *= 0
-        return x
+    if size != x.shape[1]:
+        indicators = np.ones(x.shape)
+        indicators[:, size:x.shape, :] *= 0
+        indicators = tf.convert_to_tensor(indicators)
+        x = tf.math.multiply(x, indicators)
+    return x
