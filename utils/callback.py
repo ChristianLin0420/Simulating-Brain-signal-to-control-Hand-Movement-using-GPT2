@@ -143,7 +143,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
             self.stft = tf.constant(logs.get("generated"))
 
     def on_epoch_end(self, epoch, logs = None):
-        if epoch == self.config.epochs % 10 == 0:
+        if epoch % 10 == 0:
             self.stft = self.stft / self.stft.shape[0]
             brain = None
             signals = None
