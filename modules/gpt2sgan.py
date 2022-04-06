@@ -64,15 +64,18 @@ class gpt2sgan(tf.keras.Model):
             sigs = seeds
 
             # sysnthesis procedure
-            for i in range(5):
+            for i in range(4):
                 sigs = self.gptGenerator.generator(sigs)
 
-                if i < 4:
+                if i < 3:
                     sigs = tf.reshape(sigs, sigs.shape[:3])
                     sigs = instance_norm(sigs)                              # adaptive instance normalization
                     sigs = upsampling2D(sigs, (4, 1))                       # upsampling 
                     sigs = filled_zeros(sigs, self.upsampling_base_size)    # filled zeros for unsampling place
                     self.upsampling_base_size *= 4
+
+                    if self.upsampling_base_size > 2089:
+                        self.upsampling_base_size = 2089
 
             brain = None
             signals = None

@@ -49,7 +49,10 @@ def instance_norm(x, epsilon = 1e-8):
 
 # Upsampling
 def upsampling2D(x, size = (2, 1)):
-    return tf.keras.layers.UpSampling2D(size = size)(x)
+    if x.shape[1] == 2089:
+        return x
+    else:
+        return tf.keras.layers.UpSampling2D(size = size)(x)
 
 # Filled zeros
 def filled_zeros(x, size):
