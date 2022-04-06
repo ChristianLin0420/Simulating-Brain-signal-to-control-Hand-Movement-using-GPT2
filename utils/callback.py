@@ -36,10 +36,8 @@ class Accuracy(tf.keras.callbacks.Callback):
 
         data = { "accuracy" : self.accuracy }
 
-        print("[Accuracy] current epoch: {}, target epoch: {}".format(epoch, self.config.epochs))
-
         if epoch == self.config.epochs - 1:
-            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "accuracy"), 'w', encoding = 'utf8') as outfile:
+            with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "accuracy"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
             
@@ -71,10 +69,8 @@ class Loss(tf.keras.callbacks.Callback):
 
         data = { "loss" : self.loss}
 
-        print("[Loss] current epoch: {}, target epoch: {}".format(epoch, self.config.epochs))
-
         if epoch == self.config.epochs - 1:
-            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "loss"), 'w', encoding = 'utf8') as outfile:
+            with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "loss"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
             
@@ -114,11 +110,11 @@ class GANLoss(tf.keras.callbacks.Callback):
         g_data = { "g_loss" : self.g_loss}
 
         if epoch == self.config.epochs - 1:
-            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "d_loss"), 'w', encoding = 'utf8') as outfile:
+            with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "d_loss"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(d_data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
 
-            with io.open("results/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "g_loss"), 'w', encoding = 'utf8') as outfile:
+            with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, self.round, "g_loss"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(g_data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
             
@@ -151,10 +147,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
                 self.stft = tf.add(self.stft, data)
 
     def on_epoch_end(self, epoch, logs = None):
-        print("[STFTgenerator] current epoch: {}, target epoch: {}".format(epoch, self.config.epochs))
         if epoch == self.config.epochs - 1:
-            print("STFTgenerator start generating")
-            print("shape: {}".format(self.stft.shape))
             self.stft = self.stft / self.stft.shape[0]
             brain = None
             signals = None
@@ -206,8 +199,8 @@ class STFTgenerator(tf.keras.callbacks.Callback):
 
             ## generate short-time fourier transform figures
             for sample in range(bz):
-                if not os.path.exists('results/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch)):
-                    os.mkdir('results/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch))
+                if not os.path.exists('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch)):
+                    os.mkdir('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch))
 
                 for idx in range(int(len(channels))):
                     log_spec = tf.math.log(tf.transpose(Zxx[sample][idx]))
