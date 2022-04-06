@@ -162,7 +162,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
             tmp = tf.reshape(brain, shape = [brain.shape[0], brain.shape[1], brain.shape[2]])
             brain = None
 
-            generated_num_per_class = int(self.config.example_to_generate / self.class_count)
+            generated_num_per_class = int(self.config.example_to_generate / self.config.class_count)
             
             for i in range(self.class_count):
                 mean = tf.reduce_mean(tmp[i * generated_num_per_class : (i + 1) * generated_num_per_class], axis = 0)
