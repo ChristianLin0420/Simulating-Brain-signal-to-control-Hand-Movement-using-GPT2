@@ -2,6 +2,7 @@
 import numpy as np
 import tensorflow as tf
 
+from res.brain import Brain
 from .gpt2cgan import gpt2cgan
 from .classifier import stft_min_max
 from .model_utils import instance_norm, upsampling2D, filled_zeros

@@ -61,5 +61,5 @@ def filled_zeros(x, size):
         return x
     else:
         for b in range(x.shape[0]):
-            x[b, size:x.shape[1], :] = tf.zeros((x.shape[1] - size, x.shape[2]))
+            x[b, size:x.shape[1], :] *= 0
         return x
