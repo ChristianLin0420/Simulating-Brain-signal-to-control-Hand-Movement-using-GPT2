@@ -208,7 +208,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
                     plt.title('STFT Magnitude for channel {} of class {} in iteration {}'.format(channels[idx], sample + 1, epoch))
                     plt.ylabel('Frequency [Hz]')
                     plt.xlabel('Time [sec]')
-                    plt.savefig('results/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
+                    plt.savefig('result/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
                     plt.close()
 
 
