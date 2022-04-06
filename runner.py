@@ -157,7 +157,6 @@ class Runner():
         for key in list(history.history.keys()):
             if key not in ["generated", "accuracy", "loss"]:
                 value = np.asarray(history.history[str(key)]).tolist()
-                print("Key: {}, value: {}".format(key, value))
 
                 data = { str(key) : value }
                 with io.open("result/{}/{}/history/{}/{}.json".format(self.config.model_name, self.time, _round, key), 'w', encoding = 'utf8') as outfile:
