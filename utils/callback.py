@@ -3,13 +3,12 @@ from calendar import c
 import os
 import io
 import json
-from datetime import time
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-from .model_monitor import generate_and_save_images, save_result_as_gif, save_distribution_record, record_model_weight, save_loss_range_record
-from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, generate_eeg, generate_single_channel_eeg_signal, fetch_brain_template, generate_mne_plot, restore_brain_activation_tf
+from .model_monitor import record_model_weight
+from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, fetch_brain_template, restore_brain_activation_tf
 
 '''
 ----- Accuracy -----
@@ -140,11 +139,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
 
     def on_train_batch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
-            data = tf.constant(logs.get("generated"))
-            if self.stft is None:
-                self.stft = data
-            else:
-                self.stft = tf.add(self.stft, data)
+            self.stft = tf.constant(logs.get("generated"))
 
     def on_epoch_end(self, epoch, logs = None):
         if epoch == self.config.epochs - 1:
@@ -167,7 +162,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
             tmp = tf.reshape(brain, shape = [brain.shape[0], brain.shape[1], brain.shape[2]])
             brain = None
 
-            generated_num_per_class = int(self.example_to_generate / self.class_count)
+            generated_num_per_class = int(self.config.example_to_generate / self.class_count)
             
             for i in range(self.class_count):
                 mean = tf.reduce_mean(tmp[i * generated_num_per_class : (i + 1) * generated_num_per_class], axis = 0)
