@@ -193,7 +193,9 @@ class Runner():
                                             batch_size = self.config.batch_size, 
                                             epochs = self.config.epochs, 
                                             verbose = 1,
-                                            callbacks = self.callbacks
+                                            callbacks = [   Accuracy(self.config, self.time, idx), 
+                                                            Loss(self.config, self.time, idx), 
+                                                            STFTgenerator(self.config, self.time, idx)  ]
                                         )
             elif self.config.model_name == "gpt2scnn":
                 pass
