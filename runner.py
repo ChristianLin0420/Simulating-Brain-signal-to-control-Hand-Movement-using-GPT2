@@ -166,13 +166,15 @@ class Runner():
     def run(self):
 
         ## initialize random vectors
-        random_vectors, random_vectors_labels, _ = generate_random_vectors(   num = self.config.random_vector_num,
-                                                            length = self.config.n_positions, 
-                                                            emb = self.config.n_embd, 
-                                                            class_rate_random_vector = self.config.class_rate_random_vector, 
-                                                            class_count = self.config.class_count,
-                                                            variance = self.config.noise_variance )
-        
+        random_vectors, random_vectors_labels, _ = generate_random_vectors(     num = self.config.random_vector_num,
+                                                                                length = self.config.n_positions, 
+                                                                                emb = self.config.n_embd, 
+                                                                                class_rate_random_vector = self.config.class_rate_random_vector, 
+                                                                                class_count = self.config.class_count,
+                                                                                variance = self.config.noise_variance )
+        print(type(random_vectors))
+        print(type(random_vectors_labels))
+
         ## start training
         for idx in range(self.config.rounds):
 
@@ -192,11 +194,11 @@ class Runner():
                                             y = random_vectors_labels, 
                                             batch_size = self.config.batch_size, 
                                             epochs = self.config.epochs, 
-                                            verbose = 1,
-                                            callbacks = [   Accuracy(self.config, self.time, idx), 
-                                                            Loss(self.config, self.time, idx), 
-                                                            STFTgenerator(self.config, self.time, idx)  ]
-                                        )
+                                            verbose = 1)
+                                        #     callbacks = [   Accuracy(self.config, self.time, idx), 
+                                        #                     Loss(self.config, self.time, idx), 
+                                        #                     STFTgenerator(self.config, self.time, idx)  ]
+                                        # )
             elif self.config.model_name == "gpt2scnn":
                 pass
             else:
