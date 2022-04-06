@@ -23,8 +23,8 @@ class Accuracy(tf.keras.callbacks.Callback):
         self.time = time
         self.round = _round
 
-        self.batch_accuracy = list()
-        self.accuracy = list()
+        self.batch_accuracy = []
+        self.accuracy = []
 
     def on_train_batch_end(self, epoch, logs = None):
         self.batch_accuracy.append(float(logs.get("accuracy")))
@@ -58,8 +58,8 @@ class Loss(tf.keras.callbacks.Callback):
         self.time = time
         self.round = _round
 
-        self.batch_loss = list()
-        self.loss = list()
+        self.batch_loss = []
+        self.loss = []
 
     def on_train_batch_end(self, epoch, logs = None):
         self.batch_loss.append(float(logs.get("loss")))
