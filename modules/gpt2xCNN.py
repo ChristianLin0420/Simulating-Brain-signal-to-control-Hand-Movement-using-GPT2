@@ -51,8 +51,6 @@ class gpt2xcnn(tf.keras.Model):
     def train_step(self, data):
         
         seeds, labels = data
-        print(seeds.shape)
-        print(labels.shape)
         labels = tf.argmax(labels, 1)
         labels = tf.cast(labels, tf.float32)
         labels = tf.reshape(labels, [self.config.batch_size, 1])

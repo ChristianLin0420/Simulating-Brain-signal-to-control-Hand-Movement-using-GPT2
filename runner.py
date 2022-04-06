@@ -171,10 +171,8 @@ class Runner():
                                                                                 emb = self.config.n_embd, 
                                                                                 class_rate_random_vector = self.config.class_rate_random_vector, 
                                                                                 class_count = self.config.class_count,
-                                                                                variance = self.config.noise_variance )
-        print(type(random_vectors))
-        print(type(random_vectors_labels))
-
+                                                                                variance = self.config.noise_variance   )
+        
         ## start training
         for idx in range(self.config.rounds):
 
@@ -194,11 +192,9 @@ class Runner():
                                             y = random_vectors_labels, 
                                             batch_size = self.config.batch_size, 
                                             epochs = self.config.epochs, 
-                                            verbose = 1)
-                                        #     callbacks = [   Accuracy(self.config, self.time, idx), 
-                                        #                     Loss(self.config, self.time, idx), 
-                                        #                     STFTgenerator(self.config, self.time, idx)  ]
-                                        # )
+                                            verbose = 1,
+                                            callbacks = self.callbacks
+                                        )
             elif self.config.model_name == "gpt2scnn":
                 pass
             else:
