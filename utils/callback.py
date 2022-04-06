@@ -195,8 +195,8 @@ class STFTgenerator(tf.keras.callbacks.Callback):
 
             ## generate short-time fourier transform figures
             for sample in range(bz):
-                if not os.path.exists('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch)):
-                    os.mkdir('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.model_name, self.time, self.round, epoch))
+                if not os.path.exists('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch)):
+                    os.mkdir('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch))
 
                 for idx in range(int(len(channels))):
                     log_spec = tf.math.log(tf.transpose(Zxx[sample][idx]))
@@ -208,7 +208,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
                     plt.title('STFT Magnitude for channel {} of class {} in iteration {}'.format(channels[idx], sample + 1, epoch))
                     plt.ylabel('Frequency [Hz]')
                     plt.xlabel('Time [sec]')
-                    plt.savefig('results/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
+                    plt.savefig('results/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
                     plt.close()
 
 
