@@ -38,15 +38,14 @@ def load_model(path, model_name: str = "gpt2gan", noise_len: int = 784, noise_di
 def instance_norm(x, epsilon = 1e-8):
     assert len(x.shape) == 3 # NLT
 
-    with tf.variable_scope('InstanceNorm'):
-        orig_dtype = x.dtype
-        x = tf.cast(x, tf.float32)
-        x -= tf.reduce_mean(x, axis = [1, 2], keepdims = True)
-        epsilon = tf.constant(epsilon, dtype = x.dtype, name = 'epsilon')
-        x *= tf.rsqrt(tf.reduce_mean(tf.square(x), axis = [1, 2], keepdims = True) + epsilon)
-        x = tf.cast(x, orig_dtype)
+    orig_dtype = x.dtype
+    x = tf.cast(x, tf.float32)
+    x -= tf.reduce_mean(x, axis = [1, 2], keepdims = True)
+    epsilon = tf.constant(epsilon, dtype = x.dtype, name = 'epsilon')
+    x *= tf.rsqrt(tf.reduce_mean(tf.square(x), axis = [1, 2], keepdims = True) + epsilon)
+    x = tf.cast(x, orig_dtype)
 
-        return x
+    return x
 
 # Upsampling
 def upsampling2D(x, size = (2, 1)):
