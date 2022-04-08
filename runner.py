@@ -135,13 +135,13 @@ class Runner():
         callbacks = list()
 
         if self.config.Accuracy:
-            self.callbacks.append(Accuracy(self.config, self.time, _round))
+            callbacks.append(Accuracy(self.config, self.time, _round))
 
         if self.config.Loss:
-            self.callbacks.append(Loss(self.config, self.time, _round))
+            callbacks.append(Loss(self.config, self.time, _round))
 
         if self.config.STFTgenerator:
-            self.callbacks.append(STFTgenerator(self.config, self.time, _round))
+            callbacks.append(STFTgenerator(self.config, self.time, _round))
 
         return callbacks
 
