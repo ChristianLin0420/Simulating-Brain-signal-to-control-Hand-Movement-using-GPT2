@@ -56,63 +56,6 @@ class Runner():
         self.optimizer = keras.optimizers.Adam(learning_rate = config.learning_rate)
         self.loss_fn = keras.losses.BinaryCrossentropy(from_logits = False)
         self.loss_kl = keras.losses.KLDivergence()
-
-        ## model initialization
-        if config.model_name == "gpt2cgan":
-            self.model = gpt2cgan(
-                config = config, 
-                data_avg = self.real_average_data
-            )
-            
-            ## compile the model
-            self.model.compile(
-                d_optimizer = self.d_optimizer,
-                g_optimizer = self.g_optimizer,
-                loss_fn = self.loss_fn,
-                loss_kl = self.loss_kl
-            )
-        elif (config.model_name == "gpt2xcnn") or (config.model_name == "gpt2sgan"):
-            self.pretrained_model = gpt2cgan(
-                data_avg = self.real_average_data, 
-                config = config
-            )
-
-            ## fine-tune (load model)
-            if config.fine_tune:
-                self.pretrained_model.load_weights(config.pretrained_finetune_path)
-                self.pretrained_model.trainable = True
-
-            self.pretrained_model.compile(
-                d_optimizer = self.d_optimizer,
-                g_optimizer = self.g_optimizer,
-                loss_fn = self.loss_fn,
-                loss_kl = self.loss_kl
-            )
-
-            ## fine-tune (build new model)
-            if config.model_name == "gpt2xcnn":
-                self.model = gpt2xcnn(
-                    data_avg = self.real_average_data, 
-                    config = config, 
-                    generator = self.pretrained_model, 
-                    classifier = self.classifier
-                )
-            else:
-                self.model = gpt2sgan(
-                    data_avg = self.real_average_data, 
-                    config = config, 
-                    generator = self.pretrained_model, 
-                    classifier = self.classifier
-                )
-        
-            ## compile the model
-            self.model.compile(
-                optimizer = self.optimizer,
-                loss_fn = self.loss_fn,
-                loss_kl = self.loss_kl
-            )
-        else:
-            error("[Runner] invalid model name was given!!!")
     
     def get_training_dataset(self):
         ### retrieve training data
@@ -125,9 +68,71 @@ class Runner():
         self.left_hand_data = np.expand_dims(self.real_average_data[0], axis = 0)
         self.right_hand_data = np.expand_dims(self.real_average_data[1], axis = 0)
 
+    def get_model(self):
+        ## model initialization
+        if self.config.model_name == "gpt2cgan":
+            model = gpt2cgan(
+                config = self.config, 
+                data_avg = self.real_average_data
+            )
+            
+            ## compile the model
+            model.compile(
+                d_optimizer = self.d_optimizer,
+                g_optimizer = self.g_optimizer,
+                loss_fn = self.loss_fn,
+                loss_kl = self.loss_kl
+            )
+
+            return model
+        elif (self.config.model_name == "gpt2xcnn") or (self.config.model_name == "gpt2sgan"):
+            pretrained_model = gpt2cgan(
+                data_avg = self.real_average_data, 
+                config = self.config
+            )
+
+            ## fine-tune (load model)
+            if self.config.fine_tune:
+                pretrained_model.load_weights(self.config.pretrained_finetune_path)
+                pretrained_model.trainable = True
+
+            pretrained_model.compile(
+                d_optimizer = self.d_optimizer,
+                g_optimizer = self.g_optimizer,
+                loss_fn = self.loss_fn,
+                loss_kl = self.loss_kl
+            )
+
+            ## fine-tune (build new model)
+            if self.config.model_name == "gpt2xcnn":
+                model = gpt2xcnn(
+                    data_avg = self.real_average_data, 
+                    config = self.config, 
+                    generator = self.pretrained_model, 
+                    classifier = self.classifier
+                )
+            else:
+                model = gpt2sgan(
+                    data_avg = self.real_average_data, 
+                    config = self.config, 
+                    generator = self.pretrained_model, 
+                    classifier = self.classifier
+                )
+        
+            ## compile the model
+            model.compile(
+                optimizer = self.optimizer,
+                loss_fn = self.loss_fn,
+                loss_kl = self.loss_kl
+            )
+            return model
+        else:
+            error("[Runner] invalid model name was given!!!")
+            return None
+
     def set_callbacks(self, _round):
         
-        self.callbacks = list()
+        callbacks = list()
 
         if self.config.Accuracy:
             self.callbacks.append(Accuracy(self.config, self.time, _round))
@@ -138,10 +143,9 @@ class Runner():
         if self.config.STFTgenerator:
             self.callbacks.append(STFTgenerator(self.config, self.time, _round))
 
+        return callbacks
+
     def store_history(self, history, _round):
-
-        print(list(history.history.keys()))
-
         for key in list(history.history.keys()):
             if key not in ["generated", "accuracy", "loss"]:
                 value = np.asarray(history.history[str(key)]).tolist()
@@ -165,32 +169,33 @@ class Runner():
         for idx in range(self.config.rounds):
 
             ## set required callbacks
-            self.set_callbacks(idx)
+            model = self.get_model()
+            callbacks = self.set_callbacks(idx)
 
             ## start training and record training histroy
             if self.config.model_name == "gpt2cgan":
-                history = self.model.fit(   x = self.train_x,
-                                            y = self.train_y,
-                                            batch_size = self.config.batch_size,
-                                            epochs = self.config.epochs, 
-                                            verbose = 1
-                                        )
+                history = model.fit(x = self.train_x,
+                                    y = self.train_y,
+                                    batch_size = self.config.batch_size,
+                                    epochs = self.config.epochs, 
+                                    verbose = 1
+                                )
             elif self.config.model_name == "gpt2xcnn":
-                history = self.model.fit(   x = random_vectors, 
-                                            y = random_vectors_labels, 
-                                            batch_size = self.config.batch_size, 
-                                            epochs = self.config.epochs, 
-                                            verbose = 1,
-                                            callbacks = self.callbacks
-                                        )
+                history = model.fit(x = random_vectors, 
+                                    y = random_vectors_labels, 
+                                    batch_size = self.config.batch_size, 
+                                    epochs = self.config.epochs, 
+                                    verbose = 1,
+                                    callbacks = callbacks
+                                )
             elif self.config.model_name == "gpt2sgan":
-                history = self.model.fit(   x = random_vectors, 
-                                            y = random_vectors_labels, 
-                                            batch_size = self.config.batch_size, 
-                                            epochs = self.config.epochs, 
-                                            verbose = 1,
-                                            callbacks = self.callbacks
-                                        )
+                history = model.fit(x = random_vectors, 
+                                    y = random_vectors_labels, 
+                                    batch_size = self.config.batch_size, 
+                                    epochs = self.config.epochs, 
+                                    verbose = 1,
+                                    callbacks = callbacks
+                                )
             else:
                 error("[Runner] invalid training model!!!")
                 return
@@ -199,4 +204,4 @@ class Runner():
             self.store_history(history, idx)
 
             ## save model
-            self.model.save_weights("result/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')
+            model.save_weights("result/{}/{}/models/{}/model".format(self.config.model_name, self.time, idx), save_format = 'tf')
