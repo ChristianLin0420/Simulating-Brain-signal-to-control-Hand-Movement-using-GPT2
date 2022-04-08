@@ -108,14 +108,14 @@ class Runner():
                 model = gpt2xcnn(
                     data_avg = self.real_average_data, 
                     config = self.config, 
-                    generator = self.pretrained_model, 
+                    generator = pretrained_model, 
                     classifier = self.classifier
                 )
             else:
                 model = gpt2sgan(
                     data_avg = self.real_average_data, 
                     config = self.config, 
-                    generator = self.pretrained_model, 
+                    generator = pretrained_model, 
                     classifier = self.classifier
                 )
         
