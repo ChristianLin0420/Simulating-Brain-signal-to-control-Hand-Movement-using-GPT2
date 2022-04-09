@@ -111,7 +111,7 @@ class TrainingConfig(PretrainedConfig):
 
     def save_config(self, model_name, time):
         
-        file_path = "./result/{}/{}/config/config.txt".format(model_name, time)
+        file_path = "./result/{}/{}/config/config.json".format(model_name, time)
 
         data = {
             "gpu": self.gpu, 
@@ -181,7 +181,7 @@ class TrainingConfig(PretrainedConfig):
                 return None
             else:
                 with open(path) as f:
-                    d = json.load(f)
+                        d = json.load(f)
 
                 self.gpu = bool(d["gpu"])
                 self.gpu_id = int(d["gpu_id"])

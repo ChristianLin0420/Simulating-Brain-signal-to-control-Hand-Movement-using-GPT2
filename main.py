@@ -9,18 +9,37 @@ from datetime import datetime
 from runner import Runner
 from config.config import TrainingConfig
 from utils.directory import DirectoryGenerator
+from utils.resultGenerator import ResultGenerator
 
 if __name__ == '__main__':
 
     ## read arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default = 'training')  
+    parser.add_argument("--model_name", default = None)
     parser.add_argument("--time", default = None)
     parser.add_argument("--figure", default = 'accuracy')
     args = parser.parse_args()
 
     if args.mode == "build":
-        pass
+        if args.time is None:
+            print("[Error] No specific time input was given!!!")
+        elif args.model_name is None:
+            print("[Error] No specific model name input was given!!!")
+        else:
+            config_path = "result/{}/{}/config/config.txt".format(args.model_name, args.time)
+            
+            if not os.path.exists(config_path):
+                print("[Error] Given config path is not existed!!!")
+            else:
+                config = TrainingConfig()
+                config.load_config("result/{}/{}/config/config.txt")
+                generator = ResultGenerator(config, args.time)
+
+                generator.generate_training_result_figure()
+                generator.generate_all_channels_eeg()
+                generator.generate_topographs()
+            
     elif args.mode == "training":
         ## get training time
         now = datetime.now()
@@ -54,6 +73,13 @@ if __name__ == '__main__':
         print("Runner starts training!!!")
         runner.run()
         print("Runner finished training!!!")
+
+        print("Start generating results!!!")
+        generator = ResultGenerator(config, args.time)
+        generator.generate_training_result_figure()
+        generator.generate_all_channels_eeg()
+        generator.generate_topographs()
+        print("Finish generating results!!!")
     else:
         error("[Main] given argument is invalid!!!")
 
