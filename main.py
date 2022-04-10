@@ -10,6 +10,11 @@ from runner import Runner
 from config.config import TrainingConfig
 from utils.directory import DirectoryGenerator
 from utils.resultGenerator import ResultGenerator
+from utils.datasetGenerator import (
+    DatasetGenerator, 
+    get_training_reconstruct_signals, 
+    get_training_raw_signals
+)
 
 if __name__ == '__main__':
 
@@ -27,15 +32,19 @@ if __name__ == '__main__':
         elif args.model_name is None:
             print("[Error] No specific model name input was given!!!")
         else:
-            config_path = "result/{}/{}/config/config.txt".format(args.model_name, args.time)
+            config_path = "result/{}/{}/config/config.json".format(args.model_name, args.time)
             
             if not os.path.exists(config_path):
                 print("[Error] Given config path is not existed!!!")
             else:
                 config = TrainingConfig()
-                config.load_config("result/{}/{}/config/config.txt")
-                generator = ResultGenerator(config, args.time)
+                config.load_config("result/{}/{}/config/config.json")
+                filenames, labels = get_training_reconstruct_signals()
+                raw_filenames, raw_labels = get_training_raw_signals(subject_count = config.subject_count)
+                d_generator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, config = config)
+                _, _, avg_real_data = d_generator.get_reconstructed_items(filenames, labels)
 
+                generator = ResultGenerator(config, args.time, avg_real_data)
                 generator.generate_training_result_figure()
                 generator.generate_all_channels_eeg()
                 generator.generate_topographs()
@@ -74,12 +83,12 @@ if __name__ == '__main__':
         runner.run()
         print("Runner finished training!!!")
 
-        print("Start generating results!!!")
-        generator = ResultGenerator(config, args.time)
-        generator.generate_training_result_figure()
-        generator.generate_all_channels_eeg()
-        generator.generate_topographs()
-        print("Finish generating results!!!")
+        # print("Start generating results!!!")
+        # generator = ResultGenerator(config, args.time, runner.real_average_data)
+        # generator.generate_training_result_figure()
+        # generator.generate_all_channels_eeg()
+        # generator.generate_topographs()
+        # print("Finish generating results!!!")
     else:
         error("[Main] given argument is invalid!!!")
 

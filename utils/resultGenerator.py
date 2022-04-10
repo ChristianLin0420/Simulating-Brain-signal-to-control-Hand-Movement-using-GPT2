@@ -5,6 +5,8 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+from res.brain import Brain
+
 from brain_activation import (
     boolean_brain, 
     transformation_matrix, 
@@ -15,9 +17,10 @@ from brain_activation import (
 
 class ResultGenerator(object):
 
-    def __init__(self, config, time):
+    def __init__(self, config, time, real_data):
         self.config = config
         self.time = time
+        self.real_data = real_data
 
         (self.boolean_l, self.boolean_r) = boolean_brain()
         self.transformation_matrix = transformation_matrix()
@@ -66,7 +69,31 @@ class ResultGenerator(object):
             self.generate_figure(datas, [filename], filename)
 
     def generate_all_channels_eeg(self):
-        pass
+        channels = Brain.get_channel_names()
+        real_data = np.asarray(self.real_data)
+        t_matrix = np.asarray(self.transformation_matrix)
+        real_converted_data = np.dot(t_matrix, real_data)
+
+        for r in range(self.config.rounds):
+            for e in range(0, self.config.epochs, 10):
+                filename = "result/{}/{}/generated/{}/{}/generated.json".format(self.config.model_name, self.time, r, e)
+                data = json.load(filename)
+                data = data["generated"]
+                left, right = restore_brain_activation(data, self.boolean_l, self.boolean_r)
+                left = np.asarray(left)
+                right = np.asarray(right)
+                data = np.concatenate([left, right], axis = 0)
+                data = np.dot(t_matrix, data)
+
+                for i in range(data.shape[0]):
+                    wave1 = np.expand_dims(real_converted_data[i], axis = 0)
+                    wave2 = np.expand_dims(data[i], axis = 0)
+                    waves = np.concatenate([wave1, wave2])
+                    labels = ["real_data_channel_{}".format(channels[i]), "generated_data_channel_{}".format(channels[i])]
+
+                    self.generate_figure(waves, labels, "Channel_{}_epoch_{}".format(channels[i], e))
+
+
 
     def generate_topographs(self):
         pass

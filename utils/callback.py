@@ -140,7 +140,16 @@ class STFTgenerator(tf.keras.callbacks.Callback):
 
     def on_train_batch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
-            self.stft = tf.constant(logs.get("generated"))
+            data = logs.get["generated"]
+            self.stft = tf.constant(data)
+
+            if not os.path.exists('result/{}/{}/generated/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch)):
+                os.mkdir('result/{}/{}/generated/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch))
+            
+            data = { "generated" : data }
+            with io.open("result/{}/{}/generated/{}/epoch_{:04d}/{}.json".format(self.config.model_name, self.time, self.round, "generated"), 'w', encoding = 'utf8') as outfile:
+                s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
+                outfile.write(s)
 
     def on_epoch_end(self, epoch, logs = None):
         if epoch % 10 == 0:

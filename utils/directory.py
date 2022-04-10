@@ -16,7 +16,7 @@ class DirectoryGenerator:
         os.mkdir(roots_path)
         os.mkdir(roots_path + "/config")
 
-        for root in ["/models", "/topography", "/eeg", "/history", "/stft", "/figure"]:
+        for root in ["/models", "/topography", "/eeg", "/history", "/stft", "/figure", "/generated"]:
             os.mkdir(roots_path + "{}".format(root))
             for idx in range(self.config.rounds):
                 os.mkdir(roots_path + "{}/{}".format(root, idx))
