@@ -12,7 +12,6 @@ from brain_activation import (
     transformation_matrix, 
     restore_brain_activation, 
     restore_brain_activation_tf, 
-    fetch_brain_template
 )
 
 class ResultGenerator(object):
