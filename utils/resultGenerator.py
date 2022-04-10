@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from res.brain import Brain
 
-from brain_activation import (
+from .brain_activation import (
     boolean_brain, 
     transformation_matrix, 
     restore_brain_activation, 
