@@ -147,7 +147,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
                 os.mkdir('result/{}/{}/generated/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch))
             
             data = { "generated" : data }
-            with io.open("result/{}/{}/generated/{}/epoch_{:04d}/{}.json".format(self.config.model_name, self.time, self.round, "generated"), 'w', encoding = 'utf8') as outfile:
+            with io.open("result/{}/{}/generated/{}/epoch_{:04d}/{}.json".format(self.config.model_name, self.time, self.round, int(epoch), "generated"), 'w', encoding = 'utf8') as outfile:
                 s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
                 outfile.write(s)
 
