@@ -140,6 +140,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
 
     def on_train_batch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
+            print("--------------------------------")
             data = np.asarray(logs.get('generated')).tolist()
             self.stft = tf.constant(data)
 
