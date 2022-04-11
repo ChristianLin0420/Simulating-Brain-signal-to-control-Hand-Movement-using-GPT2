@@ -144,14 +144,14 @@ class STFTgenerator(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
-            data = np.asarray(logs.get('generated')).tolist()
-            if not os.path.exists('result/{}/{}/generated/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch)):
-                os.mkdir('result/{}/{}/generated/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch))
+            # data = np.asarray(logs.get('generated')).tolist()
+            # if not os.path.exists('result/{}/{}/generated/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch)):
+            #     os.mkdir('result/{}/{}/generated/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch))
             
-            data = { "generated" : data }
-            with io.open("result/{}/{}/generated/{}/epoch_{:04d}/{}.json".format(self.config.model_name, self.time, self.round, int(epoch), "generated"), 'w', encoding = 'utf8') as outfile:
-                s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
-                outfile.write(s)
+            # data = { "generated" : data }
+            # with io.open("result/{}/{}/generated/{}/epoch_{:04d}/{}.json".format(self.config.model_name, self.time, self.round, int(epoch), "generated"), 'w', encoding = 'utf8') as outfile:
+            #     s = json.dumps(data, indent = 4, sort_keys = True, ensure_ascii = False)
+            #     outfile.write(s)
             
             self.stft = self.stft / self.stft.shape[0]
             brain = None

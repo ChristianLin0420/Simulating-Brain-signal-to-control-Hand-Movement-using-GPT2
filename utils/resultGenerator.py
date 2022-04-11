@@ -78,6 +78,7 @@ class ResultGenerator(object):
                 filename = "result/{}/{}/generated/{}/{}/generated.json".format(self.config.model_name, self.time, r, e)
                 data = json.load(filename)
                 data = data["generated"]
+                generated_num_per_class = int(self.config.example_to_generate / self.config.class_count)
                 left, right = restore_brain_activation(data, self.boolean_l, self.boolean_r)
                 left = np.asarray(left)
                 right = np.asarray(right)
