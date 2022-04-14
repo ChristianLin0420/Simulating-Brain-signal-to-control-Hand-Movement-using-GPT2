@@ -68,9 +68,9 @@ if __name__ == '__main__':
         ## initialize the configuration and directory
         config = TrainingConfig()
         _ = DirectoryGenerator(time, config)
-        config.save_config(config.model_name[0], time[0])
+        config.save_config(config.model_name[0], time)
 
-        print("time: {}".format(time[0]))
+        print("time: {}".format(time))
         print(config)
 
         ## environment settings
@@ -88,18 +88,18 @@ if __name__ == '__main__':
                 print("[No GPR] there is no availible gpu to use!!!")
 
         ## initialize the training runner and start training    
-        runner = Runner(config, time[0])
+        runner = Runner(config, time)
 
         print("Runner starts training!!!")
         runner.run()
         print("Runner finished training!!!")
 
-        # print("Start generating results!!!")
-        # generator = ResultGenerator(config, args.time, runner.real_average_data)
-        # generator.generate_training_result_figure()
+        print("Start generating results!!!")
+        generator = ResultGenerator(config, time, runner.real_average_data)
+        generator.generate_training_result_figure()
         # generator.generate_all_channels_eeg()
         # generator.generate_topographs()
-        # print("Finish generating results!!!")
+        print("Finish generating results!!!")
     else:
         error("[Main] given argument is invalid!!!")
 

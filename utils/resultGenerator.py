@@ -37,7 +37,7 @@ class ResultGenerator(object):
         else:
             print("[Error] resultGenerator gets invalid data with dimension not equals to 2 or 3!!!")
 
-        for i in data_count:
+        for i in range(data_count):
             mean = np.mean(data[i], axis = 0)
             standrad_ev = np.std(data[i], axis = 0)
 
