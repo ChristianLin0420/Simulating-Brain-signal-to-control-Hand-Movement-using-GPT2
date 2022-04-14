@@ -102,7 +102,7 @@ class ResultGenerator(object):
         for filename in filenames:
             datas = []
 
-            for round in self.config.rounds:
+            for round in range(self.config.rounds):
                 path = "result/{}/{}/history/1/{}".format(self.config.model_name, self.time, round, filename)
                 data = json.load(open(path))
                 data = data[filename[:-5]]
