@@ -50,8 +50,8 @@ if __name__ == '__main__':
 
                 generator = ResultGenerator(config, args.time[0], avg_real_data)
                 generator.generate_training_result_figure()
-                generator.generate_all_channels_eeg()
-                generator.generate_topographs()
+                # generator.generate_all_channels_eeg()
+                # generator.generate_topographs()
     elif args.mode == "compare_result":
         if args.time is None:
             print("[Error] No specific time input was given!!!")
