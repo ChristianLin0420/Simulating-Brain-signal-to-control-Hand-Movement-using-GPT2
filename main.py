@@ -68,7 +68,7 @@ if __name__ == '__main__':
         ## initialize the configuration and directory
         config = TrainingConfig()
         _ = DirectoryGenerator(time, config)
-        config.save_config(config.model_name[0], time)
+        config.save_config(config.model_name, time)
 
         print("time: {}".format(time))
         print(config)
