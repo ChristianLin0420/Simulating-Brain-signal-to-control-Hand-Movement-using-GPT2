@@ -53,6 +53,15 @@ class ResultGenerator(object):
         plt.savefig(path)  
         plt.close()
 
+    def generate_compare_results_figure(self, model_names, times):
+
+        if len(model_names) == 1 and len(times) > 1:
+            pass
+        elif len(model_names) > 1 and len(times) == 1:
+            pass
+        else:
+            pass
+
     def generate_training_result_figure(self):
         filenames = [f for f in os.listdir("result/{}/{}/history/1/".format(self.config.model_name, self.time, self.round)) if f.endswith(".json")]
         print(filenames)
