@@ -53,17 +53,50 @@ class ResultGenerator(object):
         plt.savefig(path)  
         plt.close()
 
-    def generate_compare_results_figure(self, model_names, times):
+    def generate_compare_results_figure(self, model_names, times, compare_parameter: str = None):
+
+        if not os.path.exists("result/{}/compare_results".format(model_names[0])):
+            os.mkdir("result/{}/compare_results".format(model_names[0]))
+
+        if compare_parameter is None:
+            print("[Error] compare_parameter was not given!!!")
 
         if len(model_names) == 1 and len(times) > 1:
-            pass
-        elif len(model_names) > 1 and len(times) == 1:
-            pass
-        else:
+            filenames = [f for f in os.listdir("result/{}/{}/history/1/".format(model_names[0], times[0])) if f.endswith(".json")]
+
+            for filename in filenames:
+                labels = list()
+                datas = list()
+
+                for time in times:
+                    data = list()
+
+                    config_path = "result/{}/{}/config/config.json".format(model_names[0], time)
+                    cd = json.load(config_path)
+                    label = "{}_{}".format(compare_parameter, cd[compare_parameter])
+
+                    if label is None:
+                        print("[Error] compare_parameter cannot fit to any key of the config file!!!")
+                    else:
+                        labels.append(label)
+
+                        for r in self.config.rounds:
+                            path = "result/{}/{}/history/{}/{}".format(model_names[0], time, r, filename)
+                            d = json.load(open(path))
+                            d = data[filename[:-5]]
+                            data.append(d)
+
+                datas.append(data)
+                datas = np.asarray(datas)
+                self.generate_figure(   datas, labels, 
+                                        "{}_{}_with_{}".format(model_names[0], filename[:-5], compare_parameter), 
+                                        "result/{}/compare_results/{}_{}_with_{}.png".format(model_names[0], model_names[0], filename[:-5], compare_parameter))
+
+        elif len(model_names) > 1 and len(times) > 1:
             pass
 
     def generate_training_result_figure(self):
-        filenames = [f for f in os.listdir("result/{}/{}/history/1/".format(self.config.model_name, self.time, self.round)) if f.endswith(".json")]
+        filenames = [f for f in os.listdir("result/{}/{}/history/1/".format(self.config.model_name, self.time)) if f.endswith(".json")]
         print(filenames)
 
         for filename in filenames:
@@ -76,7 +109,7 @@ class ResultGenerator(object):
                 datas.append(data)
 
             datas = np.asarray(datas)
-            self.generate_figure(datas, [filename], filename, "result/{}/{}/figure/{}.png".format(self.config.model_name, self.time, filename))
+            self.generate_figure(datas, [filename[:-5]], filename[:-5], "result/{}/{}/figure/{}.png".format(self.config.model_name, self.time, filename))
 
     def generate_all_channels_eeg(self, data, epoch):
         channels = Brain.get_channel_names()
