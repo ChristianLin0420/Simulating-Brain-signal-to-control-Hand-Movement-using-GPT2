@@ -36,7 +36,7 @@ if __name__ == '__main__':
         elif len(args.model_name) > 1:
             print("[Error] Multiple model names input was given!!!")
         else:
-            config_path = "result/{}/{}/config/config.json".format(args.model_name, args.time)
+            config_path = "result/{}/{}/config/config.json".format(args.model_name[0], args.time[0])
             
             if not os.path.exists(config_path):
                 print("[Error] Given config path is not existed!!!")
