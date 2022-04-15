@@ -41,7 +41,7 @@ class ResultGenerator(object):
             mean = np.mean(data[i], axis = 0)
             standrad_ev = np.std(data[i], axis = 0)
 
-            plt.figure(figsize = (8,5))
+            plt.figure(figsize = (12, 6))
             plt.plot(lst_iter, mean, label = label[i], linewidth = 1)
             plt.fill_between(lst_iter, mean - standrad_ev, mean + standrad_ev, alpha = 0.2)
 
@@ -111,7 +111,7 @@ class ResultGenerator(object):
             datas = np.asarray(datas)
             self.generate_figure(datas, [filename[:-5]], filename[:-5], "result/{}/{}/figure/{}.png".format(self.config.model_name, self.time, filename))
 
-    def generate_all_channels_eeg(self, data, epoch):
+    def generate_all_channels_eeg(self, data, epoch, round):
         channels = Brain.get_channel_names()
         real_data = np.asarray(self.real_data)
         t_matrix = np.asarray(self.transformation_matrix)
@@ -127,7 +127,7 @@ class ResultGenerator(object):
             class_data = np.dot(t_matrix, class_data)
             real_converted_data = np.dot(t_matrix, real_data[i])
 
-            if not os.path.exists("result/{}/{}/eeg/{}/epoch_{:04d}".format(self.config.model_name, self.time, self.round, epoch)):
+            if not os.path.exists("result/{}/{}/eeg/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch)):
                 os.mkdir("result/{}/{}/eeg/{}/epoch_{:04d}")
 
             for c in range(data.shape[0]):
@@ -136,9 +136,9 @@ class ResultGenerator(object):
                 waves = np.concatenate([wave1, wave2])
                 labels = ["real_data_channel_{}".format(channels[c]), "generated_data_channel_{}".format(channels[c])]
 
-                self.generate_figure(waves, labels, "class_{}_channel_{}_epoch_{}".format(i, channels[c], epoch), "result/{}/{}/eeg/{}/epoch_{:04d}/class_{}_{}.png".format(self.config.model_name, self.time, self.round, epoch, i, channels[c]))
+                self.generate_figure(waves, labels, "class_{}_channel_{}_epoch_{}".format(i, channels[c], epoch), "result/{}/{}/eeg/{}/epoch_{:04d}/class_{}_{}.png".format(self.config.model_name, self.time, round, epoch, i, channels[c]))
 
-    def generate_topographs(self, data, epoch):
+    def generate_topographs(self, data, epoch, round):
         real_data = np.asarray(self.real_data)
         t_matrix = np.asarray(self.transformation_matrix)
 
@@ -153,21 +153,21 @@ class ResultGenerator(object):
             class_data = np.dot(t_matrix, class_data)
             real_converted_data = np.dot(t_matrix, real_data[i])
 
-            if not os.path.exists("result/{}/{}/mne/{}/epoch_{:04d}".format(self.config.model_name, self.time, self.round, epoch)):
+            if not os.path.exists("result/{}/{}/mne/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch)):
                 os.mkdir("result/{}/{}/mne/{}/epoch_{:04d}")
 
             self.brain_template.data = class_data
             ax = self.brain_template.plot_topomap(times = np.linspace(0.0, 0.2, 20), ch_type = 'eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Class_{} Brain Activation in iteration {}'.format(i, epoch), show = False)
-            ax.savefig("result/{}/{}/mne/{}/epoch_{:04d}/original_class_{}_topograph.png".format(self.config.model_name, self.time, self.round, epoch, i))
+            ax.savefig("result/{}/{}/mne/{}/epoch_{:04d}/original_class_{}_topograph.png".format(self.config.model_name, self.time, round, epoch, i))
             plt.close(ax)
 
             self.brain_template.data = real_converted_data
             ax = self.brain_template.plot_topomap(times = np.linspace(0.0, 0.2, 20), ch_type = 'eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Class_{} Brain Activation in iteration {}'.format(i, epoch), show = False)
-            ax.savefig("result/{}/{}/mne/{}/epoch_{:04d}/generated_class_{}_topograph.png".format(self.config.model_name, self.time, self.round, epoch, i))
+            ax.savefig("result/{}/{}/mne/{}/epoch_{:04d}/generated_class_{}_topograph.png".format(self.config.model_name, self.time, round, epoch, i))
             plt.close(ax)
 
 
-    def generate_stft(self, data, epoch):
+    def generate_stft(self, data, epoch, round):
         brain = None
         signals = None
 
@@ -216,8 +216,8 @@ class ResultGenerator(object):
 
         ## generate short-time fourier transform figures
         for sample in range(bz):
-            if not os.path.exists('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch)):
-                os.mkdir('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, self.round, epoch))
+            if not os.path.exists('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, round, epoch)):
+                os.mkdir('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, round, epoch))
 
             for idx in range(int(len(channels))):
                 log_spec = tf.math.log(tf.transpose(Zxx[sample][idx]))
@@ -229,5 +229,5 @@ class ResultGenerator(object):
                 plt.title('STFT Magnitude for channel {} of class {} in iteration {}'.format(channels[idx], sample + 1, epoch))
                 plt.ylabel('Frequency [Hz]')
                 plt.xlabel('Time [sec]')
-                plt.savefig('result/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, self.round, epoch, sample + 1, channels[idx]))
+                plt.savefig('result/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, round, epoch, sample + 1, channels[idx]))
                 plt.close()

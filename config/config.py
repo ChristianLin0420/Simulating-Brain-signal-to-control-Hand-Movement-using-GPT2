@@ -138,6 +138,9 @@ class TrainingConfig(PretrainedConfig):
 
             "Accuracy": self.Accuracy,
             "Loss": self.Loss,
+            "GANLoss": self.GANLoss,
+            "EEGgenerator": self.EEGgenerator,
+            "MNEgenerator": self.MNEgenerator,
             "STFTgenerator": self.STFTgenerator,
 
             "vocab_size": self.vocab_size,
@@ -207,6 +210,9 @@ class TrainingConfig(PretrainedConfig):
 
                 self.Accuracy = bool(d["Accuracy"])
                 self.Loss = bool(d["Loss"])
+                self.GANLoss = bool(d["GANLoss"])
+                self.EEGgenerator = bool(d["EEGgenerator"])
+                self.MNEgenerator = bool(d["MNEgenerator"])
                 self.STFTgenerator = bool(d["STFTgenerator"])
 
                 self.vocab_size = int(d["vocab_size"])

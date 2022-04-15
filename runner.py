@@ -24,11 +24,14 @@ from utils.callback import (
     Accuracy, 
     Loss, 
     GANLoss,
+    EEGgenerator,
+    MNEgenerator,
     STFTgenerator
 )
 
 from utils.datasetGenerator import (
     DatasetGenerator,
+    ResultGenerator,
     generate_random_vectors, 
     get_training_raw_signals, 
     get_training_reconstruct_signals
@@ -43,6 +46,9 @@ class Runner():
 
         ## pre-settings
         self.get_training_dataset()
+
+        ## callbacks setting
+        self.generator = ResultGenerator(config, time, self.real_average_data)
 
         ## pretrained classifier setting(for fine-tuning)
         if config.fine_tune:
@@ -140,8 +146,17 @@ class Runner():
         if self.config.Loss:
             callbacks.append(Loss(self.config, self.time, _round))
 
+        if self.config.GANLoss:
+            callbacks.append(GANLoss(self.config, self.time, _round))
+
+        if self.config.EEGgenerator:
+            callbacks.append(EEGgenerator(self.config, self.time, self.generator, _round))
+
+        if self.config.MNEgenerator:
+            callbacks.append(MNEgenerator(self.config, self.time, self.generator, _round))
+
         if self.config.STFTgenerator:
-            callbacks.append(STFTgenerator(self.config, self.time, _round))
+            callbacks.append(STFTgenerator(self.config, self.time, self.generator, _round))
 
         return callbacks
 

@@ -93,13 +93,6 @@ if __name__ == '__main__':
         print("Runner starts training!!!")
         runner.run()
         print("Runner finished training!!!")
-
-        print("Start generating results!!!")
-        generator = ResultGenerator(config, time, runner.real_average_data)
-        generator.generate_training_result_figure()
-        # generator.generate_all_channels_eeg()
-        # generator.generate_topographs()
-        print("Finish generating results!!!")
     else:
         error("[Main] given argument is invalid!!!")
 

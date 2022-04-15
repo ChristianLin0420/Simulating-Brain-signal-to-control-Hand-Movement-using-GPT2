@@ -23,6 +23,9 @@
 
     "Accuracy": true,
     "Loss": true,
+    "GANLoss": false,
+    "EEGgenerator": true,
+    "MNEgenerator": true,
     "STFTgenerator": true,
     
     "vocab_size": 50257,
