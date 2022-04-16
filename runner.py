@@ -72,9 +72,6 @@ class Runner():
         
         (self.train_x, self.train_y, self.real_average_data) = dataGenerator.get_reconstructed_items(filenames, labels)
 
-        print(self.train_x.shape)
-        print(self.train_y.shape)
-
         self.left_hand_data = np.expand_dims(self.real_average_data[0], axis = 0)
         self.right_hand_data = np.expand_dims(self.real_average_data[1], axis = 0)
 
