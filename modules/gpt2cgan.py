@@ -202,7 +202,7 @@ class gpt2cgan(tf.keras.Model):
         predictions_raw = None
 
         for i in range(self.generate_count):
-            raw = self.gptGenerator.generator(tf.expand_dims(self.seed[i], axis = 0), training = False)
+            raw = self.generator(tf.expand_dims(self.seed[i], axis = 0), training = False)
 
             if predictions_raw == None:
                 predictions_raw = raw
