@@ -115,7 +115,7 @@ class gpt2cgan(tf.keras.Model):
     def train_step(self, data):
 
         real, real_labels = data
-        real_labels = tf.argmax(real_labels, axis = 1)
+        _real_labels = tf.argmax(real_labels, axis = 1)
         
         num_classes = real_labels.shape[-1]
 
@@ -136,7 +136,7 @@ class gpt2cgan(tf.keras.Model):
         d_loss = 0
 
         for _ in range(self.d_extra_steps):
-            (random_latent_vectors, _, _) = generate_random_vectors_with_labels(real_labels, self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance)
+            (random_latent_vectors, _, _) = generate_random_vectors_with_labels(_real_labels, self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance)
             random_latent_vectors = tf.constant(random_latent_vectors.tolist(), dtype = tf.float32)
             
             # generate images from gpt2 
