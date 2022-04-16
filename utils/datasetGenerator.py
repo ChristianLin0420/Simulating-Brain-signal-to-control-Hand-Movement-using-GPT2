@@ -133,7 +133,8 @@ def generate_random_vectors_with_labels(labels, num: int = 128, length: int = 20
     tmp = labels
     tmp = tf.one_hot(tf.cast(tmp, tf.int32), class_count)
     tmp = tf.reshape(tmp, [-1])
-    tmp = tf.repeat(tmp, sub_vector_size)
+    if sub_vector_size > 1:
+        tmp = tf.repeat(tmp, sub_vector_size)
     tmp = tf.reshape(tmp, [one_hot_vector_size, num])
     one_hot = tf.expand_dims(one_hot, axis = 1)
     one_hot = tf.repeat(one_hot, repeats = length, axis = 1)
