@@ -126,7 +126,7 @@ class GANLoss(tf.keras.callbacks.Callback):
 @desciption:
     ...
 '''
-class EEGgenerator(tf.keras.Model):
+class EEGgenerator(tf.keras.callbacks.Callback):
 
     def __init__(self, config, time, generator, round):
         self.config = config

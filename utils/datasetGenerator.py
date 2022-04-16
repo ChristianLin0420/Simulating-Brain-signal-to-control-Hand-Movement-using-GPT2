@@ -68,7 +68,7 @@ def get_training_reconstruct_signals():
 
     _, dirs, files = os.walk('/home/jupyter-ivanljh123/rsc/Source_Reconstructed').__next__()
 
-    subject_folder_name = "A09"
+    subject_folder_name = "A05"
 
     train_data_filenames = ["/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_train_X.npz", "/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_test_X.npz"]
     train_data_label = ["/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_train_Y.npz", "/home/jupyter-ivanljh123/rsc/Source_Reconstructed/" + subject_folder_name + "/1_test_Y.npz"]
