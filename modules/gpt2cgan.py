@@ -7,7 +7,7 @@ from res.brain import Brain
 from .gpt2 import TFGPT2MainLayer
 from .discriminator import Discriminator
 from utils.brain_activation import boolean_brain, restore_brain_activation, transformation_matrix, restore_brain_activation_tf
-from utils.datasetGenerator import generate_random_vectors
+from utils.datasetGenerator import generate_random_vectors, generate_random_vectors_with_labels
 
 SUBGROUP_SIZE = 1
 CHANNEL_NAME  = [   "Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC5", "FC1", "FC2", "FC6", "C3", 
@@ -29,7 +29,7 @@ class gpt2cgan(tf.keras.Model):
         self.gp_weight = 10.0
         self.d_extra_steps = d_extra_steps
 
-        self.generate_count = config.example_to_generate
+        self.generate_count = config.batch_size
         assert self.generate_count % config.class_count == 0
 
         # add one hot vector for every seed
@@ -115,14 +115,27 @@ class gpt2cgan(tf.keras.Model):
     def train_step(self, data):
 
         real, real_labels = data
+        
+        num_classes = real_labels.shape[-1]
+
         real_images = self.generate_original_full_brain_activation(real)
+        image_size_h = real_images.shape[1]
+        image_size_w = real_images.shape[2]
+
+        # one hot information
+        # one_hot_labels = tf.expand_dims(real_labels, axis = 1)
+        # one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
+
+        image_one_hot_labels = real_labels[:, :, None, None]
+        image_one_hot_labels = tf.repeat(image_one_hot_labels, repeats = [image_size_h * image_size_w])
+        image_one_hot_labels = tf.reshape(image_one_hot_labels, (-1, image_size_h, image_size_w, num_classes))
         
         # Sample random points in the latent space
         batch_size = self.config.batch_size
         d_loss = 0
 
         for _ in range(self.d_extra_steps):
-            (random_latent_vectors, _, _) = generate_random_vectors(self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance, False)
+            (random_latent_vectors, _, _) = generate_random_vectors_with_labels(real_labels, self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance)
             random_latent_vectors = tf.constant(random_latent_vectors.tolist(), dtype = tf.float32)
             
             # generate images from gpt2 
@@ -132,9 +145,9 @@ class gpt2cgan(tf.keras.Model):
             del random_latent_vectors
 
             # Combine them with real images
-            fake_image_and_labels = generated_images# tf.concat([generated_images, image_one_hot_labels], -1)
-            real_image_and_labels = real_images #tf.concat([real_images, image_one_hot_labels], -1)
+            fake_image_and_labels = generated_images #tf.concat([generated_images, image_one_hot_labels], -1)
             fake_image_and_labels = tf.expand_dims(fake_image_and_labels, axis = 3)
+            real_image_and_labels = real_images #tf.concat([real_images, image_one_hot_labels], -1)
             
             # Assemble labels discriminating real from fake images
             labels = tf.concat([tf.ones((batch_size, 1)), tf.zeros((batch_size, 1))], axis = 0)
@@ -163,6 +176,7 @@ class gpt2cgan(tf.keras.Model):
         # Train the generator (note that we should *not* update the weights of the discriminator)!
         with tf.GradientTape() as tape:
             fake_images = self.generator(random_latent_vectors)
+            # fake_image_and_labels = tf.concat([fake_images, image_one_hot_labels], -1)
             fake_images = tf.expand_dims(fake_images, axis = 3)
             predictions = self.discriminator(fake_images)
             g_loss = -1.0 * tf.reduce_mean(predictions)
@@ -172,9 +186,11 @@ class gpt2cgan(tf.keras.Model):
         
         random_latent_vectors = None
         one_hot_labels = None
+        image_one_hot_labels = None
 
         del random_latent_vectors
         del one_hot_labels
+        del image_one_hot_labels
 
         # generate signals from given seed
         predictions = None
