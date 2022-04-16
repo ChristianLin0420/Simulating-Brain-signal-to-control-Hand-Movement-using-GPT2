@@ -127,28 +127,17 @@ def generate_random_vectors_with_labels(labels, num: int = 128, length: int = 20
         if num % class_count > 0:
             num += 1
 
-    random_vectors = np.random.normal(scale = variance, size = (num, length, (emb - one_hot_vector_size)))
+    random_vectors = tf.random.normal(shape = (num, length, (emb - one_hot_vector_size)), stddev = variance)
+    sub_vector_size = int(one_hot_vector_size / class_count)
 
-    tmp = tf.constant(labels)
-    one_hot = []
-
-    for val in tmp:
-        s = []
-        sub_vector_size = int(one_hot_vector_size / class_count)
-
-        for i in range(one_hot_vector_size):
-            check = tf.constant(int(i / sub_vector_size)) == val
-            if check:
-                s.append(1)
-            else:
-                s.append(0)
-
-        one_hot.append(s)
-
-    one_hot = np.asarray(one_hot)
-    one_hot = np.expand_dims(one_hot, axis = 1)
-    one_hot = np.repeat(one_hot, repeats = length, axis = 1)
-    random_vectors = np.concatenate([random_vectors, one_hot], axis = 2)
+    tmp = labels
+    tmp = tf.one_hot(tmp, class_count)
+    tmp = tf.reshape(tmp, [-1])
+    tmp = tf.repeat(tmp, sub_vector_size)
+    tmp = tf.reshape(tmp, [one_hot_vector_size, num])
+    one_hot = tf.expand_dims(one_hot, axis = 1)
+    one_hot = tf.repeat(one_hot, repeats = length, axis = 1)
+    random_vectors = tf.concat([random_vectors, one_hot], axis = 2)
 
     return random_vectors
 
