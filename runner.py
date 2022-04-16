@@ -31,11 +31,12 @@ from utils.callback import (
 
 from utils.datasetGenerator import (
     DatasetGenerator,
-    ResultGenerator,
     generate_random_vectors, 
     get_training_raw_signals, 
     get_training_reconstruct_signals
 )
+
+from utils.resultGenerator import ResultGenerator
 
 
 class Runner():
