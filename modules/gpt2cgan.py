@@ -123,12 +123,12 @@ class gpt2cgan(tf.keras.Model):
         image_size_w = real_images.shape[2]
 
         # one hot information
-        one_hot_labels = tf.expand_dims(real_labels, axis = 1)
-        one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
+        # one_hot_labels = tf.expand_dims(real_labels, axis = 1)
+        # one_hot_labels = tf.repeat(one_hot_labels, repeats = self.noise_len, axis = 1)
 
-        image_one_hot_labels = real_labels[:, :, None, None]
-        image_one_hot_labels = tf.repeat(image_one_hot_labels, repeats = [image_size_h * image_size_w])
-        image_one_hot_labels = tf.reshape(image_one_hot_labels, (-1, image_size_h, image_size_w, num_classes))
+        # image_one_hot_labels = real_labels[:, :, None, None]
+        # image_one_hot_labels = tf.repeat(image_one_hot_labels, repeats = [image_size_h * image_size_w])
+        # image_one_hot_labels = tf.reshape(image_one_hot_labels, (-1, image_size_h, image_size_w, num_classes))
         
         # Sample random points in the latent space
         batch_size = self.config.batch_size
@@ -148,9 +148,8 @@ class gpt2cgan(tf.keras.Model):
             del random_latent_vectors
 
             # Combine them with real images
-            fake_image_and_labels = tf.concat([generated_images, image_one_hot_labels], -1)
-            real_image_and_labels = tf.concat([real_images, image_one_hot_labels], -1)
-            combined_images = tf.concat([fake_image_and_labels, real_image_and_labels], axis = 0)
+            fake_image_and_labels = generated_images# tf.concat([generated_images, image_one_hot_labels], -1)
+            real_image_and_labels = real_images #tf.concat([real_images, image_one_hot_labels], -1)
             
             # Assemble labels discriminating real from fake images
             labels = tf.concat([tf.ones((batch_size, 1)), tf.zeros((batch_size, 1))], axis = 0)
@@ -173,14 +172,16 @@ class gpt2cgan(tf.keras.Model):
             self.d_optimizer.apply_gradients(zip(grads, self.discriminator.trainable_weights))
 
         # Sample random points in the latent space
-        random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
-        random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
+        # random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
+        # random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
+        (random_latent_vectors, _, _) = generate_random_vectors(self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance, False)
+        random_latent_vectors = tf.constant(random_latent_vectors.tolist(), dtype = tf.float32)
 
         # Train the generator (note that we should *not* update the weights of the discriminator)!
         with tf.GradientTape() as tape:
             fake_images = self.generator(random_latent_vectors)
-            fake_image_and_labels = tf.concat([fake_images, image_one_hot_labels], -1)
-            predictions = self.discriminator(fake_image_and_labels)
+            # fake_image_and_labels = tf.concat([fake_images, image_one_hot_labels], -1)
+            predictions = self.discriminator(fake_images)
             g_loss = -1.0 * tf.reduce_mean(predictions)
 
         grads = tape.gradient(g_loss, self.generator.trainable_weights)
@@ -188,11 +189,11 @@ class gpt2cgan(tf.keras.Model):
         
         random_latent_vectors = None
         one_hot_labels = None
-        image_one_hot_labels = None
+        # image_one_hot_labels = None
 
         del random_latent_vectors
         del one_hot_labels
-        del image_one_hot_labels
+        # del image_one_hot_labels
 
         # generate signals from given seed
         predictions = None
