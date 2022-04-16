@@ -1,4 +1,5 @@
 
+import random
 import numpy as np
 import tensorflow as tf
 
@@ -33,7 +34,6 @@ class gpt2cgan(tf.keras.Model):
 
         # add one hot vector for every seed
         self.seed, _, self.sub_vector_size = generate_random_vectors(self.generate_count, config.n_positions, config.n_embd, config.class_rate_random_vector, config.class_count, config.noise_variance, False)
-        print("self.seed: {}".format(self.seed.shape))
         self.last_dim = last_dim
 
         self.config = config
@@ -136,9 +136,11 @@ class gpt2cgan(tf.keras.Model):
 
         for _ in range(self.d_extra_steps):
 
-            random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
-            random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
-
+            # random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
+            # random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
+            random_latent_vectors = generate_random_vectors(self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance, False).tolis()
+            random = tf.constant(random_latent_vectors, dtype = tf.float32)
+            
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
 
