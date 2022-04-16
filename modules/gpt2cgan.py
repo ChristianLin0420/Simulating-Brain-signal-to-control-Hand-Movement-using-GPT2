@@ -117,6 +117,7 @@ class gpt2cgan(tf.keras.Model):
         real, real_labels = data
         
         num_classes = real_labels.shape[-1]
+        print(real_labels.shape)
 
         real_images = self.generate_original_full_brain_activation(real)
         image_size_h = real_images.shape[1]
