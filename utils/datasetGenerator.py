@@ -131,7 +131,7 @@ def generate_random_vectors_with_labels(labels, num: int = 128, length: int = 20
     sub_vector_size = int(one_hot_vector_size / class_count)
 
     tmp = labels
-    tmp = tf.one_hot(tmp, class_count)
+    tmp = tf.one_hot(tf.cast(tmp, tf.int32), class_count)
     tmp = tf.reshape(tmp, [-1])
     tmp = tf.repeat(tmp, sub_vector_size)
     tmp = tf.reshape(tmp, [one_hot_vector_size, num])
