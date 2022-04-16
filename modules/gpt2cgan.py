@@ -138,8 +138,8 @@ class gpt2cgan(tf.keras.Model):
 
             # random_latent_vectors = tf.random.normal(shape = (batch_size, self.noise_len, self.noise_dim))
             # random_latent_vectors = tf.concat([random_latent_vectors, one_hot_labels], axis = 2)
-            random_latent_vectors = generate_random_vectors(self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance, False).tolist()
-            random_latent_vectors = tf.constant(random_latent_vectors, dtype = tf.float32)
+            (random_latent_vectors, _, _) = generate_random_vectors(self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance, False)
+            random_latent_vectors = tf.constant(random_latent_vectors.tolist(), dtype = tf.float32)
             
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
