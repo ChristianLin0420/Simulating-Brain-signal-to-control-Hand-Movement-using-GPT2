@@ -129,10 +129,7 @@ def generate_random_vectors_with_labels(labels, num: int = 128, length: int = 20
 
     random_vectors = np.random.normal(scale = variance, size = (num, length, (emb - one_hot_vector_size)))
 
-    with tf.Session() as sess: 
-        data_numpy = labels.eval() 
-
-    tmp = data_numpy.tolist()
+    tmp = tf.constant(labels)
     one_hot = []
 
     for val in tmp:
@@ -140,7 +137,7 @@ def generate_random_vectors_with_labels(labels, num: int = 128, length: int = 20
         sub_vector_size = int(one_hot_vector_size / class_count)
 
         for i in range(one_hot_vector_size):
-            check = int(i / sub_vector_size) == val
+            check = tf.constant(int(i / sub_vector_size)) == val
             if check:
                 s.append(1)
             else:
