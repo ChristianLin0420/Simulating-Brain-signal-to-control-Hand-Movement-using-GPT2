@@ -135,7 +135,7 @@ def generate_random_vectors_with_labels(labels, num: int = 128, length: int = 20
     tmp = tf.reshape(tmp, [-1])
     if sub_vector_size > 1:
         tmp = tf.repeat(tmp, sub_vector_size)
-    tmp = tf.reshape(tmp, [one_hot_vector_size, num])
+    tmp = tf.reshape(tmp, [num, one_hot_vector_size])
     one_hot = tf.expand_dims(tmp, axis = 1)
     one_hot = tf.repeat(one_hot, repeats = length, axis = 1)
     random_vectors = tf.concat([random_vectors, one_hot], axis = 2)
