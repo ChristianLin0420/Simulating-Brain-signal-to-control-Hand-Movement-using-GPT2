@@ -115,9 +115,9 @@ class gpt2cgan(tf.keras.Model):
     def train_step(self, data):
 
         real, real_labels = data
+        real_labels = tf.argmax(real_labels, axis = 1)
         
         num_classes = real_labels.shape[-1]
-        print(real_labels.shape)
 
         real_images = self.generate_original_full_brain_activation(real)
         image_size_h = real_images.shape[1]
