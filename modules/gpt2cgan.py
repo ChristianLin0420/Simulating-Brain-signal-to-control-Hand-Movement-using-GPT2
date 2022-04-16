@@ -150,6 +150,8 @@ class gpt2cgan(tf.keras.Model):
             # Combine them with real images
             fake_image_and_labels = generated_images# tf.concat([generated_images, image_one_hot_labels], -1)
             real_image_and_labels = real_images #tf.concat([real_images, image_one_hot_labels], -1)
+            fake_image_and_labels = tf.expand_dims(fake_image_and_labels, axis = 3)
+            real_image_and_labels = tf.expand_dims(real_image_and_labels, axis = 3)
             
             # Assemble labels discriminating real from fake images
             labels = tf.concat([tf.ones((batch_size, 1)), tf.zeros((batch_size, 1))], axis = 0)
@@ -181,6 +183,7 @@ class gpt2cgan(tf.keras.Model):
         with tf.GradientTape() as tape:
             fake_images = self.generator(random_latent_vectors)
             # fake_image_and_labels = tf.concat([fake_images, image_one_hot_labels], -1)
+            fake_images = tf.expand_dims(fake_images, axis = 3)
             predictions = self.discriminator(fake_images)
             g_loss = -1.0 * tf.reduce_mean(predictions)
 
