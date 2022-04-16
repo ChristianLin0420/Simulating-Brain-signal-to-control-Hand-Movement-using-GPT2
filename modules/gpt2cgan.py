@@ -137,7 +137,6 @@ class gpt2cgan(tf.keras.Model):
 
         for _ in range(self.d_extra_steps):
             (random_latent_vectors, _, _) = generate_random_vectors_with_labels(_real_labels, self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance)
-            random_latent_vectors = tf.constant(random_latent_vectors.tolist(), dtype = tf.float32)
             
             # generate images from gpt2 
             generated_images = self.generator(random_latent_vectors)
