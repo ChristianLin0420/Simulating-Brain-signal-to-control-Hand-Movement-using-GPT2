@@ -118,7 +118,7 @@ def generate_random_vectors(num: int = 128, length: int = 2089, emb: int = 500, 
 
     return (random_vectors, tmp, sub_vector_size)
 
-def generate_random_vectors_with_labels(lables, num: int = 128, length: int = 2089, emb: int = 500, class_rate_random_vector: float = 0.004, class_count: int = 2, variance: float = 1.0):
+def generate_random_vectors_with_labels(labels, num: int = 128, length: int = 2089, emb: int = 500, class_rate_random_vector: float = 0.004, class_count: int = 2, variance: float = 1.0):
     one_hot_vector_size = int(emb * class_rate_random_vector)
 
     while(one_hot_vector_size % class_count and num % class_count):
@@ -129,12 +129,8 @@ def generate_random_vectors_with_labels(lables, num: int = 128, length: int = 20
 
     random_vectors = np.random.normal(scale = variance, size = (num, length, (emb - one_hot_vector_size)))
 
-    tmp = lables
+    tmp = labels
     one_hot = []
-
-    for i in range(class_count):
-        t = [i for _ in range(int(num / class_count))]
-        tmp += t
 
     for val in tmp:
         s = []
