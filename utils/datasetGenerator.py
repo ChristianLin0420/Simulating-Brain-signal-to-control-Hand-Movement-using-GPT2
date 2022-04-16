@@ -243,7 +243,7 @@ class DatasetGenerator():
 
         ## get average 
         for data, label in zip(train_data, train_label):
-            expand_data = np.expand_dims(data, axis = 0)
+            expand_data = np.asarrar([label])
 
             if label == 0:
                 if feet_data is None:
