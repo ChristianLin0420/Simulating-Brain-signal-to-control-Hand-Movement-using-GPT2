@@ -41,9 +41,13 @@ from utils.resultGenerator import ResultGenerator
 
 class Runner():
 
-    def __init__(self, config, time):
+    def __init__(self, config, time = None):
         self.config = config
-        self.time = time
+
+        if time is None:
+            error("[Error] parameter 'time' must be given!!!")
+        else:
+            self.time = time
 
         ## pre-settings
         self.get_training_dataset()
@@ -136,6 +140,36 @@ class Runner():
         else:
             error("[Runner] invalid model name was given!!!")
             return None
+
+    def generate_dataset_from_pretrained_model(self, model_path, generate_dataset_size):
+
+        # initialize model
+        model = self.get_model()
+        
+        if model != None:
+            model.load_weights(model_path)
+            model.trainable = False
+
+            # generate random seeds
+            random_vectors, _, _ = generate_random_vectors( num = generate_dataset_size,
+                                                            length = self.config.n_positions, 
+                                                            emb = self.config.n_embd, 
+                                                            class_rate_random_vector = self.config.class_rate_random_vector, 
+                                                            class_count = self.config.class_count,
+                                                            variance = self.config.noise_variance,   
+                                                            shuffle = False )
+            
+            dataset = model(random_vectors)
+            numpy_signals = np.asarray(dataset).tolist()
+            data = {}
+
+            for i in range(generate_dataset_size):
+                data[str(i)] = numpy_signals[i]
+
+            with io.open("result/{}/{}/dataset.json".format(self.config.model_name, self.time), 'w', encoding='utf8') as outfile:
+                str_ = json.dumps(data, indent=4, sort_keys=True, ensure_ascii=False)
+                outfile.write(str_)
+
 
     def set_callbacks(self, _round):
         

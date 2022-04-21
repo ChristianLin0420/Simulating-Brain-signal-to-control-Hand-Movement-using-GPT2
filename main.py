@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser.add_argument("--figure", default = 'accuracy')
     args = parser.parse_args()
 
-    if args.mode == "generate_result":
+    if args.mode == "generate_result" or args.mode == "generate_dataset":
         if args.time is None:
             print("[Error] No specific time input was given!!!")
         elif len(args.time) > 1:
@@ -49,9 +49,15 @@ if __name__ == '__main__':
                 _, _, avg_real_data = d_generator.get_reconstructed_items(filenames, labels)
 
                 generator = ResultGenerator(config, args.time[0], avg_real_data)
-                generator.generate_training_result_figure()
-                # generator.generate_all_channels_eeg()
-                # generator.generate_topographs()
+
+                if args.mode == "generate_result":
+                    generator.generate_training_result_figure()
+                else:
+                    ## initialize the training runner and start training    
+                    runner = Runner(config, args.time[0])
+                    model_path = "result/{}/{}/models/0".format(args.model_name[0], args.time[0])
+                    generate_dataset_size = 250
+                    runner.generate_dataset_from_pretrained_model(model_path, generate_dataset_size)
     elif args.mode == "compare_result":
         if args.time is None:
             print("[Error] No specific time input was given!!!")
