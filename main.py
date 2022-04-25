@@ -43,6 +43,9 @@ if __name__ == '__main__':
             else:
                 config = TrainingConfig()
                 config.load_config("result/{}/{}/config/config.json".format(args.model_name[0], args.time[0]))
+                ## environment settings
+                os.environ["CUDA_VISIBLE_DEVICES"] = str(config.gpu_id)
+                
                 filenames, labels = get_training_reconstruct_signals()
                 raw_filenames, raw_labels = get_training_raw_signals(subject_count = config.subject_count)
                 d_generator = DatasetGenerator(filenames = filenames, raw_filenames = raw_filenames, labels = labels, raw_labels = raw_labels, config = config)
