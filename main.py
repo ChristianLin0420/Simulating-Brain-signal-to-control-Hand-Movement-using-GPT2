@@ -58,7 +58,7 @@ if __name__ == '__main__':
                 else:
                     ## initialize the training runner and start training    
                     runner = Runner(config, args.time[0])
-                    model_path = "result/{}/{}/models/0".format(args.model_name[0], args.time[0])
+                    model_path = "./result/{}/{}/models/0".format(args.model_name[0], args.time[0])
                     generate_dataset_size = 250
                     runner.generate_dataset_from_pretrained_model(model_path, generate_dataset_size)
     elif args.mode == "compare_result":
