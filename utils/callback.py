@@ -148,7 +148,7 @@ class EEGgenerator(tf.keras.callbacks.Callback):
 @desciption:
     ...
 '''
-class MNEgenerator(tf.keras.Model):
+class MNEgenerator(tf.keras.callbacks.Callback):
 
     def __init__(self, config, time, generator, round):
         self.config = config
