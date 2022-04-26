@@ -119,7 +119,8 @@ class ResultGenerator(object):
         generated_num_per_class = int(self.config.example_to_generate / self.config.class_count)
 
         for i in range(self.config.class_count):
-            class_data = np.mean(data[i * generated_num_per_class : (i + 1) * generated_num_per_class], axis = 0).tolist()
+            class_data = np.mean(data[i * generated_num_per_class : (i + 1) * generated_num_per_class], axis = 0)
+            class_data = np.reshape(class_data, class_data.shape[:2]).tolist()
             left, right = restore_brain_activation(class_data, self.boolean_l, self.boolean_r)
             left = np.asarray(left)
             right = np.asarray(right)
@@ -148,7 +149,8 @@ class ResultGenerator(object):
         generated_num_per_class = int(self.config.example_to_generate / self.config.class_count)
 
         for i in range(self.config.class_count):
-            class_data = np.mean(data[i * generated_num_per_class : (i + 1) * generated_num_per_class], axis = 0).tolist()
+            class_data = np.mean(data[i * generated_num_per_class : (i + 1) * generated_num_per_class], axis = 0)
+            class_data = np.reshape(class_data, class_data.shape[:2]).tolist()
             left, right = restore_brain_activation(class_data, self.boolean_l, self.boolean_r)
             left = np.asarray(left)
             right = np.asarray(right)
