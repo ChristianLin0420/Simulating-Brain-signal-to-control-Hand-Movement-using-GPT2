@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from .model_monitor import record_model_weight
 from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, fetch_brain_template, restore_brain_activation_tf
 
+GENERATE_PERIOD = 100
+
 '''
 ----- Accuracy -----
 @desciption:
@@ -137,11 +139,11 @@ class EEGgenerator(tf.keras.callbacks.Callback):
         self.strawft = None
     
     def on_train_batch_end(self, epoch, logs = None):
-        if epoch % 10 == 0:
+        if epoch % GENERATE_PERIOD == 0:
             self.raw = logs.get('generated')
 
     def on_epoch_end(self, epoch, logs = None):
-        if epoch % 10 == 0:
+        if epoch % GENERATE_PERIOD == 0:
             self.generator.generate_all_channels_eeg(self.raw, epoch, self.round)
             self.raw = None
 
@@ -160,11 +162,11 @@ class MNEgenerator(tf.keras.callbacks.Callback):
         self.raw = None
     
     def on_train_batch_end(self, epoch, logs = None):
-        if epoch % 10 == 0:
+        if epoch % GENERATE_PERIOD == 0:
             self.raw = logs.get('generated')
 
     def on_epoch_end(self, epoch, logs = None):
-        if epoch % 10 == 0:
+        if epoch % GENERATE_PERIOD == 0:
             self.generator.generate_topographs(self.raw, epoch, self.round)
             self.raw = None
 
@@ -184,11 +186,11 @@ class STFTgenerator(tf.keras.callbacks.Callback):
         self.raw = None
 
     def on_train_batch_end(self, epoch, logs = None):
-        if epoch % 10 == 0:
+        if epoch % GENERATE_PERIOD == 0:
             self.raw = tf.constant(logs.get('generated'))
 
     def on_epoch_end(self, epoch, logs = None):
-        if epoch % 10 == 0:
+        if epoch % GENERATE_PERIOD == 0:
             self.generator.generate_stft(self.raw, epoch, self.round)
             self.raw = None
             # self.stft = self.stft / self.stft.shape[0]
