@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from .model_monitor import record_model_weight
 from .brain_activation import boolean_brain, transformation_matrix, restore_brain_activation, fetch_brain_template, restore_brain_activation_tf
 
-GENERATE_PERIOD = 100
+GENERATE_PERIOD = 10
 
 '''
 ----- Accuracy -----
