@@ -135,7 +135,7 @@ class ResultGenerator(object):
             if not os.path.exists("result/{}/{}/eeg/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch)):
                 os.mkdir("result/{}/{}/eeg/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch))
 
-            for c in range(data.shape[0]):
+            for c in range(real_converted_data.shape[0]):
                 wave1 = np.expand_dims(real_converted_data[c], axis = 0)
                 wave2 = np.expand_dims(class_data[c], axis = 0)
                 waves = np.concatenate([wave1, wave2], axis = 0)
