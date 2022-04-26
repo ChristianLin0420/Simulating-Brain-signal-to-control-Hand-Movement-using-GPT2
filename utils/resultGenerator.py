@@ -138,6 +138,9 @@ class ResultGenerator(object):
 
                 self.generate_figure(waves, labels, "class_{}_channel_{}_epoch_{}".format(i, channels[c], epoch), "result/{}/{}/eeg/{}/epoch_{:04d}/class_{}_{}.png".format(self.config.model_name, self.time, round, epoch, i, channels[c]))
 
+        data = None
+        del data
+
     def generate_topographs(self, data, epoch, round):
         real_data = np.asarray(self.real_data)
         t_matrix = np.asarray(self.transformation_matrix)
@@ -165,6 +168,9 @@ class ResultGenerator(object):
             ax = self.brain_template.plot_topomap(times = np.linspace(0.0, 0.2, 20), ch_type = 'eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Class_{} Brain Activation in iteration {}'.format(i, epoch), show = False)
             ax.savefig("result/{}/{}/mne/{}/epoch_{:04d}/generated_class_{}_topograph.png".format(self.config.model_name, self.time, round, epoch, i))
             plt.close(ax)
+
+        data = None
+        del data
 
 
     def generate_stft(self, data, epoch, round):
@@ -231,3 +237,6 @@ class ResultGenerator(object):
                 plt.xlabel('Time [sec]')
                 plt.savefig('result/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, round, epoch, sample + 1, channels[idx]))
                 plt.close()
+
+        data = None
+        del data
