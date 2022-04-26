@@ -141,7 +141,10 @@ class ResultGenerator(object):
                 waves = np.concatenate([wave1, wave2], axis = 0)
                 labels = ["real_data_channel_{}".format(channels[c]), "generated_data_channel_{}".format(channels[c])]
 
-                self.generate_figure(waves, labels, "class_{}_channel_{}_epoch_{}".format(i, channels[c], epoch), "result/{}/{}/eeg/{}/epoch_{:04d}/class_{}_{}.png".format(self.config.model_name, self.time, round, epoch, i, channels[c]), true)
+                self.generate_figure(   waves, 
+                                        labels, 
+                                        "class_{}_channel_{}_epoch_{}".format(i, channels[c], epoch), "result/{}/{}/eeg/{}/epoch_{:04d}/class_{}_{}.png".format(self.config.model_name, self.time, round, epoch, i, channels[c]), 
+                                        True)
 
         data = None
         del data
