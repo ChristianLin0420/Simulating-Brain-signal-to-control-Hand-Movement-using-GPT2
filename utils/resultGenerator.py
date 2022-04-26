@@ -182,7 +182,7 @@ class ResultGenerator(object):
         del data
 
 
-    def generate_stft(self, data, epoch, round):
+    def generate_stft(self, data, epoch, _round):
         brain = None
         signals = None
 
@@ -231,8 +231,8 @@ class ResultGenerator(object):
 
         ## generate short-time fourier transform figures
         for sample in range(bz):
-            if not os.path.exists('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, round, epoch)):
-                os.mkdir('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, round, epoch))
+            if not os.path.exists('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, _round, epoch)):
+                os.mkdir('result/{}/{}/stft/{}/epoch_{:04d}'.format(self.config.model_name, self.time, _round, epoch))
 
             for idx in range(int(len(channels))):
                 log_spec = tf.math.log(tf.transpose(Zxx[sample][idx]))
@@ -244,7 +244,7 @@ class ResultGenerator(object):
                 plt.title('STFT Magnitude for channel {} of class {} in iteration {}'.format(channels[idx], sample + 1, epoch))
                 plt.ylabel('Frequency [Hz]')
                 plt.xlabel('Time [sec]')
-                plt.savefig('result/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, round, epoch, sample + 1, channels[idx]))
+                plt.savefig('result/{}/{}/stft/{}/epoch_{:04d}/class_{}_{}.png'.format(self.config.model_name, self.time, _round, epoch, sample + 1, channels[idx]))
                 plt.close()
 
         data = None
