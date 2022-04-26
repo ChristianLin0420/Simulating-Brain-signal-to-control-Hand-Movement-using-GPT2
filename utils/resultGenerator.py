@@ -26,8 +26,12 @@ class ResultGenerator(object):
         self.transformation_matrix = transformation_matrix()
         self.brain_template = fetch_brain_template()
 
-    def generate_figure(self, data, label, title, path):
-        lst_iter = np.arange(self.config.epochs)
+    def generate_figure(self, data, label, title, path, flag = False):
+
+        if flag is False:
+            lst_iter = np.arange(self.config.epochs)
+        else:
+            lst_iter = np.arange(data.shape[1])
 
         if data.ndim == 3:
             data_count = data.shape[0]
@@ -134,10 +138,10 @@ class ResultGenerator(object):
             for c in range(data.shape[0]):
                 wave1 = np.expand_dims(real_converted_data[c], axis = 0)
                 wave2 = np.expand_dims(class_data[c], axis = 0)
-                waves = np.concatenate([wave1, wave2])
+                waves = np.concatenate([wave1, wave2], axis = 0)
                 labels = ["real_data_channel_{}".format(channels[c]), "generated_data_channel_{}".format(channels[c])]
 
-                self.generate_figure(waves, labels, "class_{}_channel_{}_epoch_{}".format(i, channels[c], epoch), "result/{}/{}/eeg/{}/epoch_{:04d}/class_{}_{}.png".format(self.config.model_name, self.time, round, epoch, i, channels[c]))
+                self.generate_figure(waves, labels, "class_{}_channel_{}_epoch_{}".format(i, channels[c], epoch), "result/{}/{}/eeg/{}/epoch_{:04d}/class_{}_{}.png".format(self.config.model_name, self.time, round, epoch, i, channels[c]), true)
 
         data = None
         del data
