@@ -165,17 +165,17 @@ class ResultGenerator(object):
             class_data = np.dot(t_matrix, class_data)
             real_converted_data = np.dot(t_matrix, real_data[i])
 
-            if not os.path.exists("result/{}/{}/mne/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch)):
-                os.mkdir("result/{}/{}/mne/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch))
+            if not os.path.exists("result/{}/{}/topography/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch)):
+                os.mkdir("result/{}/{}/topography/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch))
 
             self.brain_template.data = class_data
             ax = self.brain_template.plot_topomap(times = np.linspace(0.0, 0.2, 20), ch_type = 'eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Class_{} Brain Activation in iteration {}'.format(i, epoch), show = False)
-            ax.savefig("result/{}/{}/mne/{}/epoch_{:04d}/original_class_{}_topograph.png".format(self.config.model_name, self.time, round, epoch, i))
+            ax.savefig("result/{}/{}/topography/{}/epoch_{:04d}/original_class_{}_topograph.png".format(self.config.model_name, self.time, round, epoch, i))
             plt.close(ax)
 
             self.brain_template.data = real_converted_data
             ax = self.brain_template.plot_topomap(times = np.linspace(0.0, 0.2, 20), ch_type = 'eeg', time_unit='s', ncols=5, nrows='auto', title = 'Generated Class_{} Brain Activation in iteration {}'.format(i, epoch), show = False)
-            ax.savefig("result/{}/{}/mne/{}/epoch_{:04d}/generated_class_{}_topograph.png".format(self.config.model_name, self.time, round, epoch, i))
+            ax.savefig("result/{}/{}/topography/{}/epoch_{:04d}/generated_class_{}_topograph.png".format(self.config.model_name, self.time, round, epoch, i))
             plt.close(ax)
 
         data = None
