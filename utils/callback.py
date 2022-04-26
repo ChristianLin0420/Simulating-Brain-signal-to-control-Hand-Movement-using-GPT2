@@ -143,6 +143,7 @@ class EEGgenerator(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
             self.generator.generate_all_channels_eeg(self.raw, epoch, self.round)
+            self.raw = None
 
 ''' ----- MNEgenerator -----
 @desciption:
@@ -165,6 +166,7 @@ class MNEgenerator(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
             self.generator.generate_topographs(self.raw, epoch, self.round)
+            self.raw = None
 
 '''
 ----- STFTgenerator -----
@@ -188,6 +190,7 @@ class STFTgenerator(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs = None):
         if epoch % 10 == 0:
             self.generator.generate_stft(self.raw, epoch, self.round)
+            self.raw = None
             # self.stft = self.stft / self.stft.shape[0]
             # brain = None
             # signals = None
