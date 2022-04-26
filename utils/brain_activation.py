@@ -96,12 +96,12 @@ def restore_brain_activation_tf(activation, boolean_l, boolean_r):
 
 def restore_brain_activation(activation, boolean_l, boolean_r):
 
-    l = activation[:255].tolist()
-    r = activation[255:].tolist()
+    l = activation[:255]
+    r = activation[255:]
 
     if len(activation) > 1000:
-        l = activation[:1022].tolist()
-        r = activation[1022:].tolist()
+        l = activation[:1022]
+        r = activation[1022:]
 
     left_brain_activation = []
     right_brain_activation = []
@@ -111,17 +111,10 @@ def restore_brain_activation(activation, boolean_l, boolean_r):
     count = 0
     factor = SUBGROUP_SIZE if len(activation) < 1000 else 1
 
-    # print("factor: {}".format(factor))
-
     for idx in range(len(boolean_l)):
         if boolean_l[idx]:
             if count % factor == 0 and count < 1022:
                 left_brain_activation.append(l[int(count / factor)])
-            # else:
-            #     left_brain_activation.append(zero)
-            # count += 1
-        # else:
-        #     left_brain_activation.append(zero)
 
             count += 1
 
@@ -131,22 +124,17 @@ def restore_brain_activation(activation, boolean_l, boolean_r):
         if boolean_l[idx]:
             if count % factor == 0 and count < 1067:
                 right_brain_activation.append(r[int(count / factor)])
-        #     else:
-        #         right_brain_activation.append(zero)
-        #     count += 1
-        # else:
-        #     right_brain_activation.append(zero)
 
             count += 1
 
     left_brain_activation = np.asarray(left_brain_activation)
     right_brain_activation = np.asarray(right_brain_activation)
 
-    print("l shape: {}".format(np.asarray(l).shape))
-    print("r shape: {}".format(np.asarray(r).shape))
+    # print("l shape: {}".format(np.asarray(l).shape))
+    # print("r shape: {}".format(np.asarray(r).shape))
 
-    print("left_brain_activation shape is {}".format(left_brain_activation.shape))
-    print("right_brain_activation shape is {}".format(right_brain_activation.shape))
+    # print("left_brain_activation shape is {}".format(left_brain_activation.shape))
+    # print("right_brain_activation shape is {}".format(right_brain_activation.shape))
 
     return (l, r)
 
