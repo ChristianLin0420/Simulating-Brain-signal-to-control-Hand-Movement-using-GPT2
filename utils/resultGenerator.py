@@ -129,7 +129,7 @@ class ResultGenerator(object):
             real_converted_data = np.dot(t_matrix, real_data[i])
 
             if not os.path.exists("result/{}/{}/eeg/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch)):
-                os.mkdir("result/{}/{}/eeg/{}/epoch_{:04d}")
+                os.mkdir("result/{}/{}/eeg/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch))
 
             for c in range(data.shape[0]):
                 wave1 = np.expand_dims(real_converted_data[c], axis = 0)
@@ -159,7 +159,7 @@ class ResultGenerator(object):
             real_converted_data = np.dot(t_matrix, real_data[i])
 
             if not os.path.exists("result/{}/{}/mne/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch)):
-                os.mkdir("result/{}/{}/mne/{}/epoch_{:04d}")
+                os.mkdir("result/{}/{}/mne/{}/epoch_{:04d}".format(self.config.model_name, self.time, round, epoch))
 
             self.brain_template.data = class_data
             ax = self.brain_template.plot_topomap(times = np.linspace(0.0, 0.2, 20), ch_type = 'eeg', time_unit='s', ncols=5, nrows='auto', title = 'Original Class_{} Brain Activation in iteration {}'.format(i, epoch), show = False)
