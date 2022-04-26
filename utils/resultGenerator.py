@@ -112,7 +112,7 @@ class ResultGenerator(object):
             self.generate_figure(datas, [filename[:-5]], filename[:-5], "result/{}/{}/figure/{}.png".format(self.config.model_name, self.time, filename))
 
     def generate_all_channels_eeg(self, data, epoch, round):
-        channels = Brain.get_channel_names()
+        channels = Brain().get_channel_names()
         real_data = np.asarray(self.real_data)
         t_matrix = np.asarray(self.transformation_matrix)
 
