@@ -226,7 +226,7 @@ class ResultGenerator(object):
         Zxx = tf.signal.stft(signals, frame_length = 256, frame_step = 16)
         Zxx = tf.abs(Zxx)
         
-        bz = int(self.stft.shape[0])
+        bz = int(data.shape[0])
         channels = ["C3", "C4", "Cz"]
 
         ## generate short-time fourier transform figures
