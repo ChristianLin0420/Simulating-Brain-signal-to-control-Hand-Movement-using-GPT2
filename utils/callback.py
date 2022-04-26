@@ -177,7 +177,7 @@ class MNEgenerator(tf.keras.callbacks.Callback):
 '''
 class STFTgenerator(tf.keras.callbacks.Callback):
 
-    def __init__(self, config, time, generator, roudn):
+    def __init__(self, config, time, generator, round):
         self.config = config
         self.time = time
         self.generator = generator
