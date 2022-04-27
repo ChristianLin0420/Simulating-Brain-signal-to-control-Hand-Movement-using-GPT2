@@ -248,21 +248,21 @@ class gpt2xcnn(tf.keras.Model):
             act = np.concatenate([l_act, r_act], axis = 0)
             eeg_signal = np.dot(self.t_matrix, act)
             eeg_signal = np.expand_dims(eeg_signal, axis = 0)
-            motor_signal = None
+            # motor_signal = None
 
-            for name, i in enumerate(eeg_signal):
-                if name in Brain.get_channel_names():
-                    sig = np.expand_dims(eeg_signal[i], axis = 0)
+            # for name, i in enumerate(eeg_signal):
+            #     if name in Brain.get_channel_names():
+            #         sig = np.expand_dims(eeg_signal[i], axis = 0)
 
-                    if motor_signal is None:
-                        motor_signal = sig
-                    else:
-                        motor_signal = np.concatenate([motor_signal, sig], axis = 0)
+            #         if motor_signal is None:
+            #             motor_signal = sig
+            #         else:
+            #             motor_signal = np.concatenate([motor_signal, sig], axis = 0)
 
             if filtered_activations is None:
-                filtered_activations = motor_signal
+                filtered_activations = eeg_signal
             else:
-                filtered_activations = np.concatenate([filtered_activations, motor_signal], axis = 0)
+                filtered_activations = np.concatenate([filtered_activations, eeg_signal], axis = 0)
 
         print("filtered activation shape: {}".format(filtered_activations.shape))
             
