@@ -108,9 +108,10 @@ class ResultGenerator(object):
 
             for round in range(self.config.rounds):
                 path = "result/{}/{}/history/{}/{}".format(self.config.model_name, self.time, round, filename)
-                data = json.load(open(path))
-                data = data[filename[:-5]]
-                datas.append(data)
+                if os.path.exists(path):
+                    data = json.load(open(path))
+                    data = data[filename[:-5]]
+                    datas.append(data)
 
             datas = np.asarray(datas)
             self.generate_figure(datas, [filename[:-5]], filename[:-5], "result/{}/{}/figure/{}.png".format(self.config.model_name, self.time, filename))
