@@ -276,7 +276,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.h = [TFBlock(self.n_embd, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
         # self.activation_layer = tf.keras.layers.ReLU(max_value = 1)
-        self.activation_layer = tf.keras.layers.SoftMax()
+        self.activation_layer = tf.keras.layers.Softmax()
         self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
 
     def build(self, input_shape):
