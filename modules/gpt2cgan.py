@@ -80,7 +80,7 @@ class gpt2cgan(tf.keras.Model):
         # 3. Calculate the norm of the gradients.
         norm = tf.sqrt(tf.reduce_sum(tf.square(grads), axis = [1, 2, 3]))
         gp = tf.reduce_mean((norm - 1.0) ** 2)
-        return gp
+        return gp, tf.reduce_max(interpolated), grads
 
     def generate_original_full_brain_activation(self, original_images):
 
@@ -171,11 +171,9 @@ class gpt2cgan(tf.keras.Model):
                 real_image_and_labels = real_image_and_labels / 255.0
                 
                 # Calculate the gradient penalty
-                gp = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
+                gp, t_fake_predictions, t_real_predictions = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
                 
                 # Add the gradient penalty to the original discriminator loss
-                t_fake_predictions = tf.reduce_max(real_image_and_labels)
-                t_real_predictions = tf.reduce_max(fake_image_and_labels)
                 t_gp = gp
 
                 d_loss = tf.reduce_mean(fake_predictions) - tf.reduce_mean(real_predictions) + gp * self.gp_weight
