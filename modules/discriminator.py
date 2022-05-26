@@ -53,7 +53,7 @@ class Discriminator(tf.keras.layers.Layer):
         self.pooling_b = tf.keras.layers.AveragePooling2D((1, 4))
         self.drop_b = tf.keras.layers.Dropout(self.drop_rate)
         self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(1, activation = 'softmax', kernel_constraint = tf.keras.constraints.MaxNorm(0.25))
+        self.dense = tf.keras.layers.Dense(1, activation = 'sigmoid', kernel_constraint = tf.keras.constraints.MaxNorm(0.25))
 
     def forward(self, x, training = False):
 
