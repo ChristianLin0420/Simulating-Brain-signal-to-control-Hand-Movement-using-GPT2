@@ -23,7 +23,6 @@ class gpt2cgan(tf.keras.Model):
 
         self.generator = TFGPT2MainLayer(config = config, name = "name", last_dim = last_dim)
         self.discriminator = Discriminator(config = config)
-        self.normalization = tf.keras.layers.Normalization(mean = 0., variance = 0.5)
         self.noise_len = config.n_positions
         self.noise_dim = config.n_embd
 
@@ -64,7 +63,7 @@ class gpt2cgan(tf.keras.Model):
         # Get the interpolated image
         alpha = tf.random.normal([batch_size, 1, 1, 1], 0.0, 1.0)
         diff = fake_images - real_images
-        interpolated = real_images + alpha * diff
+        interpolated = fake_images + alpha * diff
 
         with tf.GradientTape() as gp_tape:
             gp_tape.watch(interpolated)
