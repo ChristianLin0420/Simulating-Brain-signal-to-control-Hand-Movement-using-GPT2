@@ -167,8 +167,8 @@ class gpt2cgan(tf.keras.Model):
                 gp = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
 
                 # Add the gradient penalty to the original discriminator loss
-                t_fake_predictions = max(real_image_and_labels)
-                t_real_predictions = max(fake_image_and_labels)
+                t_fake_predictions = tf.reduce_max(real_image_and_labels)
+                t_real_predictions = tf.reduce_max(fake_image_and_labels)
                 t_gp = gp
 
                 d_loss = tf.reduce_mean(fake_predictions) - tf.reduce_mean(real_predictions) + gp * self.gp_weight
