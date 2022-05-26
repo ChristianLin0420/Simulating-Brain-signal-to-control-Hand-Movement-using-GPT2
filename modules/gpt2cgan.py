@@ -134,6 +134,10 @@ class gpt2cgan(tf.keras.Model):
         batch_size = self.config.batch_size
         d_loss = 0
 
+        t_fake_predictions = None
+        t_real_predictions = None
+        t_gp = None
+
         for _ in range(self.d_extra_steps):
             random_latent_vectors = generate_random_vectors_with_labels(_real_labels, self.generate_count, self.config.n_positions, self.config.n_embd, self.config.class_rate_random_vector, self.config.class_count, self.config.noise_variance)
             
@@ -163,9 +167,9 @@ class gpt2cgan(tf.keras.Model):
                 gp = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
 
                 # Add the gradient penalty to the original discriminator loss
-                print("reduce mean of fake prediction: {}".format(tf.reduce_mean(fake_predictions)))
-                print("reduce mean of real prediction: {}".format(tf.reduce_mean(real_predictions)))
-                print("gp: {}".format(gp))
+                t_fake_predictions = tf.reduce_mean(fake_predictions)
+                t_real_predictions = tf.reduce_mean(real_predictions)
+                t_gp = gp
 
                 d_loss = tf.reduce_mean(fake_predictions) - tf.reduce_mean(real_predictions) + gp * self.gp_weight
 
@@ -276,6 +280,9 @@ class gpt2cgan(tf.keras.Model):
         result["d_loss"] = d_loss
         result["g_loss"] = g_loss
         result["generated"] = predictions
+        result["t_fake_predictions"] = t_fake_predictions
+        result["t_real_predictions"] = t_real_predictions
+        result["t_gp"] = t_gp
 
         ## record raw signal loss
         for class_i in range(int(self.config.class_count)):
