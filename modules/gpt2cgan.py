@@ -78,7 +78,7 @@ class gpt2cgan(tf.keras.Model):
         grads = gp_tape.gradient(pred, interpolated)
 
         # 3. Calculate the norm of the gradients.
-        norm = tf.sqrt(tf.reduce_sum(grads), axis = [1, 2, 3])
+        norm = tf.sqrt(tf.reduce_sum(grads, axis = [1, 2, 3]))
         gp = tf.reduce_mean((grads - 1.0) ** 2)
         return gp
 
