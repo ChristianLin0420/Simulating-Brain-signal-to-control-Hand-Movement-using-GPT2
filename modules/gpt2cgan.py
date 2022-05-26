@@ -283,8 +283,6 @@ class gpt2cgan(tf.keras.Model):
         result["d_loss"] = d_loss
         result["g_loss"] = g_loss
         result["generated"] = predictions
-        result["t_fake_predictions"] = t_fake_predictions
-        result["t_real_predictions"] = t_real_predictions
         result["t_gp"] = t_gp
 
         ## record raw signal loss
