@@ -53,13 +53,17 @@ class gpt2cgan(tf.keras.Model):
         self.loss_kl = loss_kl
 
     def gradient_penalty(self, 
-                         real_images, 
-                         fake_images, 
+                         real, 
+                         fake, 
                          batch_size: int = 8):
         """ Calculates the gradient penalty.
         This loss is calculated on an interpolated image
         and added to the discriminator loss.
         """
+
+        real_images = tf.reshape(real, [real.shape[0], real.shape[1], real.shape[2]])
+        fake_images = tf.reshape(fake, [fake.shape[0], fake.shape[1], fake.shape[2]])
+
         # Get the interpolated image
         alpha = tf.random.normal([batch_size, 1, 1, 1], 0.0, 1.0)
         diff = fake_images - real_images
@@ -71,7 +75,7 @@ class gpt2cgan(tf.keras.Model):
             pred = self.discriminator(interpolated, training = True)
 
         # 2. Calculate the gradients w.r.t to this interpolated image.
-        grads = gp_tape.gradient(pred, [interpolated])[0]
+        grads = gp_tape.gradient(pred, interpolated)
 
         # 3. Calculate the norm of the gradients.
         norm = tf.sqrt(tf.reduce_sum(tf.square(grads), axis = [1, 2, 3]))
