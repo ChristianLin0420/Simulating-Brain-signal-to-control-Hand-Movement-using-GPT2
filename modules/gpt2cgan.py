@@ -23,6 +23,7 @@ class gpt2cgan(tf.keras.Model):
 
         self.generator = TFGPT2MainLayer(config = config, name = "name", last_dim = last_dim)
         self.discriminator = Discriminator(config = config)
+        self.activation_layer = tf.keras.layers.Softmax()
         self.noise_len = config.n_positions
         self.noise_dim = config.n_embd
 
@@ -162,10 +163,13 @@ class gpt2cgan(tf.keras.Model):
             with tf.GradientTape() as tape:
                 fake_predictions = self.discriminator(fake_image_and_labels)
                 real_predictions = self.discriminator(real_image_and_labels)
+
+                real_image_and_labels = real_image_and_labels / 255.0
+                real_image_and_labels = real_image_and_labels / 255.0
                 
                 # Calculate the gradient penalty
                 gp = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
-
+                
                 # Add the gradient penalty to the original discriminator loss
                 t_fake_predictions = tf.reduce_max(real_image_and_labels)
                 t_real_predictions = tf.reduce_max(fake_image_and_labels)

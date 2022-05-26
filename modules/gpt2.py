@@ -458,7 +458,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             print('-' * 80)
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
-        hidden_states = self.activation_layer(hidden_states)
+        # hidden_states = self.activation_layer(hidden_states)
         # hidden_states = self.transformer(hidden_states)
         # bz, _ = shape_list(hidden_states)[:2]
         # print("hidden_states: {}. {}".format(hidden_states, type(hidden_states)))
