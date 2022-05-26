@@ -79,7 +79,7 @@ class gpt2cgan(tf.keras.Model):
 
         # 3. Calculate the norm of the gradients.
         norm = tf.sqrt(tf.reduce_sum(grads, axis = [1, 2, 3]))
-        gp = tf.reduce_mean((norm - 1.0) ** 2)
+        gp = tf.reduce_mean(tf.sqrt(norm - 1.0))
         return gp
 
     def generate_original_full_brain_activation(self, original_images):
