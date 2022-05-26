@@ -164,9 +164,6 @@ class gpt2cgan(tf.keras.Model):
             with tf.GradientTape() as tape:
                 fake_predictions = self.discriminator(fake_image_and_labels)
                 real_predictions = self.discriminator(real_image_and_labels)
-
-                fake_image_and_labels = fake_image_and_labels / 255.0
-                real_image_and_labels = real_image_and_labels / 255.0
                 
                 # Calculate the gradient penalty
                 gp = self.gradient_penalty(real_image_and_labels, fake_image_and_labels, batch_size)
