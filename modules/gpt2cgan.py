@@ -148,9 +148,9 @@ class gpt2cgan(tf.keras.Model):
             del random_latent_vectors
 
             # Combine them with real images
-            fake_image_and_labels = tf.concat([tf.expand_dims(generated_images, axis = 3), image_one_hot_labels], -1)
-            # fake_image_and_labels = tf.expand_dims(fake_image_and_labels, axis = 3)
-            real_image_and_labels = tf.concat([real_images, image_one_hot_labels], -1)
+            fake_image_and_labels = generated_images
+            fake_image_and_labels = tf.expand_dims(fake_image_and_labels, axis = 3)
+            real_image_and_labels = real_images # tf.concat([real_images, image_one_hot_labels], -1)
             
             # Assemble labels discriminating real from fake images
             labels = tf.concat([tf.ones((batch_size, 1)), tf.zeros((batch_size, 1))], axis = 0)

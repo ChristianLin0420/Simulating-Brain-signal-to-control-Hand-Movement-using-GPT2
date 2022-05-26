@@ -275,7 +275,8 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
         self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
         self.h = [TFBlock(self.n_embd, config, scale=True, name=f"h_._{i}") for i in range(config.n_layer)]
         self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
-        self.activation_layer = tf.keras.layers.ReLU(max_value = 1)
+        # self.activation_layer = tf.keras.layers.ReLU(max_value = 1)
+        self.activation_layer = tf.keras.layers.SoftMax()
         self.transformer = TFImageTransformer(config.n_embd, config.initializer_range, last_dim)
 
     def build(self, input_shape):
@@ -457,7 +458,7 @@ class TFGPT2MainLayer(tf.keras.layers.Layer):
             print('-' * 80)
             return tuple(v for v in [hidden_states, presents, all_hidden_states, all_attentions] if v is not None)
 
-        # hidden_states = self.activation_layer(hidden_states)
+        hidden_states = self.activation_layer(hidden_states)
         # hidden_states = self.transformer(hidden_states)
         # bz, _ = shape_list(hidden_states)[:2]
         # print("hidden_states: {}. {}".format(hidden_states, type(hidden_states)))
